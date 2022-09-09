@@ -8,5 +8,6 @@ project(
 inc = include_directories('inc')
 
 sfml = dependency('sfml-graphics')
+ruby = dependency('ruby')
 
 subdir('src')

@@ -1,0 +1,19 @@
+{
+	"files.associations": {
+		"*.ui": "xml",
+		"*.z80": "z80-macroasm",
+		"*.inc65": "ca65",
+		"**/.config/sway/config": "i3",
+		"*.s65": "ca65",
+		"__hash_table": "cpp",
+		"__split_buffer": "cpp",
+		"__tree": "cpp",
+		"atomic": "cpp",
+		"ios": "cpp",
+		"map": "cpp",
+		"string": "cpp",
+		"system_error": "cpp",
+		"unordered_map": "cpp",
+		"vector": "cpp"
+	}
+}
