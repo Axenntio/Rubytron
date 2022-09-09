@@ -1,0 +1,37 @@
+{
+    "env": {
+        "defaultIncludePath": [
+            "${workspaceFolder}/**",
+            "${workspaceFolder}/inc/**"
+        ]
+    },
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${defaultIncludePath}"
+            ],
+            "defines": [],
+            "compilerPath": "/sbin/gcc",
+            "cStandard": "gnu17",
+            "cppStandard": "gnu++17",
+            "intelliSenseMode": "gcc-x64"
+        },
+        {
+            "name": "Mac",
+            "includePath": [
+                "${defaultIncludePath}",
+                "/opt/homebrew/Cellar/sfml/2.5.1_1/include/"
+            ],
+            "defines": [],
+            "macFrameworkPath": [
+                "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks"
+            ],
+            "compilerPath": "/usr/bin/clang",
+            "cStandard": "c17",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "macos-clang-arm64"
+        }
+    ],
+    "version": 4
+}
