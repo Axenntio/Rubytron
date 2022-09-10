@@ -11,9 +11,9 @@ public:
 
 private:
 	sf::RenderWindow _window;
-	sf::RenderTexture _window_texture;
+	sf::RenderTexture _background_texture;
+	sf::RenderTexture _foreground_texture;
 	sf::View _canvas_view;
 	unsigned int _width;
 	unsigned int _height;
-	unsigned char _scale;
 };

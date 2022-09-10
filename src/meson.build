@@ -9,5 +9,5 @@ executable(
 	'rubytron',
 	sources,
 	include_directories: inc,
-	dependencies : [sfml, ruby]
+	dependencies : [sfml]
 )
