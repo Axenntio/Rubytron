@@ -1,6 +1,7 @@
 sources = [
 	'main.cpp',
-	'Desktop.cpp'
+	'Desktop.cpp',
+	'Window.cpp'
 ]
 
 add_global_arguments('-g3', language : 'cpp')

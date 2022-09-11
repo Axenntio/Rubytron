@@ -1,7 +1,7 @@
 #include <Desktop.hpp>
 
-int main(int argc, char** argv) {
-	Desktop desktop(192, 128, 6);
+int main() {
+	Desktop desktop(192, 128);
 	desktop.run();
 	return 0;
 }
