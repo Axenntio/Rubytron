@@ -10,5 +10,5 @@ executable(
 	'rubytron',
 	sources,
 	include_directories: inc,
-	dependencies : [sfml]
+	dependencies : [sfml, mruby]
 )

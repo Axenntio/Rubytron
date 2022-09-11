@@ -8,6 +8,8 @@ project(
 inc = include_directories('inc')
 
 sfml = dependency('sfml-graphics')
-# ruby = dependency('ruby')
+
+mruby_inc = include_directories('./mruby/include/')
+mruby = declare_dependency(link_args: meson.source_root() + '/mruby/build/host/lib/libmruby.a', include_directories: mruby_inc)
 
 subdir('src')

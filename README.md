@@ -15,6 +15,8 @@ Code: mruby 3.1 (2.x ruby)
 ## Build
 
 ```console
+$ cd mruby && rake && cd ..
+[...]
 $ meson build
 [...]
 $ ninja -C build

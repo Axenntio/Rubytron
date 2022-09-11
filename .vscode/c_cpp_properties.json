@@ -2,7 +2,8 @@
     "env": {
         "defaultIncludePath": [
             "${workspaceFolder}/**",
-            "${workspaceFolder}/inc/**"
+            "${workspaceFolder}/inc/**",
+            "${workspaceFolder}/mruby/include/**"
         ]
     },
     "configurations": [
