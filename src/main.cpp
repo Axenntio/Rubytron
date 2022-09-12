@@ -10,6 +10,8 @@ mrb_value mruby_test_method(mrb_state *mrb, mrb_value self)
 	return mrb_nil_value();
 }
 
+Desktop desktop(192, 128, 4);
+
 int main()
 {
 	mrb_state *mrb = mrb_open();
@@ -23,7 +25,6 @@ int main()
 	else
 		std::cout << "Seems that 'from_ruby' doesn't exists" << std::endl;
 	mrb_close(mrb);
-	Desktop desktop(192, 128);
 	desktop.run();
 	return 0;
 }

@@ -10,6 +10,7 @@ public:
 	Desktop(unsigned int width, unsigned int height, unsigned char scale = 1);
 
 	void run();
+	Window* getWindow(mrb_state *mrb);
 
 private:
 	void resizeEvent(sf::Event event);

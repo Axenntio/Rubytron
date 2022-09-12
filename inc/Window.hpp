@@ -8,10 +8,14 @@ public:
 	Window(unsigned int width, unsigned int height, const std::vector<sf::Color>& palette);
 	~Window();
 
+	void execute(const std::string& string);
+
 	virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
 
+	bool isContext(mrb_state* mrb) const;
+
+	static mrb_value mrubyLine(mrb_state *mrb, mrb_value self);
 private:
-	mrb_value mrubyLine(mrb_state *mrb, mrb_value self);
 
 	sf::RenderTexture _texture;
 	std::vector<sf::Color> _palette;

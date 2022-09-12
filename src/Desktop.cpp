@@ -41,10 +41,16 @@ void Desktop::run()
         sf::Event event;
         while (this->_window.pollEvent(event))
         {
-            if (event.type == sf::Event::Closed)
+            if (event.type == sf::Event::Closed) {
 				this->closeEvent(event);
-			if (event.type == sf::Event::Resized)
+			}
+			if (event.type == sf::Event::Resized) {
 				this->resizeEvent(event);
+			}
+			if (event.type == sf::Event::KeyPressed) {
+				this->_windows[0]->execute("line 0, 0, 10, 10");
+				this->_windows[0]->execute("line 10, 10, 25, 15");
+			}
         }
 
 		this->_window.setVerticalSyncEnabled(true);
@@ -58,6 +64,17 @@ void Desktop::run()
 		this->_window.draw(foreground);
 		this->_window.display();
     }
+}
+
+Window* Desktop::getWindow(mrb_state* mrb)
+{
+	for (Window* window : this->_windows) {
+		mrb_state* test = mrb;
+		if (window->isContext(mrb)) {
+			return window;
+		}
+	}
+	return nullptr;
 }
 
 void Desktop::resizeEvent(sf::Event event)
