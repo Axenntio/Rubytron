@@ -65,7 +65,6 @@ void Desktop::run()
 Window* Desktop::getWindow(mrb_state* mrb)
 {
 	for (Window* window : this->_windows) {
-		mrb_state* test = mrb;
 		if (window->isContext(mrb)) {
 			return window;
 		}
