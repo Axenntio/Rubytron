@@ -31,7 +31,7 @@ Desktop::Desktop(unsigned int width, unsigned int height, unsigned char scale) :
 	this->_canvas_view.setSize(sf::Vector2f(this->_width, this->_height));
 	this->_window.setView(this->_canvas_view);
 
-	this->_windows.push_back(new Window(60, 30, this->_palette));
+	this->_windows.push_back(new Window(60, 30, this->_palette, "test.rb"));
 }
 
 void Desktop::run()
@@ -46,10 +46,6 @@ void Desktop::run()
 			}
 			if (event.type == sf::Event::Resized) {
 				this->resizeEvent(event);
-			}
-			if (event.type == sf::Event::KeyPressed) {
-				this->_windows[0]->execute("line 0, 0, 10, 10");
-				this->_windows[0]->execute("line 10, 10, 25, 15");
 			}
         }
 

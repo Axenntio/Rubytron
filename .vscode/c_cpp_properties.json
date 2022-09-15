@@ -22,7 +22,7 @@
             "name": "Mac",
             "includePath": [
                 "${defaultIncludePath}",
-                "/opt/homebrew/Cellar/sfml/2.5.1_1/include/"
+                "/opt/homebrew/include"
             ],
             "defines": [],
             "macFrameworkPath": [

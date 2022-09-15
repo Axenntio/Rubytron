@@ -1,13 +1,23 @@
+#include <fstream>
+#include <sstream>
 #include <Window.hpp>
 #include <Desktop.hpp>
 
-Window::Window(unsigned int width, unsigned int height, const std::vector<sf::Color>& palette) : _width(width), _height(height)
+Window::Window(unsigned int width, unsigned int height, const std::vector<sf::Color>& palette, const std::string& programPath) : _width(width), _height(height)
 {
 	this->_palette = palette;
 	this->_texture.create(this->_width, this->_height);
-	this->_texture.clear(this->_palette[3]);
+	this->_texture.clear(this->_palette[0]);
 	this->_mrb = mrb_open();
+	mrb_define_method(this->_mrb, this->_mrb->object_class, "clear", &Window::mrubyClear, MRB_ARGS_REQ(1));
+	mrb_define_method(this->_mrb, this->_mrb->object_class, "pxl", &Window::mrubyPixel, MRB_ARGS_REQ(2));
 	mrb_define_method(this->_mrb, this->_mrb->object_class, "line", &Window::mrubyLine, MRB_ARGS_REQ(4));
+	std::ifstream file(programPath);
+	std::stringstream buffer;
+	buffer << file.rdbuf();
+	this->execute(buffer.str());
+	if (mrb_obj_respond_to(this->_mrb, this->_mrb->object_class, mrb_intern_cstr(this->_mrb, "init")))
+		mrb_funcall(this->_mrb, mrb_nil_value(), "init", 0);
 }
 
 Window::~Window()
@@ -22,6 +32,9 @@ void Window::execute(const std::string& string)
 
 void Window::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {
+	if (mrb_obj_respond_to(this->_mrb, this->_mrb->object_class, mrb_intern_cstr(this->_mrb, "update")))
+		mrb_funcall(this->_mrb, mrb_nil_value(), "update", 0);
+
 	states.transform *= getTransform();
 
 	states.texture = NULL;
@@ -29,6 +42,10 @@ void Window::draw(sf::RenderTarget& target, sf::RenderStates states) const
 	sf::Sprite sprite(this->_texture.getTexture());
 
 	target.draw(sprite, states);
+
+	if (this->_mrb->exc) {
+		mrb_print_error(this->_mrb);
+	}
 }
 
 bool Window::isContext(mrb_state* mrb) const
@@ -36,22 +53,45 @@ bool Window::isContext(mrb_state* mrb) const
 	return this->_mrb == mrb;
 }
 
-
-#include <iostream>
-#include <mruby/variable.h>
-
 extern Desktop desktop;
+
+mrb_value Window::mrubyClear(mrb_state* mrb, mrb_value self)
+{
+	Window* window = desktop.getWindow(mrb);
+	if (window == nullptr) return mrb_nil_value();
+
+
+	mrb_int paletteIndex;
+	mrb_get_args(mrb, "i", &paletteIndex);
+
+	window->_texture.clear(window->_palette[paletteIndex]);
+
+	return mrb_nil_value();
+}
+
+mrb_value Window::mrubyPixel(mrb_state* mrb, mrb_value self)
+{
+	Window* window = desktop.getWindow(mrb);
+	if (window == nullptr) return mrb_nil_value();
+
+	mrb_int x, y;
+	mrb_get_args(mrb, "ii", &x, &y);
+
+	sf::Vertex point[] = {
+		sf::Vertex(sf::Vector2f(x, y))
+	};
+
+	window->_texture.draw(point, 1, sf::Points);
+
+	return mrb_nil_value();
+}
 
 mrb_value Window::mrubyLine(mrb_state* mrb, mrb_value self)
 {
 	Window* window = desktop.getWindow(mrb);
 	if (window == nullptr) return mrb_nil_value();
 
-
-	mrb_int x1;
-	mrb_int x2;
-	mrb_int y1;
-	mrb_int y2;
+	mrb_int x1, x2, y1, y2;
 	mrb_get_args(mrb, "iiii", &x1, &y1, &x2, &y2);
 
 	sf::Vertex line[] = {
