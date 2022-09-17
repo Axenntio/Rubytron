@@ -31,7 +31,10 @@ Desktop::Desktop(unsigned int width, unsigned int height, unsigned char scale) :
 	this->_canvas_view.setSize(sf::Vector2f(this->_width, this->_height));
 	this->_window.setView(this->_canvas_view);
 
-	this->_windows.push_back(new Window(60, 30, this->_palette, "test.rb"));
+	this->_focusedWindow = nullptr;
+	this->_windows.push_back(new Window(sf::Vector2i(10, 10), sf::Vector2u(60, 30), this->_palette, "test.rb"));
+	this->_windows.push_back(new Window(sf::Vector2i(20, 20), sf::Vector2u(60, 30), this->_palette, "test.rb"));
+	this->_windows.push_back(new Window(sf::Vector2i(60, 60), sf::Vector2u(60, 30), this->_palette, "test.rb"));
 }
 
 void Desktop::run()
@@ -47,6 +50,9 @@ void Desktop::run()
 			if (event.type == sf::Event::Resized) {
 				this->resizeEvent(event);
 			}
+			if (event.type == sf::Event::MouseButtonPressed) {
+				this->mouseButtonEvent(event);
+			}
         }
 
 		this->_window.setVerticalSyncEnabled(true);
@@ -55,7 +61,12 @@ void Desktop::run()
 		sf::Sprite foreground(this->_foreground_texture.getTexture());
 		this->_window.draw(background);
 		for (const Window* window : this->_windows) {
-			this->_window.draw(*window);
+			if (window != this->_focusedWindow) {
+				this->_window.draw(*window);
+			}
+		}
+		if (this->_focusedWindow != nullptr) {
+			this->_window.draw(*this->_focusedWindow);
 		}
 		this->_window.draw(foreground);
 		this->_window.display();
@@ -72,6 +83,11 @@ Window* Desktop::getWindow(mrb_state* mrb)
 	return nullptr;
 }
 
+void Desktop::closeEvent([[maybe_unused]] sf::Event event)
+{
+	this->_window.close();
+}
+
 void Desktop::resizeEvent(sf::Event event)
 {
 	sf::Vector2f factors = sf::Vector2f(
@@ -84,7 +100,13 @@ void Desktop::resizeEvent(sf::Event event)
 	this->_window.setView(this->_canvas_view);
 }
 
-void Desktop::closeEvent([[maybe_unused]] sf::Event event)
+void Desktop::mouseButtonEvent([[maybe_unused]] sf::Event event)
 {
-	this->_window.close();
+	sf::Vector2f mappedPoint = this->_window.mapPixelToCoords(sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
+	for (Window* window : this->_windows) {
+		if (window->isIn(static_cast<sf::Vector2i>(mappedPoint))) {
+			this->_focusedWindow = window;
+			return;
+		}
+	}
 }

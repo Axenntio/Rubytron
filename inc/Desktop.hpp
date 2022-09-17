@@ -13,8 +13,9 @@ public:
 	Window* getWindow(mrb_state *mrb);
 
 private:
-	void resizeEvent(sf::Event event);
 	void closeEvent(sf::Event event);
+	void resizeEvent(sf::Event event);
+	void mouseButtonEvent(sf::Event event);
 
 	sf::RenderWindow _window;
 	sf::RenderTexture _background_texture;
@@ -24,5 +25,6 @@ private:
 	unsigned int _width;
 	unsigned int _height;
 
+	Window* _focusedWindow;
 	std::vector<Window*> _windows;
 };

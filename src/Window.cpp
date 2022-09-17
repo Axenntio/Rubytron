@@ -3,10 +3,10 @@
 #include <Window.hpp>
 #include <Desktop.hpp>
 
-Window::Window(unsigned int width, unsigned int height, const std::vector<sf::Color>& palette, const std::string& programPath) : _width(width), _height(height)
+Window::Window(sf::Vector2i position, sf::Vector2u size, const std::vector<sf::Color>& palette, const std::string& programPath) : _position(position), _size(size)
 {
 	this->_palette = palette;
-	this->_texture.create(this->_width, this->_height);
+	this->_texture.create(this->_size.x, this->_size.y);
 	this->_texture.clear(this->_palette[0]);
 	this->_mrb = mrb_open();
 	mrb_define_method(this->_mrb, this->_mrb->object_class, "clear", &Window::mrubyClear, MRB_ARGS_REQ(1));
@@ -42,8 +42,8 @@ void Window::draw(sf::RenderTarget& target, sf::RenderStates states) const
 	states.texture = NULL;
 
 	sf::Sprite sprite(this->_texture.getTexture());
-	sprite.setPosition(10, 10); // Update with position of window
-	sprite.setTextureRect(sf::IntRect(0, this->_height, this->_width, -this->_height));
+	sprite.setPosition(sf::Vector2f(this->_position));
+	sprite.setTextureRect(sf::IntRect(0, this->_size.y, this->_size.x, -this->_size.y));
 
 	target.draw(sprite, states);
 
@@ -55,6 +55,15 @@ void Window::draw(sf::RenderTarget& target, sf::RenderStates states) const
 bool Window::isContext(mrb_state* mrb) const
 {
 	return this->_mrb == mrb;
+}
+
+bool Window::isIn(sf::Vector2i point) const
+{
+	return
+		point.x >= this->_position.x &&
+		point.x <= this->_position.x + static_cast<int>(this->_size.x) &&
+		point.y >= this->_position.y &&
+		point.y <= this->_position.y + static_cast<int>(this->_size.y);
 }
 
 extern Desktop desktop;
