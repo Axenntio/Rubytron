@@ -1,3 +1,13 @@
+class Window
+	def self.resize_event(new_width, new_height)
+		puts "Received resize event"
+	end
+
+	def self.close_event
+		puts "Received close event"
+	end
+end
+
 def init
 	$color_index = 1
 	$value = 0
@@ -7,9 +17,9 @@ def update
 	clear $color_index
 	$value += 0.1
 	pxl 0, 0, 2
-	pxl 0, 29, 3
-	pxl 59, 0, 4
-	pxl 59, 29, 5
+	pxl 0, Window.height - 1, 3
+	pxl Window.width - 1, 0, 4
+	pxl Window.width - 1, Window.height - 1, 5
 	pxl Math.cos($value) * 10 + 20, Math.sin($value) * 10 + 20, 6
 	line 20, 20, Math.cos($value) * 10 + 20, Math.sin($value) * 10 + 20, 10
 	pxl Math.cos($value / 2) * 4 + 20, Math.sin($value / 2) * 4 + 20, 7

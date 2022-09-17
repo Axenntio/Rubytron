@@ -94,6 +94,8 @@
 		"fstream": "cpp",
 		"locale": "cpp",
 		"stack": "cpp",
-		"__functional_base": "cpp"
+		"__functional_base": "cpp",
+		"ranges": "cpp",
+		"span": "cpp"
 	}
 }

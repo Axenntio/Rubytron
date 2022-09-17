@@ -10,10 +10,16 @@ public:
 
 	void execute(const std::string& string);
 
+	void init() const;
 	virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
 
 	bool isContext(mrb_state* mrb) const;
 	bool isIn(sf::Vector2i point) const;
+
+	static mrb_value mrubyGetWidth(mrb_state *mrb, mrb_value self);
+	static mrb_value mrubyGetHeight(mrb_state *mrb, mrb_value self);
+	static mrb_value mrubySetWidth(mrb_state *mrb, mrb_value self);
+	static mrb_value mrubySetHeight(mrb_state *mrb, mrb_value self);
 
 	static mrb_value mrubyClear(mrb_state *mrb, mrb_value self);
 	static mrb_value mrubyPixel(mrb_state *mrb, mrb_value self);

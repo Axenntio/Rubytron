@@ -9,6 +9,13 @@ Window::Window(sf::Vector2i position, sf::Vector2u size, const std::vector<sf::C
 	this->_texture.create(this->_size.x, this->_size.y);
 	this->_texture.clear(this->_palette[0]);
 	this->_mrb = mrb_open();
+
+	RClass *windowClass = mrb_define_class(this->_mrb, "Window", this->_mrb->object_class);
+	mrb_define_class_method(this->_mrb, windowClass, "width", &Window::mrubyGetWidth, MRB_ARGS_NONE());
+	mrb_define_class_method(this->_mrb, windowClass, "height", &Window::mrubyGetHeight, MRB_ARGS_NONE());
+	mrb_define_class_method(this->_mrb, windowClass, "width=", &Window::mrubySetWidth, MRB_ARGS_REQ(1));
+	mrb_define_class_method(this->_mrb, windowClass, "height=", &Window::mrubySetHeight, MRB_ARGS_REQ(1));
+
 	mrb_define_method(this->_mrb, this->_mrb->object_class, "clear", &Window::mrubyClear, MRB_ARGS_REQ(1));
 	mrb_define_method(this->_mrb, this->_mrb->object_class, "pxl", &Window::mrubyPixel, MRB_ARGS_REQ(2) | MRB_ARGS_OPT(1));
 	mrb_define_method(this->_mrb, this->_mrb->object_class, "line", &Window::mrubyLine, MRB_ARGS_REQ(4) | MRB_ARGS_OPT(1));
@@ -16,9 +23,6 @@ Window::Window(sf::Vector2i position, sf::Vector2u size, const std::vector<sf::C
 	std::stringstream buffer;
 	buffer << file.rdbuf();
 	this->execute(buffer.str());
-	if (mrb_obj_respond_to(this->_mrb, this->_mrb->object_class, mrb_intern_cstr(this->_mrb, "init"))) {
-		mrb_funcall(this->_mrb, mrb_nil_value(), "init", 0);
-	}
 }
 
 Window::~Window()
@@ -29,6 +33,13 @@ Window::~Window()
 void Window::execute(const std::string& string)
 {
 	mrb_load_string(this->_mrb, string.c_str());
+}
+
+void Window::init() const
+{
+	if (mrb_obj_respond_to(this->_mrb, this->_mrb->object_class, mrb_intern_cstr(this->_mrb, "init"))) {
+		mrb_funcall(this->_mrb, mrb_nil_value(), "init", 0);
+	}
 }
 
 void Window::draw(sf::RenderTarget& target, sf::RenderStates states) const
@@ -67,6 +78,46 @@ bool Window::isIn(sf::Vector2i point) const
 }
 
 extern Desktop desktop;
+
+mrb_value Window::mrubyGetWidth(mrb_state *mrb, [[maybe_unused]] mrb_value self)
+{
+	Window* window = desktop.getWindow(mrb);
+	if (window == nullptr) return mrb_nil_value();
+
+	return mrb_int_value(mrb, window->_size.x);
+}
+
+mrb_value Window::mrubyGetHeight(mrb_state *mrb, [[maybe_unused]] mrb_value self)
+{
+	Window* window = desktop.getWindow(mrb);
+	if (window == nullptr) return mrb_nil_value();
+
+	return mrb_int_value(mrb, window->_size.y);
+}
+
+mrb_value Window::mrubySetWidth(mrb_state *mrb, [[maybe_unused]] mrb_value self)
+{
+	Window* window = desktop.getWindow(mrb);
+	if (window == nullptr) return mrb_nil_value();
+
+	mrb_int newWidth;
+	mrb_get_args(mrb, "i", &newWidth);
+	window->_size.x = newWidth;
+
+	return mrb_nil_value();
+}
+
+mrb_value Window::mrubySetHeight(mrb_state *mrb, [[maybe_unused]] mrb_value self)
+{
+	Window* window = desktop.getWindow(mrb);
+	if (window == nullptr) return mrb_nil_value();
+
+	mrb_int newHeight;
+	mrb_get_args(mrb, "i", &newHeight);
+	window->_size.y = newHeight;
+
+	return mrb_nil_value();
+}
 
 mrb_value Window::mrubyClear(mrb_state* mrb, [[maybe_unused]] mrb_value self)
 {
