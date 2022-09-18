@@ -19,6 +19,8 @@ Window::Window(sf::Vector2i position, sf::Vector2u size, const std::vector<sf::C
 	mrb_define_method(this->_mrb, this->_mrb->object_class, "clear", &Window::mrubyClear, MRB_ARGS_REQ(1));
 	mrb_define_method(this->_mrb, this->_mrb->object_class, "pxl", &Window::mrubyPixel, MRB_ARGS_REQ(2) | MRB_ARGS_OPT(1));
 	mrb_define_method(this->_mrb, this->_mrb->object_class, "line", &Window::mrubyLine, MRB_ARGS_REQ(4) | MRB_ARGS_OPT(1));
+	mrb_define_method(this->_mrb, this->_mrb->object_class, "rect", &Window::mrubyRectangle, MRB_ARGS_REQ(4) | MRB_ARGS_OPT(1));
+	mrb_define_method(this->_mrb, this->_mrb->object_class, "circle", &Window::mrubyCircle, MRB_ARGS_REQ(3) | MRB_ARGS_OPT(1));
 	std::ifstream file(programPath);
 	std::stringstream buffer;
 	buffer << file.rdbuf();
@@ -168,6 +170,42 @@ mrb_value Window::mrubyLine(mrb_state* mrb, [[maybe_unused]] mrb_value self)
 	};
 
 	window->_texture.draw(line, 2, sf::Lines);
+
+	return mrb_nil_value();
+}
+
+mrb_value Window::mrubyRectangle(mrb_state* mrb, [[maybe_unused]] mrb_value self)
+{
+	Window* window = desktop.getWindow(mrb);
+	if (window == nullptr) return mrb_nil_value();
+
+	mrb_int x, y, w, h;
+	mrb_int colorPalette = 1;
+	mrb_get_args(mrb, "iiii|i", &x, &y, &w, &h, &colorPalette);
+
+	sf::RectangleShape rectangle(sf::Vector2f(w, h));
+	rectangle.setPosition(sf::Vector2f(x, y));
+	rectangle.setOutlineColor(window->_palette[colorPalette]);
+	rectangle.setFillColor(window->_palette[colorPalette]);
+	window->_texture.draw(rectangle);
+
+	return mrb_nil_value();
+}
+
+mrb_value Window::mrubyCircle(mrb_state* mrb, [[maybe_unused]] mrb_value self)
+{
+	Window* window = desktop.getWindow(mrb);
+	if (window == nullptr) return mrb_nil_value();
+
+	mrb_int x, y, radius;
+	mrb_int colorPalette = 1;
+	mrb_get_args(mrb, "iii|i", &x, &y, &radius, &colorPalette);
+
+	sf::CircleShape circle(radius);
+	circle.setPosition(sf::Vector2f(x, y));
+	circle.setOutlineColor(window->_palette[colorPalette]);
+	circle.setFillColor(window->_palette[colorPalette]);
+	window->_texture.draw(circle);
 
 	return mrb_nil_value();
 }

@@ -24,6 +24,8 @@ public:
 	static mrb_value mrubyClear(mrb_state *mrb, mrb_value self);
 	static mrb_value mrubyPixel(mrb_state *mrb, mrb_value self);
 	static mrb_value mrubyLine(mrb_state *mrb, mrb_value self);
+	static mrb_value mrubyRectangle(mrb_state *mrb, mrb_value self);
+	static mrb_value mrubyCircle(mrb_state *mrb, mrb_value self);
 private:
 
 	sf::RenderTexture _texture;

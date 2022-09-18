@@ -35,6 +35,8 @@ Desktop::Desktop(unsigned int width, unsigned int height, unsigned char scale) :
 	this->_windows.push_back(new Window(sf::Vector2i(10, 10), sf::Vector2u(60, 30), this->_palette, "test.rb"));
 	this->_windows.push_back(new Window(sf::Vector2i(20, 20), sf::Vector2u(60, 30), this->_palette, "test.rb"));
 	this->_windows.push_back(new Window(sf::Vector2i(60, 60), sf::Vector2u(10, 10), this->_palette, "resize.rb"));
+	this->_windows.push_back(new Window(sf::Vector2i(30, 5), sf::Vector2u(20, 20), this->_palette, "palette.rb"));
+	this->_windows.push_back(new Window(sf::Vector2i(100, 15), sf::Vector2u(40, 20), this->_palette, "xeyes.rb"));
 	for (Window* window : this->_windows) {
 		window->init();
 	}
