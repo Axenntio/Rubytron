@@ -1,4 +1,3 @@
-#include <algorithm>
 #include <Desktop.hpp>
 
 Desktop::Desktop(unsigned int width, unsigned int height, unsigned char scale) : _width(width), _height(height)
@@ -34,7 +33,6 @@ Desktop::Desktop(unsigned int width, unsigned int height, unsigned char scale) :
 
 	this->_focusedWindow = nullptr;
 	this->_windows.push_back(new Window(sf::Vector2i(10, 10), sf::Vector2u(60, 30), this->_palette, "test.rb"));
-	this->_windows.push_back(new Window(sf::Vector2i(20, 20), sf::Vector2u(60, 30), this->_palette, "test.rb"));
 	this->_windows.push_back(new Window(sf::Vector2i(60, 60), sf::Vector2u(10, 10), this->_palette, "resize.rb"));
 	this->_windows.push_back(new Window(sf::Vector2i(30, 5), sf::Vector2u(20, 20), this->_palette, "palette.rb"));
 	this->_windows.push_back(new Window(sf::Vector2i(100, 15), sf::Vector2u(40, 20), this->_palette, "xeyes.rb"));
@@ -119,15 +117,19 @@ void Desktop::mouseButtonPressEvent([[maybe_unused]] sf::Event event)
 	for (std::vector<Window*>::reverse_iterator it = this->_windows.rbegin(); it != this->_windows.rend(); ++it) {
 		if ((*it)->isIn(static_cast<sf::Vector2i>(mappedPoint))) {
 			this->_focusedWindow = *it;
-			this->_windows.push_back(*it);
-			this->_windows.erase(std::next(it).base());
-			this->_focusMove = true;
-			this->_focusMoveDelta = this->_focusedWindow->getPosition() - mappedPoint;
-			return;
+			break;
 		}
 	}
+	if (this->_focusedWindow == nullptr) {
+		return;
+	}
+	this->_windows.erase(
+		std::remove_if(this->_windows.begin(), this->_windows.end(), [this](Window* window) { return window == this->_focusedWindow; } )
+	);
+	this->_windows.push_back(this->_focusedWindow);
+	this->_focusMove = true;
+	this->_focusMoveDelta = this->_focusedWindow->getPosition() - mappedPoint;
 }
-
 
 void Desktop::mouseButtonReleaseEvent([[maybe_unused]] sf::Event event)
 {
@@ -136,9 +138,12 @@ void Desktop::mouseButtonReleaseEvent([[maybe_unused]] sf::Event event)
 
 void Desktop::mouseMoveEvent([[maybe_unused]] sf::Event event)
 {
+	sf::Vector2f mappedPoint = this->_window.mapPixelToCoords(sf::Vector2i(event.mouseMove.x, event.mouseMove.y));
+	for (Window* window : this->_windows) {
+		window->setMousePosition(mappedPoint);
+	}
 	if (this->_focusMove && this->_focusedWindow != nullptr)
 	{
-		sf::Vector2f mappedPoint = this->_window.mapPixelToCoords(sf::Vector2i(event.mouseMove.x, event.mouseMove.y));
 		this->_focusedWindow->setPosition(sf::Vector2f(sf::Vector2i(mappedPoint + this->_focusMoveDelta)));
 	}
 }

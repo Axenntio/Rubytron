@@ -16,6 +16,10 @@ Window::Window(sf::Vector2i position, sf::Vector2u size, const std::vector<sf::C
 	mrb_define_class_method(this->_mrb, windowClass, "height", &Window::mrubyGetHeight, MRB_ARGS_NONE());
 	mrb_define_class_method(this->_mrb, windowClass, "width=", &Window::mrubySetWidth, MRB_ARGS_REQ(1));
 	mrb_define_class_method(this->_mrb, windowClass, "height=", &Window::mrubySetHeight, MRB_ARGS_REQ(1));
+	mrb_define_class_method(this->_mrb, windowClass, "mouse_x", &Window::mrubyGetMouseX, MRB_ARGS_NONE());
+	mrb_define_class_method(this->_mrb, windowClass, "mouse_y", &Window::mrubyGetMouseY, MRB_ARGS_NONE());
+	mrb_define_class_method(this->_mrb, windowClass, "mouse_x=", &Window::mrubySetMouseX, MRB_ARGS_REQ(1));
+	mrb_define_class_method(this->_mrb, windowClass, "mouse_y=", &Window::mrubySetMouseY, MRB_ARGS_REQ(1));
 
 	mrb_define_method(this->_mrb, this->_mrb->object_class, "clear", &Window::mrubyClear, MRB_ARGS_REQ(1));
 	mrb_define_method(this->_mrb, this->_mrb->object_class, "pxl", &Window::mrubyPixel, MRB_ARGS_REQ(2) | MRB_ARGS_OPT(1));
@@ -80,6 +84,11 @@ bool Window::isIn(sf::Vector2i point) const
 		point.y <= this->getPosition().y + static_cast<int>(this->_size.y);
 }
 
+void Window::setMousePosition(sf::Vector2f position)
+{
+	this->_mousePosition = sf::Vector2i(position - this->getPosition());
+}
+
 extern Desktop desktop;
 
 mrb_value Window::mrubyGetWidth(mrb_state *mrb, [[maybe_unused]] mrb_value self)
@@ -120,6 +129,46 @@ mrb_value Window::mrubySetHeight(mrb_state *mrb, [[maybe_unused]] mrb_value self
 	mrb_get_args(mrb, "i", &newHeight);
 	window->_size.y = newHeight;
 	window->_texture.create(window->_size.x, window->_size.y);
+
+	return mrb_nil_value();
+}
+
+mrb_value Window::mrubyGetMouseX(mrb_state *mrb, [[maybe_unused]] mrb_value self)
+{
+	Window* window = desktop.getWindow(mrb);
+	if (window == nullptr) return mrb_nil_value();
+
+	return mrb_int_value(mrb, window->_mousePosition.x);
+}
+
+mrb_value Window::mrubyGetMouseY(mrb_state *mrb, [[maybe_unused]] mrb_value self)
+{
+	Window* window = desktop.getWindow(mrb);
+	if (window == nullptr) return mrb_nil_value();
+
+	return mrb_int_value(mrb, window->_mousePosition.y);
+}
+
+mrb_value Window::mrubySetMouseX(mrb_state *mrb, [[maybe_unused]] mrb_value self)
+{
+	Window* window = desktop.getWindow(mrb);
+	if (window == nullptr) return mrb_nil_value();
+
+	mrb_int newX;
+	mrb_get_args(mrb, "i", &newX);
+	window->_mousePosition.x = newX;
+
+	return mrb_nil_value();
+}
+
+mrb_value Window::mrubySetMouseY(mrb_state *mrb, [[maybe_unused]] mrb_value self)
+{
+	Window* window = desktop.getWindow(mrb);
+	if (window == nullptr) return mrb_nil_value();
+
+	mrb_int newY;
+	mrb_get_args(mrb, "i", &newY);
+	window->_mousePosition.y = newY;
 
 	return mrb_nil_value();
 }

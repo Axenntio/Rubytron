@@ -96,6 +96,7 @@
 		"stack": "cpp",
 		"__functional_base": "cpp",
 		"ranges": "cpp",
-		"span": "cpp"
+		"span": "cpp",
+		"filesystem": "cpp"
 	}
 }
