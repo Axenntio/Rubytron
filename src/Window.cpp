@@ -103,6 +103,7 @@ mrb_value Window::mrubySetWidth(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 	mrb_int newWidth;
 	mrb_get_args(mrb, "i", &newWidth);
 	window->_size.x = newWidth;
+	window->_texture.create(window->_size.x, window->_size.y);
 
 	return mrb_nil_value();
 }
@@ -115,6 +116,7 @@ mrb_value Window::mrubySetHeight(mrb_state *mrb, [[maybe_unused]] mrb_value self
 	mrb_int newHeight;
 	mrb_get_args(mrb, "i", &newHeight);
 	window->_size.y = newHeight;
+	window->_texture.create(window->_size.x, window->_size.y);
 
 	return mrb_nil_value();
 }
