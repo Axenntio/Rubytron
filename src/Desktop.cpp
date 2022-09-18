@@ -36,6 +36,7 @@ Desktop::Desktop(unsigned int width, unsigned int height, unsigned char scale) :
 	this->_windows.push_back(new Window(sf::Vector2i(60, 60), sf::Vector2u(10, 10), this->_palette, "resize.rb"));
 	this->_windows.push_back(new Window(sf::Vector2i(30, 5), sf::Vector2u(20, 20), this->_palette, "palette.rb"));
 	this->_windows.push_back(new Window(sf::Vector2i(100, 15), sf::Vector2u(40, 20), this->_palette, "xeyes.rb"));
+	this->_windows.push_back(new Window(sf::Vector2i(100, 40), sf::Vector2u(40, 40), this->_palette, "key.rb"));
 	for (Window* window : this->_windows) {
 		window->init();
 	}
@@ -63,6 +64,12 @@ void Desktop::run()
 			if (event.type == sf::Event::MouseMoved) {
 				this->mouseMoveEvent(event);
 			}
+			if (event.type == sf::Event::KeyPressed) {
+				this->keyPressEvent(event);
+			}
+			if (event.type == sf::Event::KeyReleased) {
+				this->keyReleaseEvent(event);
+			}
         }
 
 		this->_window.setVerticalSyncEnabled(true);
@@ -83,7 +90,7 @@ void Desktop::run()
     }
 }
 
-Window* Desktop::getWindow(mrb_state* mrb)
+Window* Desktop::getWindow(mrb_state* mrb) const
 {
 	for (Window* window : this->_windows) {
 		if (window->isContext(mrb)) {
@@ -93,8 +100,18 @@ Window* Desktop::getWindow(mrb_state* mrb)
 	return nullptr;
 }
 
+bool Desktop::isFocused(Window* window) const
+{
+	return this->_focusedWindow == window;
+}
+
 void Desktop::closeEvent([[maybe_unused]] sf::Event event)
 {
+	this->_focusedWindow = nullptr;
+	for (Window* window : this->_windows) {
+		delete window;
+	}
+	this->_windows.clear();
 	this->_window.close();
 }
 
@@ -110,7 +127,7 @@ void Desktop::resizeEvent(sf::Event event)
 	this->_window.setView(this->_canvas_view);
 }
 
-void Desktop::mouseButtonPressEvent([[maybe_unused]] sf::Event event)
+void Desktop::mouseButtonPressEvent(sf::Event event)
 {
 	sf::Vector2f mappedPoint = this->_window.mapPixelToCoords(sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
 	this->_focusedWindow = nullptr;
@@ -143,7 +160,7 @@ void Desktop::mouseButtonReleaseEvent([[maybe_unused]] sf::Event event)
 	this->_focusResize = false;
 }
 
-void Desktop::mouseMoveEvent([[maybe_unused]] sf::Event event)
+void Desktop::mouseMoveEvent(sf::Event event)
 {
 	sf::Vector2f mappedPoint = this->_window.mapPixelToCoords(sf::Vector2i(event.mouseMove.x, event.mouseMove.y));
 	for (Window* window : this->_windows) {
@@ -153,6 +170,22 @@ void Desktop::mouseMoveEvent([[maybe_unused]] sf::Event event)
 		this->_focusedWindow->setPosition(sf::Vector2f(sf::Vector2i(mappedPoint + this->_focusInitialDelta)));
 	}
 	if (this->_focusResize && this->_focusedWindow != nullptr) {
-		this->_focusedWindow->setSize(sf::Vector2u(mappedPoint + this->_focusInitialDelta));
+		this->_focusedWindow->resize(sf::Vector2u(mappedPoint + this->_focusInitialDelta));
 	}
+}
+
+void Desktop::keyPressEvent([[maybe_unused]] sf::Event event)
+{
+	if (this->_focusedWindow == nullptr) {
+		return;
+	}
+	this->_focusedWindow->setLastKeypress(event.key.code);
+}
+
+void Desktop::keyReleaseEvent([[maybe_unused]] sf::Event event)
+{
+	if (this->_focusedWindow == nullptr) {
+		return;
+	}
+	this->_focusedWindow->setLastKeypress(sf::Keyboard::Unknown);
 }

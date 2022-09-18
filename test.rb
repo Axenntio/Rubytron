@@ -1,10 +1,10 @@
 class Window
 	def self.resize_event(new_width, new_height)
-		puts "Received resize event"
+		puts "Received resize event (#{new_width}, #{new_height})"
 	end
 
 	def self.close_event
-		puts "Received close event"
+		puts 'Received close event'
 	end
 end
 

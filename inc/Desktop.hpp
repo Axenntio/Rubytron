@@ -10,7 +10,8 @@ public:
 	Desktop(unsigned int width, unsigned int height, unsigned char scale = 1);
 
 	void run();
-	Window* getWindow(mrb_state *mrb);
+	Window* getWindow(mrb_state *mrb) const;
+	bool isFocused(Window* window) const;
 
 private:
 	void closeEvent(sf::Event event);
@@ -18,6 +19,8 @@ private:
 	void mouseButtonPressEvent(sf::Event event);
 	void mouseButtonReleaseEvent(sf::Event event);
 	void mouseMoveEvent(sf::Event event);
+	void keyPressEvent(sf::Event event);
+	void keyReleaseEvent(sf::Event event);
 
 	sf::RenderWindow _window;
 	sf::RenderTexture _background_texture;

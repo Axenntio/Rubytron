@@ -9,31 +9,42 @@ Window::Window(sf::Vector2i position, sf::Vector2u size, const std::vector<sf::C
 	this->_palette = palette;
 	this->_texture.create(this->_size.x, this->_size.y);
 	this->_texture.clear(this->_palette[0]);
+	this->_lastKey = sf::Keyboard::Unknown;
 	this->_mrb = mrb_open();
 
-	RClass *windowClass = mrb_define_class(this->_mrb, "Window", this->_mrb->object_class);
-	mrb_define_class_method(this->_mrb, windowClass, "width", &Window::mrubyGetWidth, MRB_ARGS_NONE());
-	mrb_define_class_method(this->_mrb, windowClass, "height", &Window::mrubyGetHeight, MRB_ARGS_NONE());
-	mrb_define_class_method(this->_mrb, windowClass, "width=", &Window::mrubySetWidth, MRB_ARGS_REQ(1));
-	mrb_define_class_method(this->_mrb, windowClass, "height=", &Window::mrubySetHeight, MRB_ARGS_REQ(1));
-	mrb_define_class_method(this->_mrb, windowClass, "mouse_x", &Window::mrubyGetMouseX, MRB_ARGS_NONE());
-	mrb_define_class_method(this->_mrb, windowClass, "mouse_y", &Window::mrubyGetMouseY, MRB_ARGS_NONE());
-	mrb_define_class_method(this->_mrb, windowClass, "mouse_x=", &Window::mrubySetMouseX, MRB_ARGS_REQ(1));
-	mrb_define_class_method(this->_mrb, windowClass, "mouse_y=", &Window::mrubySetMouseY, MRB_ARGS_REQ(1));
+	if (!this->_mrb) {
+		throw new std::runtime_error("Unable to start mruby for window");
+	}
+
+	this->_mrbWindowClass = mrb_define_class(this->_mrb, "Window", this->_mrb->object_class);
+	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "width", &Window::mrubyGetWidth, MRB_ARGS_NONE());
+	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "height", &Window::mrubyGetHeight, MRB_ARGS_NONE());
+	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "width=", &Window::mrubySetWidth, MRB_ARGS_REQ(1));
+	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "height=", &Window::mrubySetHeight, MRB_ARGS_REQ(1));
+	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "mouse_x", &Window::mrubyGetMouseX, MRB_ARGS_NONE());
+	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "mouse_y", &Window::mrubyGetMouseY, MRB_ARGS_NONE());
+	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "mouse_x=", &Window::mrubySetMouseX, MRB_ARGS_REQ(1));
+	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "mouse_y=", &Window::mrubySetMouseY, MRB_ARGS_REQ(1));
 
 	mrb_define_method(this->_mrb, this->_mrb->object_class, "clear", &Window::mrubyClear, MRB_ARGS_REQ(1));
 	mrb_define_method(this->_mrb, this->_mrb->object_class, "pxl", &Window::mrubyPixel, MRB_ARGS_REQ(2) | MRB_ARGS_OPT(1));
 	mrb_define_method(this->_mrb, this->_mrb->object_class, "line", &Window::mrubyLine, MRB_ARGS_REQ(4) | MRB_ARGS_OPT(1));
 	mrb_define_method(this->_mrb, this->_mrb->object_class, "rect", &Window::mrubyRectangle, MRB_ARGS_REQ(4) | MRB_ARGS_OPT(1));
 	mrb_define_method(this->_mrb, this->_mrb->object_class, "circle", &Window::mrubyCircle, MRB_ARGS_REQ(3) | MRB_ARGS_OPT(1));
+	mrb_define_method(this->_mrb, this->_mrb->object_class, "key", &Window::mrubyKey, MRB_ARGS_OPT(1));
+
 	std::ifstream file(programPath);
 	std::stringstream buffer;
 	buffer << file.rdbuf();
+	file.close();
 	this->execute(buffer.str());
 }
 
 Window::~Window()
 {
+	// if (mrb_obj_respond_to(this->_mrb, this->_mrbWindowClass, mrb_intern_cstr(this->_mrb, "close_event"))) {
+	// 	mrb_funcall(this->_mrb, mrb_nil_value(), "close_event", 0);
+	// }
 	mrb_close(this->_mrb);
 }
 
@@ -42,11 +53,12 @@ void Window::execute(const std::string& string)
 	mrb_load_string(this->_mrb, string.c_str());
 }
 
-void Window::init() const
+void Window::init()
 {
 	if (mrb_obj_respond_to(this->_mrb, this->_mrb->object_class, mrb_intern_cstr(this->_mrb, "init"))) {
 		mrb_funcall(this->_mrb, mrb_nil_value(), "init", 0);
 	}
+	this->_mrbWindowClass = mrb_class_get(this->_mrb, "Window");
 }
 
 void Window::draw(sf::RenderTarget& target, sf::RenderStates states) const
@@ -74,10 +86,13 @@ sf::Vector2u Window::getSize() const
 	return this->_size;
 }
 
-void Window::setSize(sf::Vector2u size)
+void Window::resize(sf::Vector2u size)
 {
 	this->_size = size;
 	this->_texture.create(this->_size.x, this->_size.y);
+	// if (mrb_obj_respond_to(this->_mrb, this->_mrbWindowClass, mrb_intern_cstr(this->_mrb, "close_event"))) {
+	// 	mrb_funcall(this->_mrb, mrb_nil_value(), "close_event", 0);
+	// }
 }
 
 bool Window::isContext(mrb_state* mrb) const
@@ -97,6 +112,11 @@ bool Window::isIn(sf::Vector2i point) const
 void Window::setMousePosition(sf::Vector2f position)
 {
 	this->_mousePosition = sf::Vector2i(position - this->getPosition());
+}
+
+void Window::setLastKeypress(sf::Keyboard::Key key)
+{
+	this->_lastKey = key;
 }
 
 extern Desktop desktop;
@@ -268,4 +288,20 @@ mrb_value Window::mrubyCircle(mrb_state* mrb, [[maybe_unused]] mrb_value self)
 	window->_texture.draw(circle);
 
 	return mrb_nil_value();
+}
+
+mrb_value Window::mrubyKey(mrb_state* mrb, [[maybe_unused]] mrb_value self)
+{
+	Window* window = desktop.getWindow(mrb);
+	if (window == nullptr) return mrb_nil_value();
+	if (!desktop.isFocused(window)) return mrb_nil_value();
+
+	mrb_int key = -1;
+	mrb_get_args(mrb, "|i", &key);
+
+	if (key != -1) {
+		return mrb_bool_value(sf::Keyboard::isKeyPressed(static_cast<sf::Keyboard::Key>(key)));
+	}
+
+	return mrb_int_value(mrb, window->_lastKey);
 }

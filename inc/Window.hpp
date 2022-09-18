@@ -10,16 +10,17 @@ public:
 
 	void execute(const std::string& string);
 
-	void init() const;
+	void init();
 	virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
 
 	sf::Vector2u getSize() const;
-	void setSize(sf::Vector2u size);
+	void resize(sf::Vector2u size);
 
 	bool isContext(mrb_state* mrb) const;
 	bool isIn(sf::Vector2i point) const;
 
 	void setMousePosition(sf::Vector2f position);
+	void setLastKeypress(sf::Keyboard::Key key);
 
 private:
 	static mrb_value mrubyGetWidth(mrb_state *mrb, mrb_value self);
@@ -36,11 +37,14 @@ private:
 	static mrb_value mrubyLine(mrb_state *mrb, mrb_value self);
 	static mrb_value mrubyRectangle(mrb_state *mrb, mrb_value self);
 	static mrb_value mrubyCircle(mrb_state *mrb, mrb_value self);
+	static mrb_value mrubyKey(mrb_state *mrb, mrb_value self);
 
 	sf::RenderTexture _texture;
 	std::vector<sf::Color> _palette;
 	sf::Vector2u _size;
 	sf::Vector2i _mousePosition;
+	sf::Keyboard::Key _lastKey;
 
 	mrb_state* _mrb;
+	RClass *_mrbWindowClass;
 };
