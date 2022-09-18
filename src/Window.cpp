@@ -60,7 +60,6 @@ void Window::draw(sf::RenderTarget& target, sf::RenderStates states) const
 	states.texture = NULL;
 
 	sf::Sprite sprite(this->_texture.getTexture());
-	// sprite.setPosition(this->getPosition());
 	sprite.setTextureRect(sf::IntRect(0, this->_size.y, this->_size.x, -this->_size.y));
 
 	target.draw(sprite, states);
@@ -68,6 +67,17 @@ void Window::draw(sf::RenderTarget& target, sf::RenderStates states) const
 	if (this->_mrb->exc) {
 		mrb_print_error(this->_mrb);
 	}
+}
+
+sf::Vector2u Window::getSize() const
+{
+	return this->_size;
+}
+
+void Window::setSize(sf::Vector2u size)
+{
+	this->_size = size;
+	this->_texture.create(this->_size.x, this->_size.y);
 }
 
 bool Window::isContext(mrb_state* mrb) const

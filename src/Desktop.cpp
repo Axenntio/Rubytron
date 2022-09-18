@@ -127,13 +127,20 @@ void Desktop::mouseButtonPressEvent([[maybe_unused]] sf::Event event)
 		std::remove_if(this->_windows.begin(), this->_windows.end(), [this](Window* window) { return window == this->_focusedWindow; } )
 	);
 	this->_windows.push_back(this->_focusedWindow);
-	this->_focusMove = true;
-	this->_focusMoveDelta = this->_focusedWindow->getPosition() - mappedPoint;
+	if (event.mouseButton.button == sf::Mouse::Right) {
+		this->_focusResize = true;
+		this->_focusInitialDelta = static_cast<sf::Vector2f>(this->_focusedWindow->getSize()) - mappedPoint;
+	}
+	else {
+		this->_focusMove = true;
+		this->_focusInitialDelta = this->_focusedWindow->getPosition() - mappedPoint;
+	}
 }
 
 void Desktop::mouseButtonReleaseEvent([[maybe_unused]] sf::Event event)
 {
 	this->_focusMove = false;
+	this->_focusResize = false;
 }
 
 void Desktop::mouseMoveEvent([[maybe_unused]] sf::Event event)
@@ -142,8 +149,10 @@ void Desktop::mouseMoveEvent([[maybe_unused]] sf::Event event)
 	for (Window* window : this->_windows) {
 		window->setMousePosition(mappedPoint);
 	}
-	if (this->_focusMove && this->_focusedWindow != nullptr)
-	{
-		this->_focusedWindow->setPosition(sf::Vector2f(sf::Vector2i(mappedPoint + this->_focusMoveDelta)));
+	if (this->_focusMove && this->_focusedWindow != nullptr) {
+		this->_focusedWindow->setPosition(sf::Vector2f(sf::Vector2i(mappedPoint + this->_focusInitialDelta)));
+	}
+	if (this->_focusResize && this->_focusedWindow != nullptr) {
+		this->_focusedWindow->setSize(sf::Vector2u(mappedPoint + this->_focusInitialDelta));
 	}
 }

@@ -13,6 +13,9 @@ public:
 	void init() const;
 	virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
 
+	sf::Vector2u getSize() const;
+	void setSize(sf::Vector2u size);
+
 	bool isContext(mrb_state* mrb) const;
 	bool isIn(sf::Vector2i point) const;
 

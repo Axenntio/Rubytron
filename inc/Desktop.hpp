@@ -29,6 +29,9 @@ private:
 
 	Window* _focusedWindow;
 	bool _focusMove;
+	bool _focusResize;
+	sf::Vector2f _focusInitialDelta;
 	sf::Vector2f _focusMoveDelta;
+	sf::Vector2f _focus;
 	std::vector<Window*> _windows;
 };
