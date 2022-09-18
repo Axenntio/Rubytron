@@ -15,7 +15,9 @@ public:
 private:
 	void closeEvent(sf::Event event);
 	void resizeEvent(sf::Event event);
-	void mouseButtonEvent(sf::Event event);
+	void mouseButtonPressEvent(sf::Event event);
+	void mouseButtonReleaseEvent(sf::Event event);
+	void mouseMoveEvent(sf::Event event);
 
 	sf::RenderWindow _window;
 	sf::RenderTexture _background_texture;
@@ -26,5 +28,7 @@ private:
 	unsigned int _height;
 
 	Window* _focusedWindow;
+	bool _focusMove;
+	sf::Vector2f _focusMoveDelta;
 	std::vector<Window*> _windows;
 };

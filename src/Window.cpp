@@ -3,8 +3,9 @@
 #include <Window.hpp>
 #include <Desktop.hpp>
 
-Window::Window(sf::Vector2i position, sf::Vector2u size, const std::vector<sf::Color>& palette, const std::string& programPath) : _position(position), _size(size)
+Window::Window(sf::Vector2i position, sf::Vector2u size, const std::vector<sf::Color>& palette, const std::string& programPath) : _size(size)
 {
+	this->setPosition(sf::Vector2f(position));
 	this->_palette = palette;
 	this->_texture.create(this->_size.x, this->_size.y);
 	this->_texture.clear(this->_palette[0]);
@@ -55,7 +56,7 @@ void Window::draw(sf::RenderTarget& target, sf::RenderStates states) const
 	states.texture = NULL;
 
 	sf::Sprite sprite(this->_texture.getTexture());
-	sprite.setPosition(sf::Vector2f(this->_position));
+	// sprite.setPosition(this->getPosition());
 	sprite.setTextureRect(sf::IntRect(0, this->_size.y, this->_size.x, -this->_size.y));
 
 	target.draw(sprite, states);
@@ -73,10 +74,10 @@ bool Window::isContext(mrb_state* mrb) const
 bool Window::isIn(sf::Vector2i point) const
 {
 	return
-		point.x >= this->_position.x &&
-		point.x <= this->_position.x + static_cast<int>(this->_size.x) &&
-		point.y >= this->_position.y &&
-		point.y <= this->_position.y + static_cast<int>(this->_size.y);
+		point.x >= this->getPosition().x &&
+		point.x <= this->getPosition().x + static_cast<int>(this->_size.x) &&
+		point.y >= this->getPosition().y &&
+		point.y <= this->getPosition().y + static_cast<int>(this->_size.y);
 }
 
 extern Desktop desktop;

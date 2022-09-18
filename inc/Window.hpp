@@ -30,7 +30,6 @@ private:
 
 	sf::RenderTexture _texture;
 	std::vector<sf::Color> _palette;
-	sf::Vector2i _position;
 	sf::Vector2u _size;
 
 	mrb_state* _mrb;
