@@ -100,7 +100,7 @@ Window* Desktop::getWindow(mrb_state* mrb) const
 	return nullptr;
 }
 
-bool Desktop::isFocused(Window* window) const
+bool Desktop::isFocused(const Window* window) const
 {
 	return this->_focusedWindow == window;
 }

@@ -21,6 +21,6 @@ def update
 	$player_pos.x += 1 if key 72
 	$player_pos.y -= 1 if key 73
 	$player_pos.y += 1 if key 74
-	clear 1
-	circle $player_pos.x, $player_pos.y, 10, 3
+	clear 0
+	circle $player_pos.x, $player_pos.y, 10, 2
 end

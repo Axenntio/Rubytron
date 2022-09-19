@@ -11,7 +11,7 @@ public:
 
 	void run();
 	Window* getWindow(mrb_state *mrb) const;
-	bool isFocused(Window* window) const;
+	bool isFocused(const Window* window) const;
 
 private:
 	void closeEvent(sf::Event event);

@@ -1,6 +1,6 @@
 #include <Desktop.hpp>
 
-Desktop desktop(192, 128, 8);
+Desktop desktop(288, 192, 6);
 
 int main()
 {

@@ -3,10 +3,12 @@
 #include <Window.hpp>
 #include <Desktop.hpp>
 
+extern Desktop desktop;
+
 Window::Window(sf::Vector2i position, sf::Vector2u size, const std::vector<sf::Color>& palette, const std::string& programPath) : _size(size)
 {
 	this->setPosition(sf::Vector2f(position));
-	this->_minSize = sf::Vector2u(10, 5);
+	this->_minSize = sf::Vector2u(8, 4);
 	this->_palette = palette;
 	this->_texture.create(this->_size.x, this->_size.y);
 	this->_texture.clear(this->_palette[0]);
@@ -76,9 +78,18 @@ void Window::draw(sf::RenderTarget& target, sf::RenderStates states) const
 
 	states.texture = NULL;
 
+	sf::RectangleShape decorator(static_cast<sf::Vector2f>(this->_size + sf::Vector2u(2, 8)));
+	decorator.setPosition(sf::Vector2f(-1, -7));
+	unsigned char palette = 6;
+	if (desktop.isFocused(this)) {
+		palette = 7;
+	}
+	decorator.setOutlineColor(this->_palette[palette]);
+	decorator.setFillColor(this->_palette[palette]);
 	sf::Sprite sprite(this->_texture.getTexture());
 	sprite.setTextureRect(sf::IntRect(0, this->_size.y, this->_size.x, -this->_size.y));
 
+	target.draw(decorator, states);
 	target.draw(sprite, states);
 
 	if (this->_mrb->exc) {
@@ -125,8 +136,6 @@ void Window::setLastKeypress(sf::Keyboard::Key key)
 {
 	this->_lastKey = key;
 }
-
-extern Desktop desktop;
 
 mrb_value Window::mrubyGetWidth(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 {
