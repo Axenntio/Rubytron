@@ -3,6 +3,8 @@ def init
 	$value = 0
 	$initial_width = Window.width
 	$initial_height = Window.height
+	Window.min_width = 1
+	Window.min_height = 1
 end
 
 def update

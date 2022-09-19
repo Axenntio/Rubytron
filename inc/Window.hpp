@@ -27,6 +27,10 @@ private:
 	static mrb_value mrubyGetHeight(mrb_state *mrb, mrb_value self);
 	static mrb_value mrubySetWidth(mrb_state *mrb, mrb_value self);
 	static mrb_value mrubySetHeight(mrb_state *mrb, mrb_value self);
+	static mrb_value mrubyGetMinWidth(mrb_state *mrb, mrb_value self);
+	static mrb_value mrubyGetMinHeight(mrb_state *mrb, mrb_value self);
+	static mrb_value mrubySetMinWidth(mrb_state *mrb, mrb_value self);
+	static mrb_value mrubySetMinHeight(mrb_state *mrb, mrb_value self);
 	static mrb_value mrubyGetMouseX(mrb_state *mrb, mrb_value self);
 	static mrb_value mrubyGetMouseY(mrb_state *mrb, mrb_value self);
 	static mrb_value mrubySetMouseX(mrb_state *mrb, mrb_value self);
@@ -42,6 +46,7 @@ private:
 	sf::RenderTexture _texture;
 	std::vector<sf::Color> _palette;
 	sf::Vector2u _size;
+	sf::Vector2u _minSize;
 	sf::Vector2i _mousePosition;
 	sf::Keyboard::Key _lastKey;
 

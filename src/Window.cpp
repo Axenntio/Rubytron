@@ -6,6 +6,7 @@
 Window::Window(sf::Vector2i position, sf::Vector2u size, const std::vector<sf::Color>& palette, const std::string& programPath) : _size(size)
 {
 	this->setPosition(sf::Vector2f(position));
+	this->_minSize = sf::Vector2u(10, 5);
 	this->_palette = palette;
 	this->_texture.create(this->_size.x, this->_size.y);
 	this->_texture.clear(this->_palette[0]);
@@ -21,6 +22,10 @@ Window::Window(sf::Vector2i position, sf::Vector2u size, const std::vector<sf::C
 	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "height", &Window::mrubyGetHeight, MRB_ARGS_NONE());
 	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "width=", &Window::mrubySetWidth, MRB_ARGS_REQ(1));
 	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "height=", &Window::mrubySetHeight, MRB_ARGS_REQ(1));
+	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "min_width", &Window::mrubyGetMinWidth, MRB_ARGS_NONE());
+	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "min_height", &Window::mrubyGetMinHeight, MRB_ARGS_NONE());
+	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "min_width=", &Window::mrubySetMinWidth, MRB_ARGS_REQ(1));
+	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "min_height=", &Window::mrubySetMinHeight, MRB_ARGS_REQ(1));
 	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "mouse_x", &Window::mrubyGetMouseX, MRB_ARGS_NONE());
 	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "mouse_y", &Window::mrubyGetMouseY, MRB_ARGS_NONE());
 	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "mouse_x=", &Window::mrubySetMouseX, MRB_ARGS_REQ(1));
@@ -88,7 +93,9 @@ sf::Vector2u Window::getSize() const
 
 void Window::resize(sf::Vector2u size)
 {
-	this->_size = size;
+	this->_size.x = std::max(this->_minSize.x, size.x);
+	this->_size.y = std::max(this->_minSize.y, size.y);
+
 	this->_texture.create(this->_size.x, this->_size.y);
 	// if (mrb_obj_respond_to(this->_mrb, this->_mrbWindowClass, mrb_intern_cstr(this->_mrb, "close_event"))) {
 	// 	mrb_funcall(this->_mrb, mrb_nil_value(), "close_event", 0);
@@ -144,7 +151,7 @@ mrb_value Window::mrubySetWidth(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 
 	mrb_int newWidth;
 	mrb_get_args(mrb, "i", &newWidth);
-	window->_size.x = newWidth;
+	window->_size.x = std::max(window->_minSize.x, static_cast<unsigned int>(newWidth));
 	window->_texture.create(window->_size.x, window->_size.y);
 
 	return mrb_nil_value();
@@ -157,8 +164,48 @@ mrb_value Window::mrubySetHeight(mrb_state *mrb, [[maybe_unused]] mrb_value self
 
 	mrb_int newHeight;
 	mrb_get_args(mrb, "i", &newHeight);
-	window->_size.y = newHeight;
+	window->_size.y = std::max(window->_minSize.y, static_cast<unsigned int>(newHeight));
 	window->_texture.create(window->_size.x, window->_size.y);
+
+	return mrb_nil_value();
+}
+
+mrb_value Window::mrubyGetMinWidth(mrb_state *mrb, [[maybe_unused]] mrb_value self)
+{
+	Window* window = desktop.getWindow(mrb);
+	if (window == nullptr) return mrb_nil_value();
+
+	return mrb_int_value(mrb, window->_minSize.x);
+}
+
+mrb_value Window::mrubyGetMinHeight(mrb_state *mrb, [[maybe_unused]] mrb_value self)
+{
+	Window* window = desktop.getWindow(mrb);
+	if (window == nullptr) return mrb_nil_value();
+
+	return mrb_int_value(mrb, window->_minSize.y);
+}
+
+mrb_value Window::mrubySetMinWidth(mrb_state *mrb, [[maybe_unused]] mrb_value self)
+{
+	Window* window = desktop.getWindow(mrb);
+	if (window == nullptr) return mrb_nil_value();
+
+	mrb_int newWidth;
+	mrb_get_args(mrb, "i", &newWidth);
+	window->_minSize.x = std::max(1u, static_cast<unsigned int>(newWidth));
+
+	return mrb_nil_value();
+}
+
+mrb_value Window::mrubySetMinHeight(mrb_state *mrb, [[maybe_unused]] mrb_value self)
+{
+	Window* window = desktop.getWindow(mrb);
+	if (window == nullptr) return mrb_nil_value();
+
+	mrb_int newHeight;
+	mrb_get_args(mrb, "i", &newHeight);
+	window->_minSize.y = std::max(1u, static_cast<unsigned int>(newHeight));
 
 	return mrb_nil_value();
 }

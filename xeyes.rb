@@ -12,6 +12,11 @@ class Vector
 	end
 end
 
+def init
+	Window.min_width = 16
+	Window.min_height = 8
+end
+
 def update
 	if Window.width / 4 <= Window.height / 2
 		radius = Window.width / 4
