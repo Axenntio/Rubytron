@@ -33,6 +33,7 @@ Desktop::Desktop(unsigned int width, unsigned int height, unsigned char scale) :
 	this->_window.setView(this->_canvas_view);
 
 	this->_focusedWindow = nullptr;
+	this->_focusAction = None;
 	this->_windows.push_back(new Window(sf::Vector2i(10, 10), sf::Vector2u(60, 30), this->_palette, "test.rb"));
 	this->_windows.push_back(new Window(sf::Vector2i(60, 60), sf::Vector2u(10, 10), this->_palette, "resize.rb"));
 	this->_windows.push_back(new Window(sf::Vector2i(30, 5), sf::Vector2u(20, 20), this->_palette, "palette.rb"));
@@ -133,7 +134,7 @@ void Desktop::mouseButtonPressEvent(sf::Event event)
 	sf::Vector2f mappedPoint = this->_window.mapPixelToCoords(sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
 	this->_focusedWindow = nullptr;
 	for (std::vector<Window*>::reverse_iterator it = this->_windows.rbegin(); it != this->_windows.rend(); ++it) {
-		if ((*it)->isIn(static_cast<sf::Vector2i>(mappedPoint))) {
+		if ((*it)->isIn(All, static_cast<sf::Vector2i>(mappedPoint))) {
 			this->_focusedWindow = *it;
 			break;
 		}
@@ -145,20 +146,20 @@ void Desktop::mouseButtonPressEvent(sf::Event event)
 		std::remove_if(this->_windows.begin(), this->_windows.end(), [this](Window* window) { return window == this->_focusedWindow; } )
 	);
 	this->_windows.push_back(this->_focusedWindow);
-	if (event.mouseButton.button == sf::Mouse::Right) {
-		this->_focusResize = true;
+
+	if (this->_focusedWindow->isIn(BottomRight, static_cast<sf::Vector2i>(mappedPoint))) {
+		this->_focusAction = Resize;
 		this->_focusInitialDelta = static_cast<sf::Vector2f>(this->_focusedWindow->getSize()) - mappedPoint;
 	}
-	else {
-		this->_focusMove = true;
+	else if (this->_focusedWindow->isIn(TitleBar, static_cast<sf::Vector2i>(mappedPoint))) {
+		this->_focusAction = Move;
 		this->_focusInitialDelta = this->_focusedWindow->getPosition() - mappedPoint;
 	}
 }
 
 void Desktop::mouseButtonReleaseEvent([[maybe_unused]] sf::Event event)
 {
-	this->_focusMove = false;
-	this->_focusResize = false;
+	this->_focusAction = None;
 }
 
 void Desktop::mouseMoveEvent(sf::Event event)
@@ -167,11 +168,15 @@ void Desktop::mouseMoveEvent(sf::Event event)
 	for (Window* window : this->_windows) {
 		window->setMousePosition(mappedPoint);
 	}
-	if (this->_focusMove && this->_focusedWindow != nullptr) {
-		this->_focusedWindow->setPosition(sf::Vector2f(sf::Vector2i(mappedPoint + this->_focusInitialDelta)));
-	}
-	if (this->_focusResize && this->_focusedWindow != nullptr) {
-		this->_focusedWindow->resize(sf::Vector2u(mappedPoint + this->_focusInitialDelta));
+	switch (this->_focusAction) {
+		case None:
+			return;
+		case Move:
+			this->_focusedWindow->setPosition(sf::Vector2f(sf::Vector2i(mappedPoint + this->_focusInitialDelta)));
+			return;
+		case Resize:
+			this->_focusedWindow->resize(sf::Vector2u(mappedPoint + this->_focusInitialDelta));
+			return;
 	}
 }
 

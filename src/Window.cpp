@@ -121,13 +121,39 @@ bool Window::isContext(mrb_state* mrb) const
 	return this->_mrb == mrb;
 }
 
-bool Window::isIn(sf::Vector2i point) const
+bool Window::isIn(WindowZone zone, sf::Vector2i point) const
 {
-	return
-		point.x >= this->getPosition().x &&
-		point.x <= this->getPosition().x + static_cast<int>(this->_size.x) &&
-		point.y >= this->getPosition().y &&
-		point.y <= this->getPosition().y + static_cast<int>(this->_size.y);
+	switch (zone) {
+		case All:
+			return
+				point.x >= this->getPosition().x - 1 &&
+				point.x < this->getPosition().x + static_cast<int>(this->_size.x) + 1 &&
+				point.y >= this->getPosition().y - 7 &&
+				point.y < this->getPosition().y + static_cast<int>(this->_size.y) + 1;
+		case TitleBar:
+			return
+				point.x >= this->getPosition().x - 1 &&
+				point.x < this->getPosition().x + static_cast<int>(this->_size.x) + 1 &&
+				point.y >= this->getPosition().y - 7 &&
+				point.y < this->getPosition().y;
+		case Canvas:
+			return
+				point.x >= this->getPosition().x &&
+				point.x < this->getPosition().x + static_cast<int>(this->_size.x) &&
+				point.y >= this->getPosition().y &&
+				point.y < this->getPosition().y + static_cast<int>(this->_size.y);
+		case BottomRight:
+			return
+				(
+					point.x == this->getPosition().x + static_cast<int>(this->_size.x) &&
+					point.y >= this->getPosition().y + static_cast<int>(this->_size.y) - 2 &&
+					point.y < this->getPosition().y + static_cast<int>(this->_size.y) + 1
+				) || (
+					point.y == this->getPosition().y + static_cast<int>(this->_size.y) &&
+					point.x >= this->getPosition().x + static_cast<int>(this->_size.x) - 2 &&
+					point.x < this->getPosition().x + static_cast<int>(this->_size.x) + 1
+				);
+	}
 }
 
 void Window::setMousePosition(sf::Vector2f position)

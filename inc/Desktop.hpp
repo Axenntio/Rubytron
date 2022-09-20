@@ -5,6 +5,12 @@
 #include <SFML/Graphics.hpp>
 #include <Window.hpp>
 
+enum FocusAction {
+	None,
+	Move,
+	Resize
+};
+
 class Desktop {
 public:
 	Desktop(unsigned int width, unsigned int height, unsigned char scale = 1);
@@ -31,10 +37,7 @@ private:
 	unsigned int _height;
 
 	Window* _focusedWindow;
-	bool _focusMove;
-	bool _focusResize;
+	FocusAction _focusAction;
 	sf::Vector2f _focusInitialDelta;
-	sf::Vector2f _focusMoveDelta;
-	sf::Vector2f _focus;
 	std::vector<Window*> _windows;
 };

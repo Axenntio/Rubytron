@@ -3,6 +3,13 @@
 #include <SFML/Graphics.hpp>
 #include <mruby/compile.h>
 
+enum WindowZone {
+	All,
+	TitleBar,
+	Canvas,
+	BottomRight
+};
+
 class Window : public sf::Drawable, public sf::Transformable {
 public:
 	Window(sf::Vector2i position, sf::Vector2u size, const std::vector<sf::Color>& palette, const std::string& programPath);
@@ -17,7 +24,7 @@ public:
 	void resize(sf::Vector2u size);
 
 	bool isContext(mrb_state* mrb) const;
-	bool isIn(sf::Vector2i point) const;
+	bool isIn(WindowZone zone, sf::Vector2i point) const;
 
 	void setMousePosition(sf::Vector2f position);
 	void setLastKeypress(sf::Keyboard::Key key);
