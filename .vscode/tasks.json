@@ -4,7 +4,10 @@
 		{
 			"label": "Rubytron build",
 			"type": "shell",
-			"command": "ninja -C build"
+			"command": "ninja -C build",
+			"presentation": {
+				"reveal": "silent"
+			}
 		}
 	]
 }

@@ -22,6 +22,7 @@ Desktop::Desktop(unsigned int width, unsigned int height, unsigned char scale) :
 	};
 
 	this->_window.create(sf::VideoMode(this->_width * scale, this->_height * scale), "Rubytron");
+	this->_window.setMouseCursorVisible(true); // Todo: Change to false when proper cursor will be added
 	this->_background_texture.create(this->_width, this->_height);
 	this->_background_texture.clear(this->_palette[0]);
 	this->_foreground_texture.create(this->_width, this->_height);

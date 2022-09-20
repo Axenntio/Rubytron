@@ -13,6 +13,7 @@ class Vector
 end
 
 def init
+	Window.title = 'xEyes'
 	Window.min_width = 16
 	Window.min_height = 8
 end

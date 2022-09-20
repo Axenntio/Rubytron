@@ -5,7 +5,7 @@
 
 extern Desktop desktop;
 
-Window::Window(sf::Vector2i position, sf::Vector2u size, const std::vector<sf::Color>& palette, const std::string& programPath) : _size(size)
+Window::Window(sf::Vector2i position, sf::Vector2u size, const std::vector<sf::Color>& palette, const std::string& programPath) : _size(size), _title(programPath)
 {
 	this->setPosition(sf::Vector2f(position));
 	this->_minSize = sf::Vector2u(8, 4);
@@ -21,17 +21,20 @@ Window::Window(sf::Vector2i position, sf::Vector2u size, const std::vector<sf::C
 
 	this->_mrbWindowClass = mrb_define_class(this->_mrb, "Window", this->_mrb->object_class);
 	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "width", &Window::mrubyGetWidth, MRB_ARGS_NONE());
-	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "height", &Window::mrubyGetHeight, MRB_ARGS_NONE());
 	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "width=", &Window::mrubySetWidth, MRB_ARGS_REQ(1));
+	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "height", &Window::mrubyGetHeight, MRB_ARGS_NONE());
 	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "height=", &Window::mrubySetHeight, MRB_ARGS_REQ(1));
 	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "min_width", &Window::mrubyGetMinWidth, MRB_ARGS_NONE());
-	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "min_height", &Window::mrubyGetMinHeight, MRB_ARGS_NONE());
 	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "min_width=", &Window::mrubySetMinWidth, MRB_ARGS_REQ(1));
+	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "min_height", &Window::mrubyGetMinHeight, MRB_ARGS_NONE());
 	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "min_height=", &Window::mrubySetMinHeight, MRB_ARGS_REQ(1));
 	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "mouse_x", &Window::mrubyGetMouseX, MRB_ARGS_NONE());
-	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "mouse_y", &Window::mrubyGetMouseY, MRB_ARGS_NONE());
 	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "mouse_x=", &Window::mrubySetMouseX, MRB_ARGS_REQ(1));
+	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "mouse_y", &Window::mrubyGetMouseY, MRB_ARGS_NONE());
 	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "mouse_y=", &Window::mrubySetMouseY, MRB_ARGS_REQ(1));
+	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "title", &Window::mrubyGetTitle, MRB_ARGS_NONE());
+	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "title=", &Window::mrubySetTitle, MRB_ARGS_REQ(1));
+
 
 	mrb_define_method(this->_mrb, this->_mrb->object_class, "clear", &Window::mrubyClear, MRB_ARGS_REQ(1));
 	mrb_define_method(this->_mrb, this->_mrb->object_class, "pxl", &Window::mrubyPixel, MRB_ARGS_REQ(2) | MRB_ARGS_OPT(1));
@@ -145,14 +148,6 @@ mrb_value Window::mrubyGetWidth(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 	return mrb_int_value(mrb, window->_size.x);
 }
 
-mrb_value Window::mrubyGetHeight(mrb_state *mrb, [[maybe_unused]] mrb_value self)
-{
-	Window* window = desktop.getWindow(mrb);
-	if (window == nullptr) return mrb_nil_value();
-
-	return mrb_int_value(mrb, window->_size.y);
-}
-
 mrb_value Window::mrubySetWidth(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 {
 	Window* window = desktop.getWindow(mrb);
@@ -164,6 +159,14 @@ mrb_value Window::mrubySetWidth(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 	window->_texture.create(window->_size.x, window->_size.y);
 
 	return mrb_nil_value();
+}
+
+mrb_value Window::mrubyGetHeight(mrb_state *mrb, [[maybe_unused]] mrb_value self)
+{
+	Window* window = desktop.getWindow(mrb);
+	if (window == nullptr) return mrb_nil_value();
+
+	return mrb_int_value(mrb, window->_size.y);
 }
 
 mrb_value Window::mrubySetHeight(mrb_state *mrb, [[maybe_unused]] mrb_value self)
@@ -187,14 +190,6 @@ mrb_value Window::mrubyGetMinWidth(mrb_state *mrb, [[maybe_unused]] mrb_value se
 	return mrb_int_value(mrb, window->_minSize.x);
 }
 
-mrb_value Window::mrubyGetMinHeight(mrb_state *mrb, [[maybe_unused]] mrb_value self)
-{
-	Window* window = desktop.getWindow(mrb);
-	if (window == nullptr) return mrb_nil_value();
-
-	return mrb_int_value(mrb, window->_minSize.y);
-}
-
 mrb_value Window::mrubySetMinWidth(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 {
 	Window* window = desktop.getWindow(mrb);
@@ -205,6 +200,14 @@ mrb_value Window::mrubySetMinWidth(mrb_state *mrb, [[maybe_unused]] mrb_value se
 	window->_minSize.x = std::max(1u, static_cast<unsigned int>(newWidth));
 
 	return mrb_nil_value();
+}
+
+mrb_value Window::mrubyGetMinHeight(mrb_state *mrb, [[maybe_unused]] mrb_value self)
+{
+	Window* window = desktop.getWindow(mrb);
+	if (window == nullptr) return mrb_nil_value();
+
+	return mrb_int_value(mrb, window->_minSize.y);
 }
 
 mrb_value Window::mrubySetMinHeight(mrb_state *mrb, [[maybe_unused]] mrb_value self)
@@ -227,14 +230,6 @@ mrb_value Window::mrubyGetMouseX(mrb_state *mrb, [[maybe_unused]] mrb_value self
 	return mrb_int_value(mrb, window->_mousePosition.x);
 }
 
-mrb_value Window::mrubyGetMouseY(mrb_state *mrb, [[maybe_unused]] mrb_value self)
-{
-	Window* window = desktop.getWindow(mrb);
-	if (window == nullptr) return mrb_nil_value();
-
-	return mrb_int_value(mrb, window->_mousePosition.y);
-}
-
 mrb_value Window::mrubySetMouseX(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 {
 	Window* window = desktop.getWindow(mrb);
@@ -247,6 +242,14 @@ mrb_value Window::mrubySetMouseX(mrb_state *mrb, [[maybe_unused]] mrb_value self
 	return mrb_nil_value();
 }
 
+mrb_value Window::mrubyGetMouseY(mrb_state *mrb, [[maybe_unused]] mrb_value self)
+{
+	Window* window = desktop.getWindow(mrb);
+	if (window == nullptr) return mrb_nil_value();
+
+	return mrb_int_value(mrb, window->_mousePosition.y);
+}
+
 mrb_value Window::mrubySetMouseY(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 {
 	Window* window = desktop.getWindow(mrb);
@@ -255,6 +258,26 @@ mrb_value Window::mrubySetMouseY(mrb_state *mrb, [[maybe_unused]] mrb_value self
 	mrb_int newY;
 	mrb_get_args(mrb, "i", &newY);
 	window->_mousePosition.y = newY;
+
+	return mrb_nil_value();
+}
+
+mrb_value Window::mrubyGetTitle(mrb_state *mrb, [[maybe_unused]] mrb_value self)
+{
+	Window* window = desktop.getWindow(mrb);
+	if (window == nullptr) return mrb_nil_value();
+
+	return mrb_str_new(mrb, window->_title.c_str(), window->_title.length());
+}
+
+mrb_value Window::mrubySetTitle(mrb_state *mrb, [[maybe_unused]] mrb_value self)
+{
+	Window* window = desktop.getWindow(mrb);
+	if (window == nullptr) return mrb_nil_value();
+
+	const char* title;
+	mrb_get_args(mrb, "z", &title);
+	window->_title = std::string(title);
 
 	return mrb_nil_value();
 }
