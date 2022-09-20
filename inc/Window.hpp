@@ -62,5 +62,6 @@ private:
 	std::string _title;
 
 	mrb_state* _mrb;
+	mrbc_context* _mrbContext;
 	RClass *_mrbWindowClass;
 };

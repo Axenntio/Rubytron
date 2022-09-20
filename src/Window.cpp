@@ -1,5 +1,3 @@
-#include <fstream>
-#include <sstream>
 #include <Window.hpp>
 #include <Desktop.hpp>
 #include <mruby/array.h>
@@ -43,11 +41,10 @@ Window::Window(sf::Vector2i position, sf::Vector2u size, const std::vector<sf::C
 	mrb_define_method(this->_mrb, this->_mrb->object_class, "circle", &Window::mrubyCircle, MRB_ARGS_REQ(3) | MRB_ARGS_OPT(1));
 	mrb_define_method(this->_mrb, this->_mrb->object_class, "key", &Window::mrubyKey, MRB_ARGS_OPT(1));
 
-	std::ifstream file(programPath);
-	std::stringstream buffer;
-	buffer << file.rdbuf();
-	file.close();
-	this->execute(buffer.str());
+	FILE *file = fopen(programPath.c_str(), "r");
+	this->_mrbContext = mrbc_context_new(this->_mrb);
+	mrbc_filename(this->_mrb, this->_mrbContext, programPath.c_str());
+	mrb_load_file_cxt(this->_mrb, file, this->_mrbContext);
 }
 
 Window::~Window()
@@ -55,7 +52,9 @@ Window::~Window()
 	// if (mrb_obj_respond_to(this->_mrb, this->_mrbWindowClass, mrb_intern_cstr(this->_mrb, "close_event"))) {
 	// 	mrb_funcall(this->_mrb, mrb_nil_value(), "close_event", 0);
 	// }
+	mrbc_context_free(this->_mrb, this->_mrbContext);
 	mrb_close(this->_mrb);
+
 }
 
 void Window::execute(const std::string& string)
@@ -111,8 +110,8 @@ void Window::resize(sf::Vector2u size)
 	this->_size.y = std::max(this->_minSize.y, size.y);
 
 	this->_texture.create(this->_size.x, this->_size.y);
-	// if (mrb_obj_respond_to(this->_mrb, this->_mrbWindowClass, mrb_intern_cstr(this->_mrb, "close_event"))) {
-	// 	mrb_funcall(this->_mrb, mrb_nil_value(), "close_event", 0);
+	// if (mrb_obj_respond_to(this->_mrb, this->_mrbWindowClass, mrb_intern_cstr(this->_mrb, "resize_event"))) {
+	// 	mrb_funcall(this->_mrb, mrb_nil_value(), "resize_event", 0);
 	// }
 }
 
