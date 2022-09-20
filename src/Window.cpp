@@ -1,5 +1,6 @@
 #include <Window.hpp>
 #include <Desktop.hpp>
+#include <mruby/variable.h>
 #include <mruby/array.h>
 
 extern Desktop desktop;
@@ -49,9 +50,10 @@ Window::Window(sf::Vector2i position, sf::Vector2u size, const std::vector<sf::C
 
 Window::~Window()
 {
-	// if (mrb_obj_respond_to(this->_mrb, this->_mrbWindowClass, mrb_intern_cstr(this->_mrb, "close_event"))) {
-	// 	mrb_funcall(this->_mrb, mrb_nil_value(), "close_event", 0);
-	// }
+	mrb_value obj = mrb_const_get(this->_mrb, mrb_obj_value(this->_mrb->object_class), mrb_intern_cstr(this->_mrb, "Window"));
+	if (mrb_respond_to(this->_mrb, obj, mrb_intern_cstr(this->_mrb, "close_event"))) {
+		mrb_funcall(this->_mrb, obj, "close_event", 0);
+	}
 	mrbc_context_free(this->_mrb, this->_mrbContext);
 	mrb_close(this->_mrb);
 
@@ -82,9 +84,9 @@ void Window::draw(sf::RenderTarget& target, sf::RenderStates states) const
 
 	sf::RectangleShape decorator(static_cast<sf::Vector2f>(this->_size + sf::Vector2u(2, 8)));
 	decorator.setPosition(sf::Vector2f(-1, -7));
-	unsigned char palette = 6;
+	unsigned char palette = 5;
 	if (desktop.isFocused(this)) {
-		palette = 7;
+		palette = 6;
 	}
 	decorator.setOutlineColor(this->_palette[palette]);
 	decorator.setFillColor(this->_palette[palette]);
@@ -110,9 +112,11 @@ void Window::resize(sf::Vector2u size)
 	this->_size.y = std::max(this->_minSize.y, size.y);
 
 	this->_texture.create(this->_size.x, this->_size.y);
-	// if (mrb_obj_respond_to(this->_mrb, this->_mrbWindowClass, mrb_intern_cstr(this->_mrb, "resize_event"))) {
-	// 	mrb_funcall(this->_mrb, mrb_nil_value(), "resize_event", 0);
-	// }
+
+	mrb_value obj = mrb_const_get(this->_mrb, mrb_obj_value(this->_mrb->object_class), mrb_intern_cstr(this->_mrb, "Window"));
+	if (mrb_respond_to(this->_mrb, obj, mrb_intern_cstr(this->_mrb, "resize_event"))) {
+		mrb_funcall(this->_mrb, obj, "resize_event", 2, mrb_int_value(this->_mrb, this->_size.x), mrb_int_value(this->_mrb, this->_size.y));
+	}
 }
 
 bool Window::isContext(mrb_state* mrb) const
@@ -173,6 +177,14 @@ void Window::removeKeyPressed(sf::Keyboard::Key key)
 		this->_keyPressed.erase(
 			std::remove_if(this->_keyPressed.begin(), this->_keyPressed.end(), [key](sf::Keyboard::Key testKey) { return testKey == key; } )
 		);
+	}
+}
+
+void Window::textEnteredEvent(sf::Uint32 unicode)
+{
+	mrb_value obj = mrb_const_get(this->_mrb, mrb_obj_value(this->_mrb->object_class), mrb_intern_cstr(this->_mrb, "Window"));
+	if (mrb_respond_to(this->_mrb, obj, mrb_intern_cstr(this->_mrb, "text_event"))) {
+		mrb_funcall(this->_mrb, obj, "text_event", 1, mrb_int_value(this->_mrb, unicode));
 	}
 }
 

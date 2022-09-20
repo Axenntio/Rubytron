@@ -1,3 +1,9 @@
+class Window
+	def self.text_event(char)
+		$debug = !$debug if char == 32
+	end
+end
+
 class Vector
 	attr_accessor :x
 	attr_accessor :y
@@ -13,11 +19,12 @@ class Vector
 end
 
 def init
+	$debug = false
 	$player_pos = Vector.new(0, 0)
 end
 
 def update
-	puts key.inspect
+	puts key.inspect if $debug
 	$player_pos.x -= 1 if key 71
 	$player_pos.x += 1 if key 72
 	$player_pos.y -= 1 if key 73

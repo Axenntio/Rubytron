@@ -6,6 +6,10 @@ class Window
 	def self.close_event
 		puts 'Received close event'
 	end
+
+	def self.text_event(char)
+		puts "Received text event (#{char})"
+	end
 end
 
 def init

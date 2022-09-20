@@ -29,6 +29,7 @@ public:
 	void setMousePosition(sf::Vector2f position);
 	void addKeyPressed(sf::Keyboard::Key key);
 	void removeKeyPressed(sf::Keyboard::Key key);
+	void textEnteredEvent(sf::Uint32 unicode);
 
 private:
 	static mrb_value mrubyGetWidth(mrb_state *mrb, mrb_value self);

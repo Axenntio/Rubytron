@@ -72,6 +72,9 @@ void Desktop::run()
 			if (event.type == sf::Event::KeyReleased) {
 				this->keyReleaseEvent(event);
 			}
+			if (event.type == sf::Event::TextEntered) {
+				this->textEvent(event);
+			}
         }
 
 		this->_window.setVerticalSyncEnabled(true);
@@ -180,7 +183,7 @@ void Desktop::mouseMoveEvent(sf::Event event)
 	}
 }
 
-void Desktop::keyPressEvent([[maybe_unused]] sf::Event event)
+void Desktop::keyPressEvent(sf::Event event)
 {
 	if (this->_focusedWindow == nullptr) {
 		return;
@@ -188,10 +191,18 @@ void Desktop::keyPressEvent([[maybe_unused]] sf::Event event)
 	this->_focusedWindow->addKeyPressed(event.key.code);
 }
 
-void Desktop::keyReleaseEvent([[maybe_unused]] sf::Event event)
+void Desktop::keyReleaseEvent(sf::Event event)
 {
 	if (this->_focusedWindow == nullptr) {
 		return;
 	}
 	this->_focusedWindow->removeKeyPressed(event.key.code);
+}
+
+void Desktop::textEvent(sf::Event event)
+{
+	if (this->_focusedWindow == nullptr) {
+		return;
+	}
+	this->_focusedWindow->textEnteredEvent(event.text.unicode);
 }
