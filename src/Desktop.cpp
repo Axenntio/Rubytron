@@ -185,7 +185,7 @@ void Desktop::keyPressEvent([[maybe_unused]] sf::Event event)
 	if (this->_focusedWindow == nullptr) {
 		return;
 	}
-	this->_focusedWindow->setLastKeypress(event.key.code);
+	this->_focusedWindow->addKeyPressed(event.key.code);
 }
 
 void Desktop::keyReleaseEvent([[maybe_unused]] sf::Event event)
@@ -193,5 +193,5 @@ void Desktop::keyReleaseEvent([[maybe_unused]] sf::Event event)
 	if (this->_focusedWindow == nullptr) {
 		return;
 	}
-	this->_focusedWindow->setLastKeypress(sf::Keyboard::Unknown);
+	this->_focusedWindow->removeKeyPressed(event.key.code);
 }

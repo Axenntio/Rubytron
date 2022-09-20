@@ -27,7 +27,8 @@ public:
 	bool isIn(WindowZone zone, sf::Vector2i point) const;
 
 	void setMousePosition(sf::Vector2f position);
-	void setLastKeypress(sf::Keyboard::Key key);
+	void addKeyPressed(sf::Keyboard::Key key);
+	void removeKeyPressed(sf::Keyboard::Key key);
 
 private:
 	static mrb_value mrubyGetWidth(mrb_state *mrb, mrb_value self);
@@ -57,7 +58,7 @@ private:
 	sf::Vector2u _size;
 	sf::Vector2u _minSize;
 	sf::Vector2i _mousePosition;
-	sf::Keyboard::Key _lastKey;
+	std::vector<sf::Keyboard::Key> _keyPressed;
 	std::string _title;
 
 	mrb_state* _mrb;

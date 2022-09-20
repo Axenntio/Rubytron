@@ -17,6 +17,7 @@ def init
 end
 
 def update
+	puts key.inspect
 	$player_pos.x -= 1 if key 71
 	$player_pos.x += 1 if key 72
 	$player_pos.y -= 1 if key 73

@@ -2,6 +2,7 @@
 #include <sstream>
 #include <Window.hpp>
 #include <Desktop.hpp>
+#include <mruby/array.h>
 
 extern Desktop desktop;
 
@@ -12,7 +13,6 @@ Window::Window(sf::Vector2i position, sf::Vector2u size, const std::vector<sf::C
 	this->_palette = palette;
 	this->_texture.create(this->_size.x, this->_size.y);
 	this->_texture.clear(this->_palette[0]);
-	this->_lastKey = sf::Keyboard::Unknown;
 	this->_mrb = mrb_open();
 
 	if (!this->_mrb) {
@@ -161,9 +161,20 @@ void Window::setMousePosition(sf::Vector2f position)
 	this->_mousePosition = sf::Vector2i(position - this->getPosition());
 }
 
-void Window::setLastKeypress(sf::Keyboard::Key key)
+void Window::addKeyPressed(sf::Keyboard::Key key)
 {
-	this->_lastKey = key;
+	if (std::find(this->_keyPressed.begin(), this->_keyPressed.end(), static_cast<sf::Keyboard::Key>(key)) == this->_keyPressed.end()) {
+		this->_keyPressed.push_back(key);
+	}
+}
+
+void Window::removeKeyPressed(sf::Keyboard::Key key)
+{
+	if (std::find(this->_keyPressed.begin(), this->_keyPressed.end(), static_cast<sf::Keyboard::Key>(key)) != this->_keyPressed.end()) {
+		this->_keyPressed.erase(
+			std::remove_if(this->_keyPressed.begin(), this->_keyPressed.end(), [key](sf::Keyboard::Key testKey) { return testKey == key; } )
+		);
+	}
 }
 
 mrb_value Window::mrubyGetWidth(mrb_state *mrb, [[maybe_unused]] mrb_value self)
@@ -399,14 +410,18 @@ mrb_value Window::mrubyKey(mrb_state* mrb, [[maybe_unused]] mrb_value self)
 {
 	Window* window = desktop.getWindow(mrb);
 	if (window == nullptr) return mrb_nil_value();
-	if (!desktop.isFocused(window)) return mrb_nil_value();
 
 	mrb_int key = -1;
 	mrb_get_args(mrb, "|i", &key);
 
 	if (key != -1) {
-		return mrb_bool_value(sf::Keyboard::isKeyPressed(static_cast<sf::Keyboard::Key>(key)));
+		return mrb_bool_value(std::find(window->_keyPressed.begin(), window->_keyPressed.end(), static_cast<sf::Keyboard::Key>(key)) != window->_keyPressed.end());
 	}
 
-	return mrb_int_value(mrb, window->_lastKey);
+	mrb_value array = mrb_ary_new_capa(mrb, window->_keyPressed.size());
+	for (const sf::Keyboard::Key& key : window->_keyPressed) {
+		mrb_ary_push(mrb, array, mrb_int_value(mrb, key));
+	}
+
+	return array;
 }
