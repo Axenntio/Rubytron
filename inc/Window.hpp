@@ -30,6 +30,7 @@ public:
 	void addKeyPressed(sf::Keyboard::Key key);
 	void removeKeyPressed(sf::Keyboard::Key key);
 	void textEnteredEvent(sf::Uint32 unicode);
+	void focusEvent(bool isFocused);
 
 private:
 	static mrb_value mrubyGetWidth(mrb_state *mrb, mrb_value self);

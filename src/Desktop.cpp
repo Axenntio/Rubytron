@@ -136,6 +136,7 @@ void Desktop::resizeEvent(sf::Event event)
 void Desktop::mouseButtonPressEvent(sf::Event event)
 {
 	sf::Vector2f mappedPoint = this->_window.mapPixelToCoords(sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
+	Window* previous = this->_focusedWindow;
 	this->_focusedWindow = nullptr;
 	for (std::vector<Window*>::reverse_iterator it = this->_windows.rbegin(); it != this->_windows.rend(); ++it) {
 		if ((*it)->isIn(All, static_cast<sf::Vector2i>(mappedPoint))) {
@@ -143,8 +144,14 @@ void Desktop::mouseButtonPressEvent(sf::Event event)
 			break;
 		}
 	}
+	if (previous != nullptr && this->_focusedWindow != previous) {
+		previous->focusEvent(false);
+	}
 	if (this->_focusedWindow == nullptr) {
 		return;
+	}
+	if (this->_focusedWindow != previous) {
+		this->_focusedWindow->focusEvent(true);
 	}
 	this->_windows.erase(
 		std::remove_if(this->_windows.begin(), this->_windows.end(), [this](Window* window) { return window == this->_focusedWindow; } )

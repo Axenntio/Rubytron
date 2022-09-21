@@ -189,6 +189,14 @@ void Window::textEnteredEvent(sf::Uint32 unicode)
 	}
 }
 
+void Window::focusEvent(bool isFocused)
+{
+	mrb_value obj = mrb_const_get(this->_mrb, mrb_obj_value(this->_mrb->object_class), mrb_intern_cstr(this->_mrb, "Window"));
+	if (mrb_respond_to(this->_mrb, obj, mrb_intern_cstr(this->_mrb, "focus_event"))) {
+		mrb_funcall(this->_mrb, obj, "focus_event", 1, mrb_bool_value(isFocused));
+	}
+}
+
 mrb_value Window::mrubyGetWidth(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 {
 	Window* window = desktop.getWindow(mrb);

@@ -10,6 +10,10 @@ class Window
 	def self.text_event(char)
 		puts "Received text event (#{char})"
 	end
+
+	def self.focus_event(has_focus)
+		puts "Focus changed (#{has_focus})"
+	end
 end
 
 def init
