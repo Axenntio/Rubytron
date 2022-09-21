@@ -85,8 +85,8 @@ void Window::draw(sf::RenderTarget& target, sf::RenderStates states) const
 
 	states.texture = NULL;
 
-	sf::RectangleShape decorator(static_cast<sf::Vector2f>(this->_size + sf::Vector2i(2, 8)));
-	decorator.setPosition(sf::Vector2f(-1, -7));
+	sf::RectangleShape decorator(static_cast<sf::Vector2f>(this->_size + sf::Vector2i(2, 9)));
+	decorator.setPosition(sf::Vector2f(-1, -8));
 	unsigned char windowPalette = 5;
 	unsigned char textPalette = 6;
 	if (desktop.isFocused(this)) {
@@ -95,12 +95,20 @@ void Window::draw(sf::RenderTarget& target, sf::RenderStates states) const
 	}
 	decorator.setOutlineColor(this->_palette[windowPalette]);
 	decorator.setFillColor(this->_palette[windowPalette]);
-	sf::Sprite sprite(this->_texture.getTexture());
-	sprite.setTextureRect(sf::IntRect(0, this->_size.y, this->_size.x, -this->_size.y));
+
+	sf::RenderTexture titleBarTexture;
+	titleBarTexture.create(this->_size.x, 8);
+	drawText(titleBarTexture, 0, 0, this->_title, this->_palette[textPalette]);
+	sf::Sprite titleBar(titleBarTexture.getTexture());
+	titleBar.setTextureRect(sf::IntRect(0, 8, this->_size.x, -8));
+	titleBar.setPosition(sf::Vector2f(0, -7));
+
+	sf::Sprite canvas(this->_texture.getTexture());
+	canvas.setTextureRect(sf::IntRect(0, this->_size.y, this->_size.x, -this->_size.y));
 
 	target.draw(decorator, states);
-	drawText(target, states, 0, -6, this->_title, this->_palette[textPalette]);
-	target.draw(sprite, states);
+	target.draw(titleBar, states);
+	target.draw(canvas, states);
 
 	if (this->_mrb->exc) {
 		mrb_print_error(this->_mrb);
@@ -140,13 +148,13 @@ bool Window::isIn(WindowZone zone, sf::Vector2i point) const
 			return
 				point.x >= this->getPosition().x - 1 &&
 				point.x < this->getPosition().x + static_cast<int>(this->_size.x) + 1 &&
-				point.y >= this->getPosition().y - 7 &&
+				point.y >= this->getPosition().y - 8 &&
 				point.y < this->getPosition().y + static_cast<int>(this->_size.y) + 1;
 		case TitleBar:
 			return
 				point.x >= this->getPosition().x - 1 &&
 				point.x < this->getPosition().x + static_cast<int>(this->_size.x) + 1 &&
-				point.y >= this->getPosition().y - 7 &&
+				point.y >= this->getPosition().y - 8 &&
 				point.y < this->getPosition().y;
 		case Canvas:
 			return
