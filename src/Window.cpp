@@ -1,5 +1,6 @@
 #include <Window.hpp>
 #include <Desktop.hpp>
+#include <helper.hh>
 #include <mruby/variable.h>
 #include <mruby/array.h>
 
@@ -86,16 +87,19 @@ void Window::draw(sf::RenderTarget& target, sf::RenderStates states) const
 
 	sf::RectangleShape decorator(static_cast<sf::Vector2f>(this->_size + sf::Vector2i(2, 8)));
 	decorator.setPosition(sf::Vector2f(-1, -7));
-	unsigned char palette = 5;
+	unsigned char windowPalette = 5;
+	unsigned char textPalette = 6;
 	if (desktop.isFocused(this)) {
-		palette = 6;
+		windowPalette = 6;
+		textPalette = 0;
 	}
-	decorator.setOutlineColor(this->_palette[palette]);
-	decorator.setFillColor(this->_palette[palette]);
+	decorator.setOutlineColor(this->_palette[windowPalette]);
+	decorator.setFillColor(this->_palette[windowPalette]);
 	sf::Sprite sprite(this->_texture.getTexture());
 	sprite.setTextureRect(sf::IntRect(0, this->_size.y, this->_size.x, -this->_size.y));
 
 	target.draw(decorator, states);
+	drawText(target, states, 0, -6, this->_title, this->_palette[textPalette]);
 	target.draw(sprite, states);
 
 	if (this->_mrb->exc) {

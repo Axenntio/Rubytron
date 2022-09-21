@@ -31,7 +31,7 @@ Desktop::Desktop(unsigned int width, unsigned int height, unsigned char scale) :
 	this->_cursor_texture.create(4, 6);
 	this->_cursor_texture.clear(sf::Color::Transparent);
 
-	drawOnTexture(this->_cursor_texture, (unsigned char[]) {
+	drawOnTexture(this->_cursor_texture, 0, 0, (unsigned char[]) {
 		0b10000000,
 		0b11000000,
 		0b11100000,
