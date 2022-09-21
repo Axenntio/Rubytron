@@ -39,6 +39,7 @@ Desktop::Desktop(unsigned int width, unsigned int height, unsigned char scale) :
 	this->_windows.push_back(new Window(sf::Vector2i(30, 5), sf::Vector2u(20, 20), this->_palette, "palette.rb"));
 	this->_windows.push_back(new Window(sf::Vector2i(100, 15), sf::Vector2u(40, 20), this->_palette, "xeyes.rb"));
 	this->_windows.push_back(new Window(sf::Vector2i(100, 40), sf::Vector2u(40, 40), this->_palette, "key.rb"));
+	this->_windows.push_back(new Window(sf::Vector2i(100, 40), sf::Vector2u(40, 40), this->_palette, "snake.rb"));
 	for (Window* window : this->_windows) {
 		window->init();
 	}
@@ -178,7 +179,7 @@ void Desktop::mouseMoveEvent(sf::Event event)
 			this->_focusedWindow->setPosition(sf::Vector2f(sf::Vector2i(mappedPoint + this->_focusInitialDelta)));
 			return;
 		case Resize:
-			this->_focusedWindow->resize(sf::Vector2u(mappedPoint + this->_focusInitialDelta));
+			this->_focusedWindow->resize(sf::Vector2i(mappedPoint + this->_focusInitialDelta));
 			return;
 	}
 }

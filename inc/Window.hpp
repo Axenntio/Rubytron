@@ -20,8 +20,8 @@ public:
 	void init();
 	virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
 
-	sf::Vector2u getSize() const;
-	void resize(sf::Vector2u size);
+	sf::Vector2i getSize() const;
+	void resize(sf::Vector2i size);
 
 	bool isContext(mrb_state* mrb) const;
 	bool isIn(WindowZone zone, sf::Vector2i point) const;
@@ -56,8 +56,8 @@ private:
 
 	sf::RenderTexture _texture;
 	std::vector<sf::Color> _palette;
-	sf::Vector2u _size;
-	sf::Vector2u _minSize;
+	sf::Vector2i _size;
+	sf::Vector2i _minSize;
 	sf::Vector2i _mousePosition;
 	std::vector<sf::Keyboard::Key> _keyPressed;
 	std::string _title;

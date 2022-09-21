@@ -12,8 +12,8 @@ def update
 	Window.width = $initial_width + Math.cos($value) * $initial_width / 2
 	Window.height = $initial_height + Math.sin($value) * $initial_height / 2
 	clear $color_index
-	pxl 0, 0, 1
-	pxl 0, Window.height - 1, 2
-	pxl Window.width - 1, 0, 3
-	pxl Window.width - 1, Window.height - 1, 4
+	pixel 0, 0, 1
+	pixel 0, Window.height - 1, 2
+	pixel Window.width - 1, 0, 3
+	pixel Window.width - 1, Window.height - 1, 4
 end

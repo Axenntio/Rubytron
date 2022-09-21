@@ -8,7 +8,7 @@ extern Desktop desktop;
 Window::Window(sf::Vector2i position, sf::Vector2u size, const std::vector<sf::Color>& palette, const std::string& programPath) : _size(size), _title(programPath)
 {
 	this->setPosition(sf::Vector2f(position));
-	this->_minSize = sf::Vector2u(8, 4);
+	this->_minSize = sf::Vector2i(8, 4);
 	this->_palette = palette;
 	this->_texture.create(this->_size.x, this->_size.y);
 	this->_texture.clear(this->_palette[0]);
@@ -36,7 +36,7 @@ Window::Window(sf::Vector2i position, sf::Vector2u size, const std::vector<sf::C
 
 
 	mrb_define_method(this->_mrb, this->_mrb->object_class, "clear", &Window::mrubyClear, MRB_ARGS_REQ(1));
-	mrb_define_method(this->_mrb, this->_mrb->object_class, "pxl", &Window::mrubyPixel, MRB_ARGS_REQ(2) | MRB_ARGS_OPT(1));
+	mrb_define_method(this->_mrb, this->_mrb->object_class, "pixel", &Window::mrubyPixel, MRB_ARGS_REQ(2) | MRB_ARGS_OPT(1));
 	mrb_define_method(this->_mrb, this->_mrb->object_class, "line", &Window::mrubyLine, MRB_ARGS_REQ(4) | MRB_ARGS_OPT(1));
 	mrb_define_method(this->_mrb, this->_mrb->object_class, "rect", &Window::mrubyRectangle, MRB_ARGS_REQ(4) | MRB_ARGS_OPT(1));
 	mrb_define_method(this->_mrb, this->_mrb->object_class, "circle", &Window::mrubyCircle, MRB_ARGS_REQ(3) | MRB_ARGS_OPT(1));
@@ -82,7 +82,7 @@ void Window::draw(sf::RenderTarget& target, sf::RenderStates states) const
 
 	states.texture = NULL;
 
-	sf::RectangleShape decorator(static_cast<sf::Vector2f>(this->_size + sf::Vector2u(2, 8)));
+	sf::RectangleShape decorator(static_cast<sf::Vector2f>(this->_size + sf::Vector2i(2, 8)));
 	decorator.setPosition(sf::Vector2f(-1, -7));
 	unsigned char palette = 5;
 	if (desktop.isFocused(this)) {
@@ -101,12 +101,12 @@ void Window::draw(sf::RenderTarget& target, sf::RenderStates states) const
 	}
 }
 
-sf::Vector2u Window::getSize() const
+sf::Vector2i Window::getSize() const
 {
 	return this->_size;
 }
 
-void Window::resize(sf::Vector2u size)
+void Window::resize(sf::Vector2i size)
 {
 	this->_size.x = std::max(this->_minSize.x, size.x);
 	this->_size.y = std::max(this->_minSize.y, size.y);
@@ -157,6 +157,7 @@ bool Window::isIn(WindowZone zone, sf::Vector2i point) const
 					point.x < this->getPosition().x + static_cast<int>(this->_size.x) + 1
 				);
 	}
+	return false;
 }
 
 void Window::setMousePosition(sf::Vector2f position)
@@ -203,7 +204,7 @@ mrb_value Window::mrubySetWidth(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 
 	mrb_int newWidth;
 	mrb_get_args(mrb, "i", &newWidth);
-	window->_size.x = std::max(window->_minSize.x, static_cast<unsigned int>(newWidth));
+	window->_size.x = std::max(window->_minSize.x, static_cast<int>(newWidth));
 	window->_texture.create(window->_size.x, window->_size.y);
 
 	return mrb_nil_value();
@@ -224,7 +225,7 @@ mrb_value Window::mrubySetHeight(mrb_state *mrb, [[maybe_unused]] mrb_value self
 
 	mrb_int newHeight;
 	mrb_get_args(mrb, "i", &newHeight);
-	window->_size.y = std::max(window->_minSize.y, static_cast<unsigned int>(newHeight));
+	window->_size.y = std::max(window->_minSize.y, static_cast<int>(newHeight));
 	window->_texture.create(window->_size.x, window->_size.y);
 
 	return mrb_nil_value();
@@ -353,11 +354,11 @@ mrb_value Window::mrubyPixel(mrb_state* mrb, [[maybe_unused]] mrb_value self)
 	mrb_int colorPalette = 1;
 	mrb_get_args(mrb, "ii|i", &x, &y, &colorPalette);
 
-	sf::Vertex point[] = {
-		sf::Vertex(sf::Vector2f(x + 1, y), window->_palette[colorPalette]) // Not sure about the +1 trick, but otherwise the pixel is shifted
-	};
-
-	window->_texture.draw(point, 1, sf::Points);
+	sf::RectangleShape rectangle(sf::Vector2f(1, 1));
+	rectangle.setPosition(sf::Vector2f(x, y));
+	rectangle.setOutlineColor(window->_palette[colorPalette]);
+	rectangle.setFillColor(window->_palette[colorPalette]);
+	window->_texture.draw(rectangle);
 
 	return mrb_nil_value();
 }
