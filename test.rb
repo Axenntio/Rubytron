@@ -17,6 +17,7 @@ class Window
 end
 
 def init
+	Window.resizable = false;
 	$color_index = 0
 	$value = 0
 end

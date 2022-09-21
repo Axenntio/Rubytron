@@ -47,6 +47,8 @@ private:
 	static mrb_value mrubySetMouseY(mrb_state *mrb, mrb_value self);
 	static mrb_value mrubyGetTitle(mrb_state *mrb, mrb_value self);
 	static mrb_value mrubySetTitle(mrb_state *mrb, mrb_value self);
+	static mrb_value mrubyIsResizable(mrb_state *mrb, mrb_value self);
+	static mrb_value mrubySetResizable(mrb_state *mrb, mrb_value self);
 
 	static mrb_value mrubyClear(mrb_state *mrb, mrb_value self);
 	static mrb_value mrubyPixel(mrb_state *mrb, mrb_value self);
@@ -62,6 +64,7 @@ private:
 	sf::Vector2i _mousePosition;
 	std::vector<sf::Keyboard::Key> _keyPressed;
 	std::string _title;
+	bool _resizable;
 
 	mrb_state* _mrb;
 	mrbc_context* _mrbContext;

@@ -1,4 +1,5 @@
 #include <Desktop.hpp>
+#include <helper.hh>
 
 Desktop::Desktop(unsigned int width, unsigned int height, unsigned char scale) : _width(width), _height(height)
 {
@@ -22,11 +23,24 @@ Desktop::Desktop(unsigned int width, unsigned int height, unsigned char scale) :
 	};
 
 	this->_window.create(sf::VideoMode(this->_width * scale, this->_height * scale), "Rubytron");
-	this->_window.setMouseCursorVisible(true); // Todo: Change to false when proper cursor will be added
+	this->_window.setMouseCursorVisible(false);
 	this->_background_texture.create(this->_width, this->_height);
 	this->_background_texture.clear(this->_palette[0]);
 	this->_foreground_texture.create(this->_width, this->_height);
 	this->_foreground_texture.clear(sf::Color::Transparent);
+	this->_cursor_texture.create(4, 6);
+	this->_cursor_texture.clear(sf::Color::Transparent);
+
+	drawOnTexture(this->_cursor_texture, (unsigned char[]) {
+		0b10000000,
+		0b11000000,
+		0b11100000,
+		0b11110000,
+		0b11000000,
+		0b00100000
+	}, 6, this->_palette[7]);
+
+
 	this->_canvas_view.setCenter(this->_width / 2, this->_height / 2);
 	this->_canvas_view.setViewport(sf::FloatRect(0, 0, 1, 1));
 	this->_canvas_view.setSize(sf::Vector2f(this->_width, this->_height));
@@ -82,6 +96,9 @@ void Desktop::run()
 		this->_window.clear();
 		sf::Sprite background(this->_background_texture.getTexture());
 		sf::Sprite foreground(this->_foreground_texture.getTexture());
+		sf::Sprite cursor(this->_cursor_texture.getTexture());
+		cursor.setTextureRect(sf::IntRect(0, 6, 4, -6));
+		cursor.setPosition(this->_mouse_coordinated.x, this->_mouse_coordinated.y);
 		this->_window.draw(background);
 		for (const Window* window : this->_windows) {
 			if (window != this->_focusedWindow) {
@@ -92,6 +109,7 @@ void Desktop::run()
 			this->_window.draw(*this->_focusedWindow);
 		}
 		this->_window.draw(foreground);
+		this->_window.draw(cursor);
 		this->_window.display();
     }
 }
@@ -176,6 +194,7 @@ void Desktop::mouseButtonReleaseEvent([[maybe_unused]] sf::Event event)
 void Desktop::mouseMoveEvent(sf::Event event)
 {
 	sf::Vector2f mappedPoint = this->_window.mapPixelToCoords(sf::Vector2i(event.mouseMove.x, event.mouseMove.y));
+	this->_mouse_coordinated = static_cast<sf::Vector2i>(mappedPoint);
 	for (Window* window : this->_windows) {
 		window->setMousePosition(mappedPoint);
 	}

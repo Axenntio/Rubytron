@@ -32,6 +32,8 @@ private:
 	sf::RenderWindow _window;
 	sf::RenderTexture _background_texture;
 	sf::RenderTexture _foreground_texture;
+	sf::RenderTexture _cursor_texture;
+	sf::Vector2i _mouse_coordinated;
 	std::vector<sf::Color> _palette;
 	sf::View _canvas_view;
 	unsigned int _width;

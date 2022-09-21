@@ -5,7 +5,7 @@
 
 extern Desktop desktop;
 
-Window::Window(sf::Vector2i position, sf::Vector2u size, const std::vector<sf::Color>& palette, const std::string& programPath) : _size(size), _title(programPath)
+Window::Window(sf::Vector2i position, sf::Vector2u size, const std::vector<sf::Color>& palette, const std::string& programPath) : _size(size), _title(programPath), _resizable(true)
 {
 	this->setPosition(sf::Vector2f(position));
 	this->_minSize = sf::Vector2i(8, 4);
@@ -33,6 +33,8 @@ Window::Window(sf::Vector2i position, sf::Vector2u size, const std::vector<sf::C
 	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "mouse_y=", &Window::mrubySetMouseY, MRB_ARGS_REQ(1));
 	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "title", &Window::mrubyGetTitle, MRB_ARGS_NONE());
 	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "title=", &Window::mrubySetTitle, MRB_ARGS_REQ(1));
+	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "resizable", &Window::mrubyIsResizable, MRB_ARGS_NONE());
+	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "resizable=", &Window::mrubySetResizable, MRB_ARGS_REQ(1));
 
 
 	mrb_define_method(this->_mrb, this->_mrb->object_class, "clear", &Window::mrubyClear, MRB_ARGS_REQ(1));
@@ -108,6 +110,9 @@ sf::Vector2i Window::getSize() const
 
 void Window::resize(sf::Vector2i size)
 {
+	if (!this->_resizable) {
+		return;
+	}
 	this->_size.x = std::max(this->_minSize.x, size.x);
 	this->_size.y = std::max(this->_minSize.y, size.y);
 
@@ -339,6 +344,28 @@ mrb_value Window::mrubySetTitle(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 	return mrb_nil_value();
 }
 
+mrb_value Window::mrubyIsResizable(mrb_state *mrb, [[maybe_unused]] mrb_value self)
+{
+	Window* window = desktop.getWindow(mrb);
+	if (window == nullptr) return mrb_nil_value();
+
+	return mrb_bool_value(window->_resizable);
+}
+
+mrb_value Window::mrubySetResizable(mrb_state *mrb, [[maybe_unused]] mrb_value self)
+{
+	Window* window = desktop.getWindow(mrb);
+	if (window == nullptr) return mrb_nil_value();
+
+	mrb_bool resizable;
+	mrb_get_args(mrb, "b", &resizable);
+	window->_resizable = resizable;
+
+	return mrb_nil_value();
+}
+
+// Drawing
+
 mrb_value Window::mrubyClear(mrb_state* mrb, [[maybe_unused]] mrb_value self)
 {
 	Window* window = desktop.getWindow(mrb);
@@ -362,11 +389,11 @@ mrb_value Window::mrubyPixel(mrb_state* mrb, [[maybe_unused]] mrb_value self)
 	mrb_int colorPalette = 1;
 	mrb_get_args(mrb, "ii|i", &x, &y, &colorPalette);
 
-	sf::RectangleShape rectangle(sf::Vector2f(1, 1));
-	rectangle.setPosition(sf::Vector2f(x, y));
-	rectangle.setOutlineColor(window->_palette[colorPalette]);
-	rectangle.setFillColor(window->_palette[colorPalette]);
-	window->_texture.draw(rectangle);
+	sf::RectangleShape pixel(sf::Vector2f(1, 1));
+	pixel.setPosition(sf::Vector2f(x, y));
+	pixel.setOutlineColor(window->_palette[colorPalette]);
+	pixel.setFillColor(window->_palette[colorPalette]);
+	window->_texture.draw(pixel);
 
 	return mrb_nil_value();
 }
