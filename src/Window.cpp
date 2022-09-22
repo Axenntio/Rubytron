@@ -43,6 +43,7 @@ Window::Window(sf::Vector2i position, sf::Vector2u size, const std::vector<sf::C
 	mrb_define_method(this->_mrb, this->_mrb->object_class, "line", &Window::mrubyLine, MRB_ARGS_REQ(4) | MRB_ARGS_OPT(1));
 	mrb_define_method(this->_mrb, this->_mrb->object_class, "rect", &Window::mrubyRectangle, MRB_ARGS_REQ(4) | MRB_ARGS_OPT(1));
 	mrb_define_method(this->_mrb, this->_mrb->object_class, "circle", &Window::mrubyCircle, MRB_ARGS_REQ(3) | MRB_ARGS_OPT(1));
+	mrb_define_method(this->_mrb, this->_mrb->object_class, "text", &Window::mrubyText, MRB_ARGS_REQ(3) | MRB_ARGS_OPT(1));
 	mrb_define_method(this->_mrb, this->_mrb->object_class, "key", &Window::mrubyKey, MRB_ARGS_OPT(1));
 
 	FILE *file = fopen(programPath.c_str(), "r");
@@ -461,6 +462,20 @@ mrb_value Window::mrubyCircle(mrb_state* mrb, [[maybe_unused]] mrb_value self)
 	circle.setOutlineColor(window->_palette[colorPalette]);
 	circle.setFillColor(window->_palette[colorPalette]);
 	window->_texture.draw(circle);
+
+	return mrb_nil_value();
+}
+
+mrb_value Window::mrubyText(mrb_state* mrb, [[maybe_unused]] mrb_value self)
+{
+	Window* window = desktop.getWindow(mrb);
+	if (window == nullptr) return mrb_nil_value();
+
+	const char* text;
+	mrb_int x, y, radius;
+	mrb_int colorPalette = 1;
+	mrb_get_args(mrb, "iiz|i", &x, &y, &text, &colorPalette);
+	drawText(window->_texture, x, y, std::string(text), window->_palette[colorPalette]);
 
 	return mrb_nil_value();
 }

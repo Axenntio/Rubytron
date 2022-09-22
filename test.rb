@@ -34,4 +34,5 @@ def update
 	pixel Math.cos($value / 2) * 4 + 20, Math.sin($value / 2) * 4 + 20, 6
 	line 0, 0, 10, 10, 7
 	line 10, 10, 25, 15, 8
+	text 0, Window.height - 6, 'Hey! Example demo.'
 end
