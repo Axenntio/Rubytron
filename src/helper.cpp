@@ -29,8 +29,6 @@ void drawOnTexture(sf::RenderTarget& target, sf::RenderStates states, int x, int
 	target.draw(sprite, states);
 }
 
-#define FONT_HEIGHT 6
-#define FONT_WIDTH 5
 const unsigned char font[] = {
 	// 0x00 - nul
 	0b11111111, 0b11111111, 0b11111111, 0b11111111, 0b11111111, 0b00000000,

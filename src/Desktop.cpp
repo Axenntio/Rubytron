@@ -4,7 +4,7 @@
 Desktop::Desktop(unsigned int width, unsigned int height, unsigned char scale) : _width(width), _height(height)
 {
 	this->_palette = std::vector<sf::Color> {
-		sf::Color( 0,    0,   0), // #000000
+		sf::Color(  0,   0,   0), // #000000
 		sf::Color( 29,  43,  83), // #1D2B53
 		sf::Color(126,  37,  83), // #7e2553
 		sf::Color(  0, 135,  81), // #008751
@@ -62,11 +62,11 @@ Desktop::Desktop(unsigned int width, unsigned int height, unsigned char scale) :
 void Desktop::run()
 {
 	while (this->_window.isOpen())
-    {
-        sf::Event event;
-        while (this->_window.pollEvent(event))
-        {
-            if (event.type == sf::Event::Closed) {
+	{
+		sf::Event event;
+		while (this->_window.pollEvent(event))
+		{
+			if (event.type == sf::Event::Closed) {
 				this->closeEvent(event);
 			}
 			if (event.type == sf::Event::Resized) {
@@ -90,7 +90,7 @@ void Desktop::run()
 			if (event.type == sf::Event::TextEntered) {
 				this->textEvent(event);
 			}
-        }
+		}
 
 		this->_window.setVerticalSyncEnabled(true);
 		this->_window.clear();
@@ -111,7 +111,7 @@ void Desktop::run()
 		this->_window.draw(foreground);
 		this->_window.draw(cursor);
 		this->_window.display();
-    }
+	}
 }
 
 Window* Desktop::getWindow(mrb_state* mrb) const

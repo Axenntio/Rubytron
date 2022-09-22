@@ -1,8 +1,11 @@
 #include <Window.hpp>
 #include <Desktop.hpp>
 #include <helper.hh>
+#include <mruby/internal.h>
 #include <mruby/variable.h>
 #include <mruby/array.h>
+#include <mruby/string.h>
+#include <mruby/error.h>
 
 extern Desktop desktop;
 
@@ -112,7 +115,15 @@ void Window::draw(sf::RenderTarget& target, sf::RenderStates states) const
 	target.draw(canvas, states);
 
 	if (this->_mrb->exc) {
-		mrb_print_error(this->_mrb);
+		mrb_value exception = mrb_obj_as_string(this->_mrb, mrb_obj_value(this->_mrb->exc));
+		mrb_value backtraceObj = mrb_funcall(this->_mrb, mrb_obj_value(this->_mrb->exc), "backtrace", 0);
+		mrb_int backtraceLength = RARRAY_LEN(backtraceObj);
+		mrb_value *backtrace = RARRAY_PTR(backtraceObj);
+
+		drawText(target, states, 0, 0, mrb_str_to_cstr(this->_mrb, exception), this->_palette[8]);
+		for (unsigned int i = 0; i < backtraceLength; ++i) {
+			drawText(target, states, 0, (i + 1) * (FONT_HEIGHT + 1), mrb_str_to_cstr(this->_mrb, backtrace[i]) , this->_palette[8]);
+		}
 	}
 }
 
@@ -472,7 +483,7 @@ mrb_value Window::mrubyText(mrb_state* mrb, [[maybe_unused]] mrb_value self)
 	if (window == nullptr) return mrb_nil_value();
 
 	const char* text;
-	mrb_int x, y, radius;
+	mrb_int x, y;
 	mrb_int colorPalette = 1;
 	mrb_get_args(mrb, "iiz|i", &x, &y, &text, &colorPalette);
 	drawText(window->_texture, x, y, std::string(text), window->_palette[colorPalette]);
