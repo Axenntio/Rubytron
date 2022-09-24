@@ -21,8 +21,10 @@ public:
 	virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
 
 	sf::Vector2i getSize() const;
-	void resize(sf::Vector2i size);
 
+	void exceptionHandler();
+
+	void resize(sf::Vector2i size);
 	bool isContext(mrb_state* mrb) const;
 	bool isIn(WindowZone zone, sf::Vector2i point) const;
 
@@ -33,6 +35,9 @@ public:
 	void focusEvent(bool isFocused);
 
 private:
+	void resizeTrigger();
+	void titleBarRefresh();
+
 	static mrb_value mrubyGetWidth(mrb_state *mrb, mrb_value self);
 	static mrb_value mrubySetWidth(mrb_state *mrb, mrb_value self);
 	static mrb_value mrubyGetHeight(mrb_state *mrb, mrb_value self);
@@ -59,6 +64,7 @@ private:
 	static mrb_value mrubyKey(mrb_state *mrb, mrb_value self);
 
 	sf::RenderTexture _texture;
+	sf::RenderTexture _barTexture;
 	std::vector<sf::Color> _palette;
 	sf::Vector2i _size;
 	sf::Vector2i _minSize;

@@ -16,6 +16,7 @@ Window::Window(sf::Vector2i position, sf::Vector2u size, const std::vector<sf::C
 	this->_palette = palette;
 	this->_texture.create(this->_size.x, this->_size.y);
 	this->_texture.clear(this->_palette[0]);
+	this->titleBarRefresh();
 	this->_mrb = mrb_open();
 
 	if (!this->_mrb) {
@@ -91,19 +92,14 @@ void Window::draw(sf::RenderTarget& target, sf::RenderStates states) const
 
 	sf::RectangleShape decorator(static_cast<sf::Vector2f>(this->_size + sf::Vector2i(2, 9)));
 	decorator.setPosition(sf::Vector2f(-1, -8));
-	unsigned char windowPalette = 5;
-	unsigned char textPalette = 6;
+	unsigned char palette = 5;
 	if (desktop.isFocused(this)) {
-		windowPalette = 6;
-		textPalette = 0;
+		palette = 6;
 	}
-	decorator.setOutlineColor(this->_palette[windowPalette]);
-	decorator.setFillColor(this->_palette[windowPalette]);
+	decorator.setOutlineColor(this->_palette[palette]);
+	decorator.setFillColor(this->_palette[palette]);
 
-	sf::RenderTexture titleBarTexture;
-	titleBarTexture.create(this->_size.x, 8);
-	drawText(titleBarTexture, 0, 0, this->_title, this->_palette[textPalette]);
-	sf::Sprite titleBar(titleBarTexture.getTexture());
+	sf::Sprite titleBar(this->_barTexture.getTexture());
 	titleBar.setTextureRect(sf::IntRect(0, 8, this->_size.x, -8));
 	titleBar.setPosition(sf::Vector2f(0, -7));
 
@@ -113,23 +109,28 @@ void Window::draw(sf::RenderTarget& target, sf::RenderStates states) const
 	target.draw(decorator, states);
 	target.draw(titleBar, states);
 	target.draw(canvas, states);
-
-	if (this->_mrb->exc) {
-		mrb_value exception = mrb_obj_as_string(this->_mrb, mrb_obj_value(this->_mrb->exc));
-		mrb_value backtraceObj = mrb_funcall(this->_mrb, mrb_obj_value(this->_mrb->exc), "backtrace", 0);
-		mrb_int backtraceLength = RARRAY_LEN(backtraceObj);
-		mrb_value *backtrace = RARRAY_PTR(backtraceObj);
-
-		drawText(target, states, 0, 0, mrb_str_to_cstr(this->_mrb, exception), this->_palette[8]);
-		for (unsigned int i = 0; i < backtraceLength; ++i) {
-			drawText(target, states, 0, (i + 1) * (FONT_HEIGHT + 1), mrb_str_to_cstr(this->_mrb, backtrace[i]) , this->_palette[8]);
-		}
-	}
 }
 
 sf::Vector2i Window::getSize() const
 {
 	return this->_size;
+}
+
+void Window::exceptionHandler()
+{
+	if (this->_mrb->exc) {
+		this->_resizable = true;
+		this->_minSize = sf::Vector2i(8, 4);
+		mrb_value exception = mrb_obj_as_string(this->_mrb, mrb_obj_value(this->_mrb->exc));
+		mrb_value backtraceObj = mrb_funcall(this->_mrb, mrb_obj_value(this->_mrb->exc), "backtrace", 0);
+		mrb_int backtraceLength = RARRAY_LEN(backtraceObj);
+		mrb_value *backtrace = RARRAY_PTR(backtraceObj);
+
+		drawText(this->_texture, 1, 1, mrb_str_to_cstr(this->_mrb, exception), this->_palette[8]);
+		for (unsigned int i = 0; i < backtraceLength; ++i) {
+			drawText(this->_texture, 1, (i + 1) * (FONT_HEIGHT + 1) + 1, mrb_str_to_cstr(this->_mrb, backtrace[i]) , this->_palette[8]);
+		}
+	}
 }
 
 void Window::resize(sf::Vector2i size)
@@ -140,12 +141,35 @@ void Window::resize(sf::Vector2i size)
 	this->_size.x = std::max(this->_minSize.x, size.x);
 	this->_size.y = std::max(this->_minSize.y, size.y);
 
-	this->_texture.create(this->_size.x, this->_size.y);
+	this->resizeTrigger();
 
 	mrb_value obj = mrb_const_get(this->_mrb, mrb_obj_value(this->_mrb->object_class), mrb_intern_cstr(this->_mrb, "Window"));
 	if (mrb_respond_to(this->_mrb, obj, mrb_intern_cstr(this->_mrb, "resize_event"))) {
 		mrb_funcall(this->_mrb, obj, "resize_event", 2, mrb_int_value(this->_mrb, this->_size.x), mrb_int_value(this->_mrb, this->_size.y));
 	}
+}
+
+void Window::resizeTrigger()
+{
+	sf::Texture tmp(this->_texture.getTexture());
+	this->_texture.create(this->_size.x, this->_size.y);
+	this->_texture.clear(this->_palette[0]);
+	sf::Sprite tmpSprite(tmp);
+	tmpSprite.setTextureRect(sf::IntRect(0, tmp.getSize().y, tmp.getSize().x, -tmp.getSize().y));
+	this->_texture.draw(tmpSprite);
+
+	this->titleBarRefresh();
+}
+
+void Window::titleBarRefresh()
+{
+	unsigned char palette = 6;
+	if (desktop.isFocused(this)) {
+		palette = 0;
+	}
+	this->_barTexture.create(this->_size.x, 8);
+	this->_barTexture.clear(sf::Color::Transparent);
+	drawText(this->_barTexture, 0, 0, this->_title, this->_palette[palette]);
 }
 
 bool Window::isContext(mrb_state* mrb) const
@@ -220,6 +244,7 @@ void Window::textEnteredEvent(sf::Uint32 unicode)
 
 void Window::focusEvent(bool isFocused)
 {
+	this->titleBarRefresh();
 	mrb_value obj = mrb_const_get(this->_mrb, mrb_obj_value(this->_mrb->object_class), mrb_intern_cstr(this->_mrb, "Window"));
 	if (mrb_respond_to(this->_mrb, obj, mrb_intern_cstr(this->_mrb, "focus_event"))) {
 		mrb_funcall(this->_mrb, obj, "focus_event", 1, mrb_bool_value(isFocused));
@@ -242,7 +267,7 @@ mrb_value Window::mrubySetWidth(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 	mrb_int newWidth;
 	mrb_get_args(mrb, "i", &newWidth);
 	window->_size.x = std::max(window->_minSize.x, static_cast<int>(newWidth));
-	window->_texture.create(window->_size.x, window->_size.y);
+	window->resizeTrigger();
 
 	return mrb_nil_value();
 }
@@ -263,7 +288,7 @@ mrb_value Window::mrubySetHeight(mrb_state *mrb, [[maybe_unused]] mrb_value self
 	mrb_int newHeight;
 	mrb_get_args(mrb, "i", &newHeight);
 	window->_size.y = std::max(window->_minSize.y, static_cast<int>(newHeight));
-	window->_texture.create(window->_size.x, window->_size.y);
+	window->resizeTrigger();
 
 	return mrb_nil_value();
 }
@@ -364,6 +389,7 @@ mrb_value Window::mrubySetTitle(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 	const char* title;
 	mrb_get_args(mrb, "z", &title);
 	window->_title = std::string(title);
+	window->titleBarRefresh();
 
 	return mrb_nil_value();
 }

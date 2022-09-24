@@ -100,13 +100,9 @@ void Desktop::run()
 		cursor.setTextureRect(sf::IntRect(0, 6, 4, -6));
 		cursor.setPosition(this->_mouse_coordinated.x, this->_mouse_coordinated.y);
 		this->_window.draw(background);
-		for (const Window* window : this->_windows) {
-			if (window != this->_focusedWindow) {
-				this->_window.draw(*window);
-			}
-		}
-		if (this->_focusedWindow != nullptr) {
-			this->_window.draw(*this->_focusedWindow);
+		for (Window* window : this->_windows) {
+			window->exceptionHandler();
+			this->_window.draw(*window);
 		}
 		this->_window.draw(foreground);
 		this->_window.draw(cursor);
