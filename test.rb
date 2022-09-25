@@ -13,18 +13,19 @@ class Window
 
 	def self.focus_event(has_focus)
 		puts "Focus changed (#{has_focus})"
+		$has_focus = has_focus;
 	end
 end
 
 def init
-	Window.resizable = false;
+	$has_focus = false;
 	$color_index = 0
 	$value = 0
 end
 
 def update
 	clear $color_index
-	$value += 0.1
+	$value += 0.1 if $has_focus
 	pixel 0, 0, 1
 	pixel 0, Window.height - 1, 2
 	pixel Window.width - 1, 0, 3
@@ -34,5 +35,5 @@ def update
 	pixel Math.cos($value / 2) * 4 + 20, Math.sin($value / 2) * 4 + 20, 6
 	line 0, 0, 10, 10, 7
 	line 10, 10, 25, 15, 8
-	text 0, Window.height - 6, 'Hey! Example demo.'
+	text 1, Window.height - 7, 'Hey! Example demo.'
 end

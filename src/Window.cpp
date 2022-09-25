@@ -138,9 +138,9 @@ void Window::exceptionHandler()
 		mrb_int backtraceLength = RARRAY_LEN(backtraceObj);
 		mrb_value *backtrace = RARRAY_PTR(backtraceObj);
 
-		drawText(this->_texture, 1, 1, mrb_str_to_cstr(this->_mrb, exception), this->_palette[8]);
+		drawText(this->_texture, 1, 1, mrb_str_to_cstr(this->_mrb, exception), this->_palette[8], false);
 		for (unsigned int i = 0; i < backtraceLength; ++i) {
-			drawText(this->_texture, 1, (i + 1) * (FONT_HEIGHT + 1) + 1, mrb_str_to_cstr(this->_mrb, backtrace[i]) , this->_palette[8]);
+			drawText(this->_texture, 1, (i + 1) * (FONT_HEIGHT + 1) + 1, mrb_str_to_cstr(this->_mrb, backtrace[i]) , this->_palette[8], false);
 		}
 	}
 }
@@ -181,7 +181,7 @@ void Window::titleBarRefresh()
 	}
 	this->_barTexture.create(this->_size.x, 8);
 	this->_barTexture.clear(sf::Color::Transparent);
-	drawText(this->_barTexture, 0, 0, this->_title, this->_palette[palette]);
+	drawText(this->_barTexture, 0, 0, this->_title, this->_palette[palette], false);
 }
 
 bool Window::isContext(mrb_state* mrb) const
@@ -533,8 +533,9 @@ mrb_value Window::mrubyText(mrb_state* mrb, [[maybe_unused]] mrb_value self)
 	const char* text;
 	mrb_int x, y;
 	mrb_int colorPalette = 1;
-	mrb_get_args(mrb, "iiz|i", &x, &y, &text, &colorPalette);
-	drawText(window->_texture, x, y, std::string(text), window->_palette[colorPalette]);
+	mrb_bool monospaces = false;
+	mrb_get_args(mrb, "iiz|ib", &x, &y, &text, &colorPalette, &monospaces);
+	drawText(window->_texture, x, y, std::string(text), window->_palette[colorPalette], monospaces);
 
 	return mrb_nil_value();
 }
