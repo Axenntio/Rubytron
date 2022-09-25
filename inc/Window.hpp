@@ -15,6 +15,8 @@ public:
 	Window(sf::Vector2i position, sf::Vector2u size, const std::vector<sf::Color>& palette, const std::string& programPath);
 	~Window();
 
+	void loadFile();
+	void reloadFile();
 	void execute(const std::string& string);
 
 	void init();
@@ -54,6 +56,7 @@ private:
 	static mrb_value mrubySetTitle(mrb_state *mrb, mrb_value self);
 	static mrb_value mrubyIsResizable(mrb_state *mrb, mrb_value self);
 	static mrb_value mrubySetResizable(mrb_state *mrb, mrb_value self);
+	static mrb_value mrubyReload(mrb_state *mrb, mrb_value self);
 
 	static mrb_value mrubyClear(mrb_state *mrb, mrb_value self);
 	static mrb_value mrubyPixel(mrb_state *mrb, mrb_value self);
@@ -73,6 +76,7 @@ private:
 	std::string _title;
 	bool _resizable;
 
+	std::string _programFile;
 	mrb_state* _mrb;
 	mrbc_context* _mrbContext;
 	RClass *_mrbWindowClass;

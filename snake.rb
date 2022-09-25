@@ -44,6 +44,7 @@ class Snake
 	end
 
 	def keyPress(key)
+		Window.reload if key.chr == 'r'
 		self.direction = case key.chr
 		when 'a'
 			Vector.new(-1, 0)

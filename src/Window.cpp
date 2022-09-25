@@ -9,7 +9,7 @@
 
 extern Desktop desktop;
 
-Window::Window(sf::Vector2i position, sf::Vector2u size, const std::vector<sf::Color>& palette, const std::string& programPath) : _size(size), _title(programPath), _resizable(true)
+Window::Window(sf::Vector2i position, sf::Vector2u size, const std::vector<sf::Color>& palette, const std::string& programPath) : _size(size), _title(programPath), _resizable(true), _programFile(programPath)
 {
 	this->setPosition(sf::Vector2f(position));
 	this->_minSize = sf::Vector2i(8, 4);
@@ -40,6 +40,7 @@ Window::Window(sf::Vector2i position, sf::Vector2u size, const std::vector<sf::C
 	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "title=", &Window::mrubySetTitle, MRB_ARGS_REQ(1));
 	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "resizable", &Window::mrubyIsResizable, MRB_ARGS_NONE());
 	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "resizable=", &Window::mrubySetResizable, MRB_ARGS_REQ(1));
+	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "reload", &Window::mrubyReload, MRB_ARGS_NONE());
 
 
 	mrb_define_method(this->_mrb, this->_mrb->object_class, "clear", &Window::mrubyClear, MRB_ARGS_REQ(1));
@@ -50,10 +51,7 @@ Window::Window(sf::Vector2i position, sf::Vector2u size, const std::vector<sf::C
 	mrb_define_method(this->_mrb, this->_mrb->object_class, "text", &Window::mrubyText, MRB_ARGS_REQ(3) | MRB_ARGS_OPT(1));
 	mrb_define_method(this->_mrb, this->_mrb->object_class, "key", &Window::mrubyKey, MRB_ARGS_OPT(1));
 
-	FILE *file = fopen(programPath.c_str(), "r");
-	this->_mrbContext = mrbc_context_new(this->_mrb);
-	mrbc_filename(this->_mrb, this->_mrbContext, programPath.c_str());
-	mrb_load_file_cxt(this->_mrb, file, this->_mrbContext);
+	this->loadFile();
 }
 
 Window::~Window()
@@ -64,7 +62,22 @@ Window::~Window()
 	}
 	mrbc_context_free(this->_mrb, this->_mrbContext);
 	mrb_close(this->_mrb);
+}
 
+void Window::loadFile()
+{
+	FILE *file = fopen(this->_programFile.c_str(), "r");
+	this->_mrbContext = mrbc_context_new(this->_mrb);
+	mrbc_filename(this->_mrb, this->_mrbContext, this->_programFile.c_str());
+	mrb_load_file_cxt(this->_mrb, file, this->_mrbContext);
+	fclose(file);
+}
+
+void Window::reloadFile()
+{
+	mrbc_context_free(this->_mrb, this->_mrbContext);
+	this->loadFile();
+	this->init();
 }
 
 void Window::execute(const std::string& string)
@@ -77,7 +90,6 @@ void Window::init()
 	if (mrb_obj_respond_to(this->_mrb, this->_mrb->object_class, mrb_intern_cstr(this->_mrb, "init"))) {
 		mrb_funcall(this->_mrb, mrb_nil_value(), "init", 0);
 	}
-	this->_mrbWindowClass = mrb_class_get(this->_mrb, "Window");
 }
 
 void Window::draw(sf::RenderTarget& target, sf::RenderStates states) const
@@ -410,6 +422,16 @@ mrb_value Window::mrubySetResizable(mrb_state *mrb, [[maybe_unused]] mrb_value s
 	mrb_bool resizable;
 	mrb_get_args(mrb, "b", &resizable);
 	window->_resizable = resizable;
+
+	return mrb_nil_value();
+}
+
+mrb_value Window::mrubyReload(mrb_state *mrb, [[maybe_unused]] mrb_value self)
+{
+	Window* window = desktop.getWindow(mrb);
+	if (window == nullptr) return mrb_nil_value();
+
+	window->reloadFile();
 
 	return mrb_nil_value();
 }
