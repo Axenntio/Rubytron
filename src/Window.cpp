@@ -1,4 +1,3 @@
-#include <Window.hpp>
 #include <Desktop.hpp>
 #include <helper.hh>
 #include <mruby/internal.h>
@@ -9,7 +8,7 @@
 
 extern Desktop desktop;
 
-Window::Window(sf::Vector2i position, sf::Vector2u size, const std::vector<sf::Color>& palette, const std::string& programPath) : _size(size), _title(programPath), _resizable(true), _programFile(programPath)
+Window::Window(sf::Vector2i position, sf::Vector2u size, const std::vector<sf::Color>& palette, TitleBarMode titleBarMode, const std::string& programPath) : _size(size), _title(programPath), _titleBarMode(titleBarMode), _resizable(true), _programFile(programPath)
 {
 	this->setPosition(sf::Vector2f(position));
 	this->_minSize = sf::Vector2i(8, 4);
@@ -102,24 +101,33 @@ void Window::draw(sf::RenderTarget& target, sf::RenderStates states) const
 
 	states.texture = NULL;
 
-	sf::RectangleShape decorator(static_cast<sf::Vector2f>(this->_size + sf::Vector2i(2, 9)));
-	decorator.setPosition(sf::Vector2f(-1, -8));
+	unsigned char height = 8;
+	if (this->_titleBarMode == TitleBarMode::Minimal) {
+		height = 5;
+	}
+	if (this->_titleBarMode == TitleBarMode::None) {
+		height = 1;
+	}
+
+	sf::RectangleShape decorator(static_cast<sf::Vector2f>(this->_size + sf::Vector2i(2, height + 1)));
+	decorator.setPosition(sf::Vector2f(-1, -height));
 	unsigned char palette = 5;
 	if (desktop.isFocused(this)) {
 		palette = 6;
 	}
 	decorator.setOutlineColor(this->_palette[palette]);
 	decorator.setFillColor(this->_palette[palette]);
+	target.draw(decorator, states);
 
-	sf::Sprite titleBar(this->_barTexture.getTexture());
-	titleBar.setTextureRect(sf::IntRect(0, 8, this->_size.x, -8));
-	titleBar.setPosition(sf::Vector2f(0, -7));
+	if (this->_titleBarMode != TitleBarMode::None) {
+		sf::Sprite titleBar(this->_barTexture.getTexture());
+		titleBar.setTextureRect(sf::IntRect(0, (height - 2), this->_size.x, -(height - 2)));
+		titleBar.setPosition(sf::Vector2f(0, -(height - 1)));
+		target.draw(titleBar, states);
+	}
 
 	sf::Sprite canvas(this->_texture.getTexture());
 	canvas.setTextureRect(sf::IntRect(0, this->_size.y, this->_size.x, -this->_size.y));
-
-	target.draw(decorator, states);
-	target.draw(titleBar, states);
 	target.draw(canvas, states);
 }
 
@@ -175,13 +183,33 @@ void Window::resizeTrigger()
 
 void Window::titleBarRefresh()
 {
+	if (this->_titleBarMode == TitleBarMode::None) {
+		return;
+	}
+	unsigned char height = (this->_titleBarMode == TitleBarMode::Minimal) ? 3 : 6;
 	unsigned char palette = 6;
 	if (desktop.isFocused(this)) {
 		palette = 0;
 	}
-	this->_barTexture.create(this->_size.x, 8);
+	this->_barTexture.create(this->_size.x, height);
 	this->_barTexture.clear(sf::Color::Transparent);
-	drawText(this->_barTexture, 0, 0, this->_title, this->_palette[palette], false);
+	if (this->_titleBarMode == TitleBarMode::Full) {
+		drawText(this->_barTexture, 0, 0, this->_title, this->_palette[palette], false);
+		drawOnTexture(this->_barTexture, this->_size.x - 5, 0, (unsigned char[]) {
+			0b10001000,
+			0b01010000,
+			0b00100000,
+			0b01010000,
+			0b10001000
+		}, 5, this->_palette[palette]);
+	}
+	if (this->_titleBarMode == TitleBarMode::Minimal) {
+		drawOnTexture(this->_barTexture, this->_size.x - 3, 0, (unsigned char[]) {
+			0b10100000,
+			0b01000000,
+			0b10100000
+		}, 3, this->_palette[palette]);
+	}
 }
 
 bool Window::isContext(mrb_state* mrb) const
@@ -191,26 +219,33 @@ bool Window::isContext(mrb_state* mrb) const
 
 bool Window::isIn(WindowZone zone, sf::Vector2i point) const
 {
+	unsigned char height = 8;
+	if (this->_titleBarMode == TitleBarMode::Minimal) {
+		height = 5;
+	}
+	if (this->_titleBarMode == TitleBarMode::None) {
+		height = 1;
+	}
 	switch (zone) {
-		case All:
+		case WindowZone::All:
 			return
 				point.x >= this->getPosition().x - 1 &&
 				point.x < this->getPosition().x + static_cast<int>(this->_size.x) + 1 &&
 				point.y >= this->getPosition().y - 8 &&
 				point.y < this->getPosition().y + static_cast<int>(this->_size.y) + 1;
-		case TitleBar:
+		case WindowZone::TitleBar:
 			return
 				point.x >= this->getPosition().x - 1 &&
 				point.x < this->getPosition().x + static_cast<int>(this->_size.x) + 1 &&
-				point.y >= this->getPosition().y - 8 &&
+				point.y >= this->getPosition().y - height &&
 				point.y < this->getPosition().y;
-		case Canvas:
+		case WindowZone::Canvas:
 			return
 				point.x >= this->getPosition().x &&
 				point.x < this->getPosition().x + static_cast<int>(this->_size.x) &&
 				point.y >= this->getPosition().y &&
 				point.y < this->getPosition().y + static_cast<int>(this->_size.y);
-		case BottomRight:
+		case WindowZone::BottomRight:
 			return
 				(
 					point.x == this->getPosition().x + static_cast<int>(this->_size.x) &&

@@ -4,16 +4,12 @@
 #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
 #include <Window.hpp>
-
-enum FocusAction {
-	None,
-	Move,
-	Resize
-};
+#include <TitleBarMode.hh>
+#include <FocusAction.hh>
 
 class Desktop {
 public:
-	Desktop(unsigned int width, unsigned int height, unsigned char scale = 1);
+	Desktop(unsigned int width, unsigned int height, unsigned char scale = 1, TitleBarMode titleBarMode = TitleBarMode::Full);
 
 	void run();
 	Window* getWindow(mrb_state *mrb) const;
@@ -38,6 +34,7 @@ private:
 	sf::View _canvas_view;
 	unsigned int _width;
 	unsigned int _height;
+	TitleBarMode _titleBarMode;
 
 	Window* _focusedWindow;
 	FocusAction _focusAction;

@@ -1,7 +1,7 @@
 #include <Desktop.hpp>
 #include <helper.hh>
 
-Desktop::Desktop(unsigned int width, unsigned int height, unsigned char scale) : _width(width), _height(height)
+Desktop::Desktop(unsigned int width, unsigned int height, unsigned char scale, TitleBarMode titleBarMode) : _width(width), _height(height), _titleBarMode(titleBarMode)
 {
 	this->_palette = std::vector<sf::Color> {
 		sf::Color(  0,   0,   0), // #000000
@@ -47,13 +47,13 @@ Desktop::Desktop(unsigned int width, unsigned int height, unsigned char scale) :
 	this->_window.setView(this->_canvas_view);
 
 	this->_focusedWindow = nullptr;
-	this->_focusAction = None;
-	this->_windows.push_back(new Window(sf::Vector2i(10, 10), sf::Vector2u(60, 30), this->_palette, "test.rb"));
-	this->_windows.push_back(new Window(sf::Vector2i(60, 60), sf::Vector2u(10, 10), this->_palette, "resize.rb"));
-	this->_windows.push_back(new Window(sf::Vector2i(30, 5), sf::Vector2u(20, 20), this->_palette, "palette.rb"));
-	this->_windows.push_back(new Window(sf::Vector2i(100, 15), sf::Vector2u(40, 20), this->_palette, "xeyes.rb"));
-	this->_windows.push_back(new Window(sf::Vector2i(100, 40), sf::Vector2u(40, 40), this->_palette, "key.rb"));
-	this->_windows.push_back(new Window(sf::Vector2i(100, 40), sf::Vector2u(40, 40), this->_palette, "snake.rb"));
+	this->_focusAction = FocusAction::None;
+	this->_windows.push_back(new Window(sf::Vector2i(10, 10), sf::Vector2u(60, 30), this->_palette, this->_titleBarMode, "test.rb"));
+	this->_windows.push_back(new Window(sf::Vector2i(60, 60), sf::Vector2u(10, 10), this->_palette, this->_titleBarMode, "resize.rb"));
+	this->_windows.push_back(new Window(sf::Vector2i(30, 8), sf::Vector2u(20, 20), this->_palette, this->_titleBarMode, "palette.rb"));
+	this->_windows.push_back(new Window(sf::Vector2i(100, 15), sf::Vector2u(40, 20), this->_palette, this->_titleBarMode, "xeyes.rb"));
+	this->_windows.push_back(new Window(sf::Vector2i(100, 40), sf::Vector2u(40, 40), this->_palette, this->_titleBarMode, "key.rb"));
+	this->_windows.push_back(new Window(sf::Vector2i(100, 40), sf::Vector2u(40, 40), this->_palette, this->_titleBarMode, "snake.rb"));
 	for (Window* window : this->_windows) {
 		window->init();
 	}
@@ -153,7 +153,7 @@ void Desktop::mouseButtonPressEvent(sf::Event event)
 	Window* previous = this->_focusedWindow;
 	this->_focusedWindow = nullptr;
 	for (std::vector<Window*>::reverse_iterator it = this->_windows.rbegin(); it != this->_windows.rend(); ++it) {
-		if ((*it)->isIn(All, static_cast<sf::Vector2i>(mappedPoint))) {
+		if ((*it)->isIn(WindowZone::All, static_cast<sf::Vector2i>(mappedPoint))) {
 			this->_focusedWindow = *it;
 			break;
 		}
@@ -172,19 +172,19 @@ void Desktop::mouseButtonPressEvent(sf::Event event)
 	);
 	this->_windows.push_back(this->_focusedWindow);
 
-	if (this->_focusedWindow->isIn(BottomRight, static_cast<sf::Vector2i>(mappedPoint))) {
-		this->_focusAction = Resize;
+	if (this->_focusedWindow->isIn(WindowZone::BottomRight, static_cast<sf::Vector2i>(mappedPoint))) {
+		this->_focusAction = FocusAction::Resize;
 		this->_focusInitialDelta = static_cast<sf::Vector2f>(this->_focusedWindow->getSize()) - mappedPoint;
 	}
-	else if (this->_focusedWindow->isIn(TitleBar, static_cast<sf::Vector2i>(mappedPoint))) {
-		this->_focusAction = Move;
+	else if (this->_focusedWindow->isIn(WindowZone::TitleBar, static_cast<sf::Vector2i>(mappedPoint))) {
+		this->_focusAction = FocusAction::Move;
 		this->_focusInitialDelta = this->_focusedWindow->getPosition() - mappedPoint;
 	}
 }
 
 void Desktop::mouseButtonReleaseEvent([[maybe_unused]] sf::Event event)
 {
-	this->_focusAction = None;
+	this->_focusAction = FocusAction::None;
 }
 
 void Desktop::mouseMoveEvent(sf::Event event)
@@ -195,12 +195,12 @@ void Desktop::mouseMoveEvent(sf::Event event)
 		window->setMousePosition(mappedPoint);
 	}
 	switch (this->_focusAction) {
-		case None:
+		case FocusAction::None:
 			return;
-		case Move:
+		case FocusAction::Move:
 			this->_focusedWindow->setPosition(sf::Vector2f(sf::Vector2i(mappedPoint + this->_focusInitialDelta)));
 			return;
-		case Resize:
+		case FocusAction::Resize:
 			this->_focusedWindow->resize(sf::Vector2i(mappedPoint + this->_focusInitialDelta));
 			return;
 	}

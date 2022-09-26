@@ -2,17 +2,12 @@
 
 #include <SFML/Graphics.hpp>
 #include <mruby/compile.h>
-
-enum WindowZone {
-	All,
-	TitleBar,
-	Canvas,
-	BottomRight
-};
+#include <WindowZone.hh>
+#include <TitleBarMode.hh>
 
 class Window : public sf::Drawable, public sf::Transformable {
 public:
-	Window(sf::Vector2i position, sf::Vector2u size, const std::vector<sf::Color>& palette, const std::string& programPath);
+	Window(sf::Vector2i position, sf::Vector2u size, const std::vector<sf::Color>& palette, TitleBarMode _titleBarMode, const std::string& programPath);
 	~Window();
 
 	void loadFile();
@@ -74,6 +69,7 @@ private:
 	sf::Vector2i _mousePosition;
 	std::vector<sf::Keyboard::Key> _keyPressed;
 	std::string _title;
+	TitleBarMode _titleBarMode;
 	bool _resizable;
 
 	std::string _programFile;
