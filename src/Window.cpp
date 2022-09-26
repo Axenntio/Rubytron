@@ -67,6 +67,7 @@ void Window::loadFile()
 {
 	FILE *file = fopen(this->_programFile.c_str(), "r");
 	this->_mrbContext = mrbc_context_new(this->_mrb);
+	this->_mrbContext->capture_errors = true;
 	mrbc_filename(this->_mrb, this->_mrbContext, this->_programFile.c_str());
 	mrb_load_file_cxt(this->_mrb, file, this->_mrbContext);
 	fclose(file);
@@ -142,13 +143,15 @@ void Window::exceptionHandler()
 		this->_resizable = true;
 		this->_minSize = sf::Vector2i(8, 4);
 		mrb_value exception = mrb_obj_as_string(this->_mrb, mrb_obj_value(this->_mrb->exc));
-		mrb_value backtraceObj = mrb_funcall(this->_mrb, mrb_obj_value(this->_mrb->exc), "backtrace", 0);
-		mrb_int backtraceLength = RARRAY_LEN(backtraceObj);
-		mrb_value *backtrace = RARRAY_PTR(backtraceObj);
-
 		drawText(this->_texture, 1, 1, mrb_str_to_cstr(this->_mrb, exception), this->_palette[8], false);
-		for (unsigned int i = 0; i < backtraceLength; ++i) {
-			drawText(this->_texture, 1, (i + 1) * (FONT_HEIGHT + 1) + 1, mrb_str_to_cstr(this->_mrb, backtrace[i]) , this->_palette[8], false);
+
+		mrb_value backtraceObj = mrb_funcall(this->_mrb, mrb_obj_value(this->_mrb->exc), "backtrace", 0);
+		if (mrb_array_p(backtraceObj)) {
+			mrb_int backtraceLength = RARRAY_LEN(backtraceObj);
+			mrb_value *backtrace = RARRAY_PTR(backtraceObj);
+			for (unsigned int i = 0; i < backtraceLength; ++i) {
+				drawText(this->_texture, 1, (i + 1) * (FONT_HEIGHT + 1) + 1, mrb_str_to_cstr(this->_mrb, backtrace[i]) , this->_palette[8], false);
+			}
 		}
 	}
 }
