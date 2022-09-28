@@ -48,7 +48,7 @@ Window::Window(sf::Vector2i position, sf::Vector2u size, const std::vector<sf::C
 	mrb_define_method(this->_mrb, this->_mrb->object_class, "line", &Window::mrubyLine, MRB_ARGS_REQ(4) | MRB_ARGS_OPT(1));
 	mrb_define_method(this->_mrb, this->_mrb->object_class, "rect", &Window::mrubyRectangle, MRB_ARGS_REQ(4) | MRB_ARGS_OPT(1));
 	mrb_define_method(this->_mrb, this->_mrb->object_class, "circle", &Window::mrubyCircle, MRB_ARGS_REQ(3) | MRB_ARGS_OPT(1));
-	mrb_define_method(this->_mrb, this->_mrb->object_class, "text", &Window::mrubyText, MRB_ARGS_REQ(3) | MRB_ARGS_OPT(1));
+	mrb_define_method(this->_mrb, this->_mrb->object_class, "text", &Window::mrubyText, MRB_ARGS_REQ(3) | MRB_ARGS_OPT(2));
 	mrb_define_method(this->_mrb, this->_mrb->object_class, "key", &Window::mrubyKey, MRB_ARGS_OPT(1));
 
 	this->loadFile();
@@ -264,6 +264,10 @@ void Window::addKeyPressed(sf::Keyboard::Key key)
 	if (std::find(this->_keyPressed.begin(), this->_keyPressed.end(), static_cast<sf::Keyboard::Key>(key)) == this->_keyPressed.end()) {
 		this->_keyPressed.push_back(key);
 	}
+	mrb_value obj = mrb_const_get(this->_mrb, mrb_obj_value(this->_mrb->object_class), mrb_intern_cstr(this->_mrb, "Window"));
+	if (mrb_respond_to(this->_mrb, obj, mrb_intern_cstr(this->_mrb, "key_press_event"))) {
+		mrb_funcall(this->_mrb, obj, "key_press_event", 1, mrb_int_value(this->_mrb, key));
+	}
 }
 
 void Window::removeKeyPressed(sf::Keyboard::Key key)
@@ -272,6 +276,10 @@ void Window::removeKeyPressed(sf::Keyboard::Key key)
 		this->_keyPressed.erase(
 			std::remove_if(this->_keyPressed.begin(), this->_keyPressed.end(), [key](sf::Keyboard::Key testKey) { return testKey == key; } )
 		);
+	}
+	mrb_value obj = mrb_const_get(this->_mrb, mrb_obj_value(this->_mrb->object_class), mrb_intern_cstr(this->_mrb, "Window"));
+	if (mrb_respond_to(this->_mrb, obj, mrb_intern_cstr(this->_mrb, "key_release_event"))) {
+		mrb_funcall(this->_mrb, obj, "key_release_event", 1, mrb_int_value(this->_mrb, key));
 	}
 }
 

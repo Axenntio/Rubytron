@@ -48,6 +48,7 @@ Desktop::Desktop(unsigned int width, unsigned int height, unsigned char scale, T
 	this->_windows.push_back(new Window(sf::Vector2i(100, 15), sf::Vector2u(40, 20), this->_palette, this->_titleBarMode, "programs/xeyes.rb"));
 	this->_windows.push_back(new Window(sf::Vector2i(100, 40), sf::Vector2u(40, 40), this->_palette, this->_titleBarMode, "programs/key.rb"));
 	this->_windows.push_back(new Window(sf::Vector2i(100, 40), sf::Vector2u(40, 40), this->_palette, this->_titleBarMode, "programs/snake.rb"));
+	this->_windows.push_back(new Window(sf::Vector2i(1, 8), sf::Vector2u(190, 115), this->_palette, this->_titleBarMode, "programs/editor.rb"));
 	for (Window* window : this->_windows) {
 		window->init();
 	}

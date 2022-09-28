@@ -50,15 +50,15 @@ const unsigned char font[] = {
 	// 0x08 - bs
 	0b10101000, 0b01010000, 0b10101000, 0b01010000, 0b10101000, 0b01010000, 0, FONT_WIDTH,
 	// 0x09 - ht
-	0b10101000, 0b01010000, 0b10101000, 0b01010000, 0b10101000, 0b01010000, 0, FONT_WIDTH,
+	0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0, 0,
 	// 0x0a - nl
-	0b10101000, 0b01010000, 0b10101000, 0b01010000, 0b10101000, 0b01010000, 0, FONT_WIDTH,
+	0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0, 0,
 	// 0x0b - vt
 	0b10101000, 0b01010000, 0b10101000, 0b01010000, 0b10101000, 0b01010000, 0, FONT_WIDTH,
 	// 0x0c - np
 	0b10101000, 0b01010000, 0b10101000, 0b01010000, 0b10101000, 0b01010000, 0, FONT_WIDTH,
 	// 0x0d - cr
-	0b10101000, 0b01010000, 0b10101000, 0b01010000, 0b10101000, 0b01010000, 0, FONT_WIDTH,
+	0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0, 0,
 	// 0x0e - so
 	0b10101000, 0b01010000, 0b10101000, 0b01010000, 0b10101000, 0b01010000, 0, FONT_WIDTH,
 	// 0x0f - si
@@ -292,6 +292,7 @@ const unsigned char font[] = {
 void drawText(sf::RenderTexture& texture, int x, int y, const std::string& text, sf::Color color, bool monospace)
 {
 	unsigned int xoffset = 0;
+	unsigned int yoffset = 0;
 	for (unsigned int i = 0; i < text.length(); ++i) {
 		unsigned char c = text[i];
 		if (c > 0x7f) {
@@ -300,19 +301,28 @@ void drawText(sf::RenderTexture& texture, int x, int y, const std::string& text,
 		if (!monospace) {
 			xoffset -= (font + FONT_DATA_LEN * c)[FONT_HEIGHT];
 		}
-		drawOnTexture(texture, x + xoffset, y, font + FONT_DATA_LEN * c, FONT_HEIGHT, color);
+		drawOnTexture(texture, x + xoffset, y + yoffset, font + FONT_DATA_LEN * c, FONT_HEIGHT, color);
 		if (monospace) {
 			xoffset += FONT_WIDTH;
 		}
 		else {
 			xoffset += (font + FONT_DATA_LEN * c)[FONT_HEIGHT + 1];
+		}
+		if (c == 0x0a) {
+			yoffset += FONT_HEIGHT;
+			continue;
+		}
+		if (c == 0x0d) {
+			xoffset = 0;
+			continue;
 		}
 		++xoffset;
 	}
 }
-void drawText(sf::RenderTarget& target, sf::RenderStates states,int x,int y, const std::string& text, sf::Color color, bool monospace)
+void drawText(sf::RenderTarget& target, sf::RenderStates states, int x, int y, const std::string& text, sf::Color color, bool monospace)
 {
 	unsigned int xoffset = 0;
+	unsigned int yoffset = 0;
 	for (unsigned int i = 0; i < text.length(); ++i) {
 		unsigned char c = text[i];
 		if (c > 0x7f) {
@@ -321,12 +331,20 @@ void drawText(sf::RenderTarget& target, sf::RenderStates states,int x,int y, con
 		if (!monospace) {
 			xoffset -= (font + FONT_DATA_LEN * c)[FONT_HEIGHT];
 		}
-		drawOnTexture(target, states, x + xoffset, y, font + FONT_DATA_LEN * c, FONT_HEIGHT, color);
+		drawOnTexture(target, states, x + xoffset, y + yoffset, font + FONT_DATA_LEN * c, FONT_HEIGHT, color);
 		if (monospace) {
 			xoffset += FONT_WIDTH;
 		}
 		else {
 			xoffset += (font + FONT_DATA_LEN * c)[FONT_HEIGHT + 1];
+		}
+		if (c == 0x0a) {
+			yoffset += FONT_HEIGHT;
+			continue;
+		}
+		if (c == 0x0d) {
+			xoffset = 0;
+			continue;
 		}
 		++xoffset;
 	}
