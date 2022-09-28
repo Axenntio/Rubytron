@@ -1,5 +1,6 @@
 #include <Desktop.hpp>
 #include <helper.hh>
+#include <sprites.hh>
 
 Desktop::Desktop(unsigned int width, unsigned int height, unsigned char scale, TitleBarMode titleBarMode) : _width(width), _height(height), _titleBarMode(titleBarMode)
 {
@@ -31,14 +32,7 @@ Desktop::Desktop(unsigned int width, unsigned int height, unsigned char scale, T
 	this->_cursor_texture.create(4, 6);
 	this->_cursor_texture.clear(sf::Color::Transparent);
 
-	drawOnTexture(this->_cursor_texture, 0, 0, (unsigned char[]) {
-		0b10000000,
-		0b11000000,
-		0b11100000,
-		0b11110000,
-		0b11000000,
-		0b00100000
-	}, 6, this->_palette[7]);
+	drawOnTexture(this->_cursor_texture, 0, 0, spr_cursor, SPR_CURSOR_HEIGHT, this->_palette[7]);
 
 
 	this->_canvas_view.setCenter(this->_width / 2, this->_height / 2);

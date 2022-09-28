@@ -1,5 +1,6 @@
 #include <Desktop.hpp>
 #include <helper.hh>
+#include <sprites.hh>
 #include <mruby/internal.h>
 #include <mruby/variable.h>
 #include <mruby/array.h>
@@ -198,20 +199,10 @@ void Window::titleBarRefresh()
 	this->_barTexture.clear(sf::Color::Transparent);
 	if (this->_titleBarMode == TitleBarMode::Full) {
 		drawText(this->_barTexture, 0, 0, this->_title, this->_palette[palette], false);
-		drawOnTexture(this->_barTexture, this->_size.x - 5, 0, (unsigned char[]) {
-			0b10001000,
-			0b01010000,
-			0b00100000,
-			0b01010000,
-			0b10001000
-		}, 5, this->_palette[palette]);
+		drawOnTexture(this->_barTexture, this->_size.x - 5, 0, spr_close_full, SPR_CLOSE_FULL_HEIGHT, this->_palette[palette]);
 	}
 	if (this->_titleBarMode == TitleBarMode::Minimal) {
-		drawOnTexture(this->_barTexture, this->_size.x - 3, 0, (unsigned char[]) {
-			0b10100000,
-			0b01000000,
-			0b10100000
-		}, 3, this->_palette[palette]);
+		drawOnTexture(this->_barTexture, this->_size.x - 3, 0, spr_close_minimal, SPR_CLOSE_MINIMAL_HEIGHT, this->_palette[palette]);
 	}
 }
 
