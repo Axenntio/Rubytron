@@ -95,7 +95,7 @@ void Window::init()
 
 void Window::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {
-	if (mrb_obj_respond_to(this->_mrb, this->_mrb->object_class, mrb_intern_cstr(this->_mrb, "update"))) {
+	if (this->_mrb->exc == nullptr && mrb_obj_respond_to(this->_mrb, this->_mrb->object_class, mrb_intern_cstr(this->_mrb, "update"))) {
 		mrb_funcall(this->_mrb, mrb_nil_value(), "update", 0);
 	}
 
@@ -141,6 +141,7 @@ sf::Vector2i Window::getSize() const
 void Window::exceptionHandler()
 {
 	if (this->_mrb->exc) {
+		this->_texture.clear(this->_palette[0]);
 		this->_resizable = true;
 		this->_minSize = sf::Vector2i(8, 4);
 		mrb_value exception = mrb_obj_as_string(this->_mrb, mrb_obj_value(this->_mrb->exc));
