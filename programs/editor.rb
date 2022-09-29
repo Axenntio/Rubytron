@@ -1,0 +1,231 @@
+FONT_WIDTH = 5.freeze
+FONT_HEIGH = 6.freeze
+
+$editor = nil
+
+class Window
+	def self.resize_event(new_width, new_height)
+		$editor.update_show_line(new_width, new_height)
+	end
+
+	def self.text_event(char)
+        case char
+        when 1 # ctrl + a
+            $editor.to_start_line
+        when 5 # ctrl + e
+            $editor.to_end_line
+        when 18 # ctrl + r
+            reload
+        when 19 # ctrl + s
+            $editor.save
+        else
+            $editor.add_char(char)
+        end
+	end
+
+    def self.key_press_event(key)
+        $editor.parse_key(key)
+	end
+end
+
+class Vector
+    attr_accessor :x
+    attr_accessor :y
+
+    def initialize(x, y)
+        self.x = x
+        self.y = y
+    end
+
+    def +(other)
+		Vector.new(self.x + other.x, self.y + other.y)
+	end
+
+    def -(other)
+		Vector.new(self.x - other.x, self.y - other.y)
+	end
+
+    def to_s
+        "{x: #{self.x}, y: #{self.y}}"
+    end
+end
+
+class Editor
+    attr_accessor :cursor
+
+    def initialize(path)
+        @path = path
+        @cursor = Vector.new(0, 0)
+        @code_shift = Vector.new(0, 0)
+        @file_content = File.open(@path, 'r') do |file|
+            file.read.split("\n")
+        end
+        @side_bar_width = @file_content.count.to_s.length
+        self.update_show_line(Window.width, Window.height)
+    end
+
+    def update_show_line(width, height)
+        @show_line = height / FONT_HEIGH + 1
+        @show_char = width / FONT_WIDTH + 1 - @side_bar_width
+        Window.title = "#{@path} - #{width}x#{height}"
+    end
+
+    def showable_content_postition
+        Vector.new(@side_bar_width, 0)
+    end
+
+    def showable_content
+        @file_content[@code_shift.y, @show_line].map do |line|
+            if line.length >= @code_shift.x
+                line[@code_shift.x, @show_char]
+            else
+                ''
+            end
+        end
+    end
+
+    def content_lines
+        ((@code_shift.y + 1)..([@code_shift.y + @show_line, @file_content.count].min))
+    end
+
+    def showable_cursor
+        @cursor - @code_shift + self.showable_content_postition
+    end
+
+    def add_char(char)
+        if char.between?(32, 126) || char == 9 # tab
+            @file_content[@cursor.y].insert(@cursor.x, char.chr)
+            @cursor.x += 1
+        elsif char == 8 # Backspace
+            if @cursor.x.positive?
+                @file_content[@cursor.y].slice!(@cursor.x - 1)
+                @cursor.x -= 1
+            elsif @cursor.y.positive?
+                @cursor.x = @file_content[@cursor.y - 1].length
+                @file_content[@cursor.y - 1] = @file_content[@cursor.y - 1] + @file_content[@cursor.y]
+                @file_content.delete_at(@cursor.y)
+                @cursor.y -= 1
+            end
+        elsif char == 13 # Enter
+            new_line = @file_content[@cursor.y].slice!(@cursor.x, @file_content[@cursor.y].length - @cursor.x)
+            @cursor.y += 1
+            @cursor.x = 0
+            new_line ||= '' # Makes sure we have a string since spliting at last pos only provide `nil` value
+            @file_content.insert(@cursor.y, new_line)
+        elsif char == 127 # Del
+            if @file_content[@cursor.y].length > @cursor.x
+                @file_content[@cursor.y].slice!(@cursor.x)
+            else
+                @file_content[@cursor.y] = @file_content[@cursor.y] + @file_content[@cursor.y + 1]
+                @file_content.delete_at(@cursor.y + 1)
+            end
+        else
+            puts "Unhandled #{char}"
+        end
+        self.update_scope
+    end
+
+    def parse_key(key)
+        case key
+        when 61 # Page up
+            @cursor.y -= @show_line - 2
+        when 62 # Page down
+            @cursor.y += @show_line - 2
+        when 63 # End
+            to_end_line
+        when 64 # Home
+            to_start_line
+        when 71 # Left
+            @cursor.x -= 1
+        when 72 # Right
+            @cursor.x += 1
+        when 73 # Down
+            @cursor.y -= 1
+            if @cursor.x > @file_content[@cursor.y].length
+                @cursor.x = @file_content[@cursor.y].length
+            end
+        when 74 # Up
+            @cursor.y += 1 if @cursor.y < (@file_content.count - 1)
+            if @cursor.x > @file_content[@cursor.y].length
+                @cursor.x = @file_content[@cursor.y].length
+            end
+        end
+        self.update_scope
+    end
+
+    def update_scope
+        @cursor.y = 0 if @cursor.y.negative?
+        @cursor.y = @file_content.count - 1 if @cursor.y >= (@file_content.count - 1)
+        if @cursor.x.negative?
+            @cursor.y -= 1
+            @cursor.x = 0
+            if @cursor.y >= 0
+                @cursor.x = @file_content[@cursor.y].length
+            end
+        end
+        if @cursor.x > @file_content[@cursor.y].length
+            if @cursor.y < (@file_content.count - 1)
+                @cursor.x = 0
+                @cursor.y += 1
+            else
+                @cursor.x = @file_content[@cursor.y].length
+            end
+        end
+        @cursor.y = 0 if @cursor.y.negative?
+        @cursor.y = @file_content.count - 1 if @cursor.y >= (@file_content.count - 1)
+
+        if @cursor.x >= (@code_shift.x + @show_char - 1)
+            @code_shift.x += @cursor.x - @show_char + 2 - @code_shift.x # Maybe unoptimized
+        end
+        if @cursor.x <= (@code_shift.x - 1)
+            @code_shift.x = @cursor.x
+        end
+        if @cursor.y >= (@code_shift.y + @show_line - 1)
+            @code_shift.y += @cursor.y - @show_line + 2 - @code_shift.y # Maybe unoptimized
+        end
+        if @cursor.y <= (@code_shift.y - 1)
+            @code_shift.y = @cursor.y
+        end
+        @side_bar_width = @file_content.count.to_s.length
+    end
+
+    def to_start_line
+        @cursor.x = 0
+        self.update_scope
+    end
+
+    def to_end_line
+        @cursor.x = @file_content[@cursor.y].length
+        self.update_scope
+    end
+
+    def save
+        File.open(@path, 'w') do |file|
+           file.write(@file_content.join("\n"))
+        end
+    end
+end
+
+def init
+    $editor = Editor.new('programs/editor.rb')
+end
+
+def update
+    showable = 10
+    clear 0
+    editor_canvas = $editor.showable_content_postition
+    rect 0, 0, editor_canvas.x * FONT_WIDTH, Window.height, 1
+    y_offset = 1
+    $editor.content_lines.each do |number|
+        line = number.to_s
+        text 1 + (editor_canvas.x - line.length) * FONT_WIDTH, y_offset, line, 13, true
+        y_offset += FONT_HEIGH
+    end
+    y_offset = 1
+    $editor.showable_content.each do |line|
+        text 1 + editor_canvas.x * FONT_WIDTH, y_offset, line, 7, true
+        y_offset += FONT_HEIGH
+    end
+    cursor = $editor.showable_cursor
+    line cursor.x * FONT_WIDTH + 1, cursor.y * FONT_HEIGH, cursor.x * FONT_WIDTH + 1, cursor.y * FONT_HEIGH + FONT_HEIGH + 1, 8
+end
