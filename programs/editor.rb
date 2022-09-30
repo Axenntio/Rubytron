@@ -207,7 +207,7 @@ class Editor
 end
 
 def init
-    $editor = Editor.new('programs/editor.rb')
+    $editor = Editor.new(Window.parameters[0])
 end
 
 def update

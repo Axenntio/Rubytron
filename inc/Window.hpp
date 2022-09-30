@@ -7,7 +7,7 @@
 
 class Window : public sf::Drawable, public sf::Transformable {
 public:
-	Window(sf::Vector2i position, sf::Vector2u size, const std::vector<sf::Color>& palette, TitleBarMode _titleBarMode, const std::string& programPath);
+	Window(sf::Vector2i position, sf::Vector2u size, const std::vector<sf::Color>& palette, TitleBarMode _titleBarMode, const std::string& programPath, const std::vector<std::string>& parameters);
 	~Window();
 
 	void loadFile();
@@ -52,6 +52,8 @@ private:
 	static mrb_value mrubyIsResizable(mrb_state *mrb, mrb_value self);
 	static mrb_value mrubySetResizable(mrb_state *mrb, mrb_value self);
 	static mrb_value mrubyReload(mrb_state *mrb, mrb_value self);
+	static mrb_value mrubySpawn(mrb_state *mrb, mrb_value self);
+	static mrb_value mrubyParameters(mrb_state *mrb, mrb_value self);
 
 	static mrb_value mrubyClear(mrb_state *mrb, mrb_value self);
 	static mrb_value mrubyPixel(mrb_state *mrb, mrb_value self);
@@ -73,6 +75,7 @@ private:
 	bool _resizable;
 
 	std::string _programFile;
+	std::vector<std::string> _programParameters;
 	mrb_state* _mrb;
 	mrbc_context* _mrbContext;
 	RClass *_mrbWindowClass;

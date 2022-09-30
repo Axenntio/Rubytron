@@ -9,7 +9,7 @@
 
 extern Desktop desktop;
 
-Window::Window(sf::Vector2i position, sf::Vector2u size, const std::vector<sf::Color>& palette, TitleBarMode titleBarMode, const std::string& programPath) : _size(size), _title(programPath), _titleBarMode(titleBarMode), _resizable(true), _programFile(programPath)
+Window::Window(sf::Vector2i position, sf::Vector2u size, const std::vector<sf::Color>& palette, TitleBarMode titleBarMode, const std::string& programPath, const std::vector<std::string>& parameters) : _size(size), _title(programPath), _titleBarMode(titleBarMode), _resizable(true), _programFile(programPath), _programParameters(parameters)
 {
 	this->setPosition(sf::Vector2f(position));
 	this->_minSize = sf::Vector2i(8, 4);
@@ -41,6 +41,8 @@ Window::Window(sf::Vector2i position, sf::Vector2u size, const std::vector<sf::C
 	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "resizable", &Window::mrubyIsResizable, MRB_ARGS_NONE());
 	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "resizable=", &Window::mrubySetResizable, MRB_ARGS_REQ(1));
 	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "reload", &Window::mrubyReload, MRB_ARGS_NONE());
+	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "spawn", &Window::mrubySpawn, MRB_ARGS_REQ(1) | MRB_ARGS_OPT(1));
+	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "parameters", &Window::mrubyParameters, MRB_ARGS_NONE());
 
 
 	mrb_define_method(this->_mrb, this->_mrb->object_class, "clear", &Window::mrubyClear, MRB_ARGS_REQ(1));
@@ -67,6 +69,9 @@ Window::~Window()
 void Window::loadFile()
 {
 	FILE *file = fopen(this->_programFile.c_str(), "r");
+	if (file == nullptr) {
+		throw std::runtime_error("The file '" + this->_programFile + "' can't be opened");
+	}
 	this->_mrbContext = mrbc_context_new(this->_mrb);
 	this->_mrbContext->capture_errors = true;
 	mrbc_filename(this->_mrb, this->_mrbContext, this->_programFile.c_str());
@@ -472,6 +477,31 @@ mrb_value Window::mrubyReload(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 	window->reloadFile();
 
 	return mrb_nil_value();
+}
+#include <iostream>
+mrb_value Window::mrubySpawn(mrb_state *mrb, [[maybe_unused]] mrb_value self)
+{
+	const char* programPath;
+	mrb_get_args(mrb, "z", &programPath);
+
+	if (desktop.spawn(std::string(programPath))) {
+		return mrb_true_value();
+	}
+
+	return mrb_false_value();
+}
+
+mrb_value Window::mrubyParameters(mrb_state *mrb, [[maybe_unused]] mrb_value self)
+{
+	Window* window = desktop.getWindow(mrb);
+	if (window == nullptr) return mrb_nil_value();
+
+	mrb_value parameters = mrb_ary_new_capa(mrb, window->_programParameters.size());
+	for (const std::string& parameter : window->_programParameters) {
+		mrb_ary_push(mrb, parameters, mrb_str_new(mrb, parameter.c_str(), parameter.length()));
+	}
+
+	return parameters;
 }
 
 // Drawing

@@ -15,6 +15,8 @@ public:
 	Window* getWindow(mrb_state *mrb) const;
 	bool isFocused(const Window* window) const;
 
+	bool spawn(const std::string& programPath);
+
 private:
 	void closeEvent(sf::Event event);
 	void resizeEvent(sf::Event event);

@@ -42,13 +42,14 @@ Desktop::Desktop(unsigned int width, unsigned int height, unsigned char scale, T
 
 	this->_focusedWindow = nullptr;
 	this->_focusAction = FocusAction::None;
-	this->_windows.push_back(new Window(sf::Vector2i(10, 10), sf::Vector2u(60, 30), this->_palette, this->_titleBarMode, "programs/test.rb"));
-	this->_windows.push_back(new Window(sf::Vector2i(60, 60), sf::Vector2u(10, 10), this->_palette, this->_titleBarMode, "programs/resize.rb"));
-	this->_windows.push_back(new Window(sf::Vector2i(30, 8), sf::Vector2u(20, 20), this->_palette, this->_titleBarMode, "programs/palette.rb"));
-	this->_windows.push_back(new Window(sf::Vector2i(100, 15), sf::Vector2u(40, 20), this->_palette, this->_titleBarMode, "programs/xeyes.rb"));
-	this->_windows.push_back(new Window(sf::Vector2i(100, 40), sf::Vector2u(40, 40), this->_palette, this->_titleBarMode, "programs/key.rb"));
-	this->_windows.push_back(new Window(sf::Vector2i(100, 40), sf::Vector2u(40, 40), this->_palette, this->_titleBarMode, "programs/snake.rb"));
-	this->_windows.push_back(new Window(sf::Vector2i(1, 8), sf::Vector2u(190, 115), this->_palette, this->_titleBarMode, "programs/editor.rb"));
+	this->_windows.push_back(new Window(sf::Vector2i(10, 10), sf::Vector2u(60, 30), this->_palette, this->_titleBarMode, "programs/test.rb", {}));
+	this->_windows.push_back(new Window(sf::Vector2i(60, 60), sf::Vector2u(10, 10), this->_palette, this->_titleBarMode, "programs/resize.rb", {}));
+	this->_windows.push_back(new Window(sf::Vector2i(30, 8), sf::Vector2u(20, 20), this->_palette, this->_titleBarMode, "programs/palette.rb", {}));
+	this->_windows.push_back(new Window(sf::Vector2i(100, 15), sf::Vector2u(40, 20), this->_palette, this->_titleBarMode, "programs/xeyes.rb", {}));
+	this->_windows.push_back(new Window(sf::Vector2i(100, 40), sf::Vector2u(40, 40), this->_palette, this->_titleBarMode, "programs/key.rb", {}));
+	this->_windows.push_back(new Window(sf::Vector2i(100, 40), sf::Vector2u(40, 40), this->_palette, this->_titleBarMode, "programs/snake.rb", {}));
+	this->_windows.push_back(new Window(sf::Vector2i(1, 8), sf::Vector2u(190, 115), this->_palette, this->_titleBarMode, "programs/editor.rb", {"programs/editor.rb", "Saucisse"}));
+	this->_windows.push_back(new Window(sf::Vector2i(1, 8), sf::Vector2u(190, 115), this->_palette, this->_titleBarMode, "programs/terminal.rb", {}));
 	for (Window* window : this->_windows) {
 		window->init();
 	}
@@ -118,6 +119,15 @@ Window* Desktop::getWindow(mrb_state* mrb) const
 bool Desktop::isFocused(const Window* window) const
 {
 	return this->_focusedWindow == window;
+}
+
+bool Desktop::spawn(const std::string& programPath)
+{
+	Window* window = new Window(sf::Vector2i(10, 10), sf::Vector2u(60, 30), this->_palette, this->_titleBarMode, programPath, {});
+	this->_windows.push_back(window);
+	window->init();
+
+	return true;
 }
 
 void Desktop::closeEvent([[maybe_unused]] sf::Event event)
