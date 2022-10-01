@@ -14,9 +14,14 @@ class Window
 			$terminal.execute
         when 18 # ctrl + r
             reload
+			$terminal.should_blink(true)
 		else
 			$terminal.input_char(char)
         end
+	end
+
+	def self.focus_event(has_focus)
+		$terminal.should_blink(has_focus)
 	end
 end
 
@@ -56,6 +61,7 @@ class Terminal
 		@display_history = []
 		@command_history = []
 		@current_line = ''
+		@should_blink = false
 		update_showable(Window.width, Window.height)
 	end
 
@@ -64,9 +70,14 @@ class Terminal
         Window.title = "Terminal - #{@showable.x}x#{@showable.y}"
 	end
 
+	def should_blink(should)
+		@should_blink = should
+		@blink = true
+	end
+
 	def showable_display
 		cursor = ''
-		@blink_time -= 1
+		@blink_time -= 1 if @should_blink
 		if @blink_time.zero?
 			@blink_time = @blink_speed
 			@blink = !@blink
