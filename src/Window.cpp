@@ -260,9 +260,9 @@ bool Window::isIn(WindowZone zone, sf::Vector2i point) const
 	return false;
 }
 
-void Window::setMousePosition(sf::Vector2f position)
+void Window::setMousePosition(sf::Vector2i position)
 {
-	this->_mousePosition = sf::Vector2i(position - this->getPosition());
+	this->_mousePosition = position - sf::Vector2i(this->getPosition());
 }
 
 void Window::addKeyPressed(sf::Keyboard::Key key)

@@ -25,7 +25,7 @@ public:
 	bool isContext(mrb_state* mrb) const;
 	bool isIn(WindowZone zone, sf::Vector2i point) const;
 
-	void setMousePosition(sf::Vector2f position);
+	void setMousePosition(sf::Vector2i position);
 	void addKeyPressed(sf::Keyboard::Key key);
 	void removeKeyPressed(sf::Keyboard::Key key);
 	void textEnteredEvent(sf::Uint32 unicode);

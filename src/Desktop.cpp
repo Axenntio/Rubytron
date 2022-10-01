@@ -163,13 +163,12 @@ void Desktop::resizeEvent(sf::Event event)
 	this->_window.setView(this->_canvas_view);
 }
 
-void Desktop::mouseButtonPressEvent(sf::Event event)
+void Desktop::mouseButtonPressEvent([[maybe_unused]] sf::Event event)
 {
-	sf::Vector2f mappedPoint = this->_window.mapPixelToCoords(sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
 	Window* previous = this->_focusedWindow;
 	this->_focusedWindow = nullptr;
 	for (std::vector<Window*>::reverse_iterator it = this->_windows.rbegin(); it != this->_windows.rend(); ++it) {
-		if ((*it)->isIn(WindowZone::All, static_cast<sf::Vector2i>(mappedPoint))) {
+		if ((*it)->isIn(WindowZone::All, static_cast<sf::Vector2i>(this->_mouse_coordinated))) {
 			this->_focusedWindow = *it;
 			break;
 		}
@@ -188,13 +187,13 @@ void Desktop::mouseButtonPressEvent(sf::Event event)
 	);
 	this->_windows.push_back(this->_focusedWindow);
 
-	if (this->_focusedWindow->isIn(WindowZone::BottomRight, static_cast<sf::Vector2i>(mappedPoint))) {
+	if (this->_focusedWindow->isIn(WindowZone::BottomRight, static_cast<sf::Vector2i>(this->_mouse_coordinated))) {
 		this->_focusAction = FocusAction::Resize;
-		this->_focusInitialDelta = static_cast<sf::Vector2f>(this->_focusedWindow->getSize()) - mappedPoint;
+		this->_focusInitialDelta = static_cast<sf::Vector2f>(this->_focusedWindow->getSize() - this->_mouse_coordinated);
 	}
-	else if (this->_focusedWindow->isIn(WindowZone::TitleBar, static_cast<sf::Vector2i>(mappedPoint))) {
+	else if (this->_focusedWindow->isIn(WindowZone::TitleBar, static_cast<sf::Vector2i>(this->_mouse_coordinated))) {
 		this->_focusAction = FocusAction::Move;
-		this->_focusInitialDelta = this->_focusedWindow->getPosition() - mappedPoint;
+		this->_focusInitialDelta = this->_focusedWindow->getPosition() - static_cast<sf::Vector2f>(this->_mouse_coordinated);
 	}
 }
 
@@ -207,17 +206,19 @@ void Desktop::mouseMoveEvent(sf::Event event)
 {
 	sf::Vector2f mappedPoint = this->_window.mapPixelToCoords(sf::Vector2i(event.mouseMove.x, event.mouseMove.y));
 	this->_mouse_coordinated = static_cast<sf::Vector2i>(mappedPoint);
+	this->_mouse_coordinated.x = std::max(0, std::min(this->_mouse_coordinated.x, static_cast<int>(this->_width - 1)));
+	this->_mouse_coordinated.y = std::max(0, std::min(this->_mouse_coordinated.y, static_cast<int>(this->_height - 1)));
 	for (Window* window : this->_windows) {
-		window->setMousePosition(mappedPoint);
+		window->setMousePosition(this->_mouse_coordinated);
 	}
 	switch (this->_focusAction) {
 		case FocusAction::None:
 			return;
 		case FocusAction::Move:
-			this->_focusedWindow->setPosition(sf::Vector2f(sf::Vector2i(mappedPoint + this->_focusInitialDelta)));
+			this->_focusedWindow->setPosition(sf::Vector2f(this->_mouse_coordinated + sf::Vector2i(this->_focusInitialDelta)));
 			return;
 		case FocusAction::Resize:
-			this->_focusedWindow->resize(sf::Vector2i(mappedPoint + this->_focusInitialDelta));
+			this->_focusedWindow->resize(this->_mouse_coordinated + sf::Vector2i(this->_focusInitialDelta));
 			return;
 	}
 }
