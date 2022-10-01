@@ -478,13 +478,23 @@ mrb_value Window::mrubyReload(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 
 	return mrb_nil_value();
 }
-#include <iostream>
+
 mrb_value Window::mrubySpawn(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 {
-	const char* programPath;
-	mrb_get_args(mrb, "z", &programPath);
+	const char* path;
+	mrb_value mrbParameters = mrb_nil_value();
+	mrb_get_args(mrb, "z|A", &path, &mrbParameters);
+	std::vector<std::string> parameters;
 
-	if (desktop.spawn(std::string(programPath))) {
+	if (mrb_array_p(mrbParameters)) {
+		mrb_int parameterLength = RARRAY_LEN(mrbParameters);
+		mrb_value *parameter = RARRAY_PTR(mrbParameters);
+		for (unsigned int i = 0; i < parameterLength; ++i) {
+			parameters.push_back(mrb_str_to_cstr(mrb, parameter[i]));
+		}
+	}
+
+	if (desktop.spawn(std::string(path), parameters)) {
 		return mrb_true_value();
 	}
 

@@ -48,7 +48,7 @@ Desktop::Desktop(unsigned int width, unsigned int height, unsigned char scale, T
 	this->_windows.push_back(new Window(sf::Vector2i(100, 15), sf::Vector2u(40, 20), this->_palette, this->_titleBarMode, "programs/xeyes.rb", {}));
 	this->_windows.push_back(new Window(sf::Vector2i(100, 40), sf::Vector2u(40, 40), this->_palette, this->_titleBarMode, "programs/key.rb", {}));
 	this->_windows.push_back(new Window(sf::Vector2i(100, 40), sf::Vector2u(40, 40), this->_palette, this->_titleBarMode, "programs/snake.rb", {}));
-	this->_windows.push_back(new Window(sf::Vector2i(1, 8), sf::Vector2u(190, 115), this->_palette, this->_titleBarMode, "programs/editor.rb", {"programs/editor.rb", "Saucisse"}));
+	this->_windows.push_back(new Window(sf::Vector2i(1, 8), sf::Vector2u(190, 115), this->_palette, this->_titleBarMode, "programs/editor.rb", {"programs/editor.rb"}));
 	this->_windows.push_back(new Window(sf::Vector2i(1, 8), sf::Vector2u(190, 115), this->_palette, this->_titleBarMode, "programs/terminal.rb", {}));
 	for (Window* window : this->_windows) {
 		window->init();
@@ -121,13 +121,24 @@ bool Desktop::isFocused(const Window* window) const
 	return this->_focusedWindow == window;
 }
 
-bool Desktop::spawn(const std::string& programPath)
+bool Desktop::spawn(const std::string& path, const std::vector<std::string>& parameters)
 {
-	Window* window = new Window(sf::Vector2i(10, 10), sf::Vector2u(60, 30), this->_palette, this->_titleBarMode, programPath, {});
-	this->_windows.push_back(window);
-	window->init();
+	try {
+		Window* window = new Window(sf::Vector2i(10, 10), sf::Vector2u(60, 30), this->_palette, this->_titleBarMode, path, parameters);
+		this->_windows.push_back(window);
+		Window* previous = this->_focusedWindow;
+		this->_focusedWindow = window;
+		if (previous != nullptr) {
+			previous->focusEvent(false);
+		}
+		this->_focusedWindow->focusEvent(true);
+		window->init();
 
-	return true;
+		return true;
+	}
+	catch (const std::runtime_error& error) {
+		return false;
+	}
 }
 
 void Desktop::closeEvent([[maybe_unused]] sf::Event event)

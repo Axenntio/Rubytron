@@ -15,7 +15,7 @@ public:
 	Window* getWindow(mrb_state *mrb) const;
 	bool isFocused(const Window* window) const;
 
-	bool spawn(const std::string& programPath);
+	bool spawn(const std::string& path, const std::vector<std::string>& parameters);
 
 private:
 	void closeEvent(sf::Event event);
