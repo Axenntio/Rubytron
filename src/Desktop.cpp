@@ -26,7 +26,7 @@ Desktop::Desktop(unsigned int width, unsigned int height, unsigned char scale, T
 	this->_window.create(sf::VideoMode(this->_width * scale, this->_height * scale), "Rubytron");
 	this->_window.setMouseCursorVisible(false);
 	this->_background_texture.create(this->_width, this->_height);
-	this->_background_texture.clear(this->_palette[0]);
+	this->_background_texture.clear(this->_palette[1]);
 	this->_foreground_texture.create(this->_width, this->_height);
 	this->_foreground_texture.clear(sf::Color::Transparent);
 	this->_cursor_texture.create(4, 6);
@@ -88,6 +88,10 @@ void Desktop::run()
 			}
 		}
 
+		this->_windows.erase(
+			std::remove_if(this->_windows.begin(), this->_windows.end(), [](const Window* window) { return window->isClosed(); }),
+			this->_windows.end()
+		);
 		this->_window.setVerticalSyncEnabled(true);
 		this->_window.clear();
 		sf::Sprite background(this->_background_texture.getTexture());
@@ -126,13 +130,13 @@ bool Desktop::spawn(const std::string& path, const std::vector<std::string>& par
 	try {
 		Window* window = new Window(sf::Vector2i(10, 10), sf::Vector2u(60, 30), this->_palette, this->_titleBarMode, path, parameters);
 		this->_windows.push_back(window);
+		window->init();
 		Window* previous = this->_focusedWindow;
 		this->_focusedWindow = window;
 		if (previous != nullptr) {
 			previous->focusEvent(false);
 		}
 		this->_focusedWindow->focusEvent(true);
-		window->init();
 
 		return true;
 	}
@@ -183,7 +187,8 @@ void Desktop::mouseButtonPressEvent([[maybe_unused]] sf::Event event)
 		this->_focusedWindow->focusEvent(true);
 	}
 	this->_windows.erase(
-		std::remove_if(this->_windows.begin(), this->_windows.end(), [this](Window* window) { return window == this->_focusedWindow; } )
+		std::remove_if(this->_windows.begin(), this->_windows.end(), [this](Window* window) { return window == this->_focusedWindow; } ),
+		this->_windows.end()
 	);
 	this->_windows.push_back(this->_focusedWindow);
 

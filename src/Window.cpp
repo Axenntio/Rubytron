@@ -9,7 +9,7 @@
 
 extern Desktop desktop;
 
-Window::Window(sf::Vector2i position, sf::Vector2u size, const std::vector<sf::Color>& palette, TitleBarMode titleBarMode, const std::string& programPath, const std::vector<std::string>& parameters) : _size(size), _title(programPath), _titleBarMode(titleBarMode), _resizable(true), _programFile(programPath), _programParameters(parameters)
+Window::Window(sf::Vector2i position, sf::Vector2u size, const std::vector<sf::Color>& palette, TitleBarMode titleBarMode, const std::string& programPath, const std::vector<std::string>& parameters) : _size(size), _title(programPath), _titleBarMode(titleBarMode), _resizable(true), _closed(false), _programFile(programPath), _programParameters(parameters)
 {
 	this->setPosition(sf::Vector2f(position));
 	this->_minSize = sf::Vector2i(8, 4);
@@ -41,6 +41,7 @@ Window::Window(sf::Vector2i position, sf::Vector2u size, const std::vector<sf::C
 	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "resizable", &Window::mrubyIsResizable, MRB_ARGS_NONE());
 	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "resizable=", &Window::mrubySetResizable, MRB_ARGS_REQ(1));
 	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "reload", &Window::mrubyReload, MRB_ARGS_NONE());
+	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "close", &Window::mrubyClose, MRB_ARGS_NONE());
 	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "spawn", &Window::mrubySpawn, MRB_ARGS_REQ(1) | MRB_ARGS_OPT(1));
 	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "parameters", &Window::mrubyParameters, MRB_ARGS_NONE());
 
@@ -161,6 +162,11 @@ void Window::exceptionHandler()
 			}
 		}
 	}
+}
+
+bool Window::isClosed() const
+{
+	return this->_closed;
 }
 
 void Window::resize(sf::Vector2i size)
@@ -475,6 +481,16 @@ mrb_value Window::mrubyReload(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 	if (window == nullptr) return mrb_nil_value();
 
 	window->reloadFile();
+
+	return mrb_nil_value();
+}
+
+mrb_value Window::mrubyClose(mrb_state *mrb, [[maybe_unused]] mrb_value self)
+{
+	Window* window = desktop.getWindow(mrb);
+	if (window == nullptr) return mrb_nil_value();
+
+	window->_closed = true;
 
 	return mrb_nil_value();
 }
