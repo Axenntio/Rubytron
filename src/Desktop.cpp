@@ -45,11 +45,11 @@ Desktop::Desktop(unsigned int width, unsigned int height, unsigned char scale, T
 	this->_windows.push_back(new Window(sf::Vector2i(10, 10), sf::Vector2u(60, 30), this->_palette, this->_titleBarMode, "programs/test.rb", {}));
 	this->_windows.push_back(new Window(sf::Vector2i(60, 60), sf::Vector2u(10, 10), this->_palette, this->_titleBarMode, "programs/resize.rb", {}));
 	this->_windows.push_back(new Window(sf::Vector2i(30, 8), sf::Vector2u(20, 20), this->_palette, this->_titleBarMode, "programs/palette.rb", {}));
+	this->_windows.push_back(new Window(sf::Vector2i(85, 30), sf::Vector2u(40, 40), this->_palette, this->_titleBarMode, "programs/key.rb", {}));
 	this->_windows.push_back(new Window(sf::Vector2i(100, 15), sf::Vector2u(40, 20), this->_palette, this->_titleBarMode, "programs/xeyes.rb", {}));
-	this->_windows.push_back(new Window(sf::Vector2i(100, 40), sf::Vector2u(40, 40), this->_palette, this->_titleBarMode, "programs/key.rb", {}));
-	this->_windows.push_back(new Window(sf::Vector2i(100, 40), sf::Vector2u(40, 40), this->_palette, this->_titleBarMode, "programs/snake.rb", {}));
-	this->_windows.push_back(new Window(sf::Vector2i(1, 8), sf::Vector2u(190, 115), this->_palette, this->_titleBarMode, "programs/editor.rb", {"programs/editor.rb"}));
-	this->_windows.push_back(new Window(sf::Vector2i(1, 8), sf::Vector2u(190, 115), this->_palette, this->_titleBarMode, "programs/terminal.rb", {}));
+	this->_windows.push_back(new Window(sf::Vector2i(120, 50), sf::Vector2u(40, 40), this->_palette, this->_titleBarMode, "programs/snake.rb", {}));
+	this->_windows.push_back(new Window(sf::Vector2i(5, 54), sf::Vector2u(48, 68), this->_palette, this->_titleBarMode, "programs/editor.rb", {"programs/editor.rb"}));
+	this->_windows.push_back(new Window(sf::Vector2i(57, 80), sf::Vector2u(60, 42), this->_palette, this->_titleBarMode, "programs/terminal.rb", {}));
 	for (Window* window : this->_windows) {
 		window->init();
 	}
