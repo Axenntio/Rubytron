@@ -61,6 +61,7 @@ class Terminal
 		@display_history = []
 		@command_history = []
 		@current_line = ''
+		@current_path = 'programs'
 		@should_blink = false
 		update_showable(Window.width, Window.height)
 	end
@@ -108,9 +109,17 @@ class Terminal
 			@monospace = param_to_bool(value) if param_is_bool(value) unless value.nil?
 			result = @monospace
 		when 'spawn'
-			result = Window.spawn command[1], command.drop(2)
+			result = Window.spawn "#{@current_path}/#{command[1]}", command.drop(2)
+		when 'cd'
+			if command[1].nil?
+				@current_path = 'programs'
+			else
+				@current_path += "/#{command[1]}"
+			end
+		when 'pwd'
+			result = @current_path
 		end
-		@display_history << result.to_s
+		@display_history << result.inspect
 		@current_line = ''
 		@cursor.y += 1
 	end

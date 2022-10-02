@@ -13,7 +13,7 @@ class Window
 
 	def self.focus_event(has_focus)
 		puts "Focus changed (#{has_focus})"
-		$has_focus = has_focus;
+		$has_focus = has_focus
 	end
 end
 
