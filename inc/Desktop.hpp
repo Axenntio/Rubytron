@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <memory>
 #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
 #include <Window.hpp>
@@ -12,10 +13,11 @@ public:
 	Desktop(unsigned int width, unsigned int height, unsigned char scale = 1, TitleBarMode titleBarMode = TitleBarMode::Full);
 
 	void run();
-	Window* getWindow(mrb_state *mrb) const;
+	std::shared_ptr<Window> getWindow(mrb_state *mrb) const;
 	bool isFocused(const Window* window) const;
 
 	bool spawn(const std::string& path, const std::vector<std::string>& parameters);
+	bool spawn(sf::Vector2i position, sf::Vector2u size, const std::string& path, const std::vector<std::string>& parameters);
 
 private:
 	void closeEvent(sf::Event event);
@@ -38,8 +40,8 @@ private:
 	unsigned int _height;
 	TitleBarMode _titleBarMode;
 
-	Window* _focusedWindow;
+	std::shared_ptr<Window> _focusedWindow;
 	FocusAction _focusAction;
 	sf::Vector2f _focusInitialDelta;
-	std::vector<Window*> _windows;
+	std::vector<std::shared_ptr<Window>> _windows;
 };

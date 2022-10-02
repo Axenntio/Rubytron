@@ -314,7 +314,7 @@ void Window::focusEvent(bool isFocused)
 
 mrb_value Window::mrubyGetWidth(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 {
-	Window* window = desktop.getWindow(mrb);
+	std::shared_ptr<Window> window = desktop.getWindow(mrb);
 	if (window == nullptr) return mrb_nil_value();
 
 	return mrb_int_value(mrb, window->_size.x);
@@ -322,7 +322,7 @@ mrb_value Window::mrubyGetWidth(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 
 mrb_value Window::mrubySetWidth(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 {
-	Window* window = desktop.getWindow(mrb);
+	std::shared_ptr<Window> window = desktop.getWindow(mrb);
 	if (window == nullptr) return mrb_nil_value();
 
 	mrb_int newWidth;
@@ -335,7 +335,7 @@ mrb_value Window::mrubySetWidth(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 
 mrb_value Window::mrubyGetHeight(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 {
-	Window* window = desktop.getWindow(mrb);
+	std::shared_ptr<Window> window = desktop.getWindow(mrb);
 	if (window == nullptr) return mrb_nil_value();
 
 	return mrb_int_value(mrb, window->_size.y);
@@ -343,7 +343,7 @@ mrb_value Window::mrubyGetHeight(mrb_state *mrb, [[maybe_unused]] mrb_value self
 
 mrb_value Window::mrubySetHeight(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 {
-	Window* window = desktop.getWindow(mrb);
+	std::shared_ptr<Window> window = desktop.getWindow(mrb);
 	if (window == nullptr) return mrb_nil_value();
 
 	mrb_int newHeight;
@@ -356,7 +356,7 @@ mrb_value Window::mrubySetHeight(mrb_state *mrb, [[maybe_unused]] mrb_value self
 
 mrb_value Window::mrubyGetMinWidth(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 {
-	Window* window = desktop.getWindow(mrb);
+	std::shared_ptr<Window> window = desktop.getWindow(mrb);
 	if (window == nullptr) return mrb_nil_value();
 
 	return mrb_int_value(mrb, window->_minSize.x);
@@ -364,7 +364,7 @@ mrb_value Window::mrubyGetMinWidth(mrb_state *mrb, [[maybe_unused]] mrb_value se
 
 mrb_value Window::mrubySetMinWidth(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 {
-	Window* window = desktop.getWindow(mrb);
+	std::shared_ptr<Window> window = desktop.getWindow(mrb);
 	if (window == nullptr) return mrb_nil_value();
 
 	mrb_int newWidth;
@@ -376,7 +376,7 @@ mrb_value Window::mrubySetMinWidth(mrb_state *mrb, [[maybe_unused]] mrb_value se
 
 mrb_value Window::mrubyGetMinHeight(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 {
-	Window* window = desktop.getWindow(mrb);
+	std::shared_ptr<Window> window = desktop.getWindow(mrb);
 	if (window == nullptr) return mrb_nil_value();
 
 	return mrb_int_value(mrb, window->_minSize.y);
@@ -384,7 +384,7 @@ mrb_value Window::mrubyGetMinHeight(mrb_state *mrb, [[maybe_unused]] mrb_value s
 
 mrb_value Window::mrubySetMinHeight(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 {
-	Window* window = desktop.getWindow(mrb);
+	std::shared_ptr<Window> window = desktop.getWindow(mrb);
 	if (window == nullptr) return mrb_nil_value();
 
 	mrb_int newHeight;
@@ -396,7 +396,7 @@ mrb_value Window::mrubySetMinHeight(mrb_state *mrb, [[maybe_unused]] mrb_value s
 
 mrb_value Window::mrubyGetMouseX(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 {
-	Window* window = desktop.getWindow(mrb);
+	std::shared_ptr<Window> window = desktop.getWindow(mrb);
 	if (window == nullptr) return mrb_nil_value();
 
 	return mrb_int_value(mrb, window->_mousePosition.x);
@@ -404,7 +404,7 @@ mrb_value Window::mrubyGetMouseX(mrb_state *mrb, [[maybe_unused]] mrb_value self
 
 mrb_value Window::mrubySetMouseX(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 {
-	Window* window = desktop.getWindow(mrb);
+	std::shared_ptr<Window> window = desktop.getWindow(mrb);
 	if (window == nullptr) return mrb_nil_value();
 
 	mrb_int newX;
@@ -416,7 +416,7 @@ mrb_value Window::mrubySetMouseX(mrb_state *mrb, [[maybe_unused]] mrb_value self
 
 mrb_value Window::mrubyGetMouseY(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 {
-	Window* window = desktop.getWindow(mrb);
+	std::shared_ptr<Window> window = desktop.getWindow(mrb);
 	if (window == nullptr) return mrb_nil_value();
 
 	return mrb_int_value(mrb, window->_mousePosition.y);
@@ -424,7 +424,7 @@ mrb_value Window::mrubyGetMouseY(mrb_state *mrb, [[maybe_unused]] mrb_value self
 
 mrb_value Window::mrubySetMouseY(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 {
-	Window* window = desktop.getWindow(mrb);
+	std::shared_ptr<Window> window = desktop.getWindow(mrb);
 	if (window == nullptr) return mrb_nil_value();
 
 	mrb_int newY;
@@ -436,7 +436,7 @@ mrb_value Window::mrubySetMouseY(mrb_state *mrb, [[maybe_unused]] mrb_value self
 
 mrb_value Window::mrubyGetTitle(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 {
-	Window* window = desktop.getWindow(mrb);
+	std::shared_ptr<Window> window = desktop.getWindow(mrb);
 	if (window == nullptr) return mrb_nil_value();
 
 	return mrb_str_new(mrb, window->_title.c_str(), window->_title.length());
@@ -444,7 +444,7 @@ mrb_value Window::mrubyGetTitle(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 
 mrb_value Window::mrubySetTitle(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 {
-	Window* window = desktop.getWindow(mrb);
+	std::shared_ptr<Window> window = desktop.getWindow(mrb);
 	if (window == nullptr) return mrb_nil_value();
 
 	const char* title;
@@ -457,7 +457,7 @@ mrb_value Window::mrubySetTitle(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 
 mrb_value Window::mrubyIsResizable(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 {
-	Window* window = desktop.getWindow(mrb);
+	std::shared_ptr<Window> window = desktop.getWindow(mrb);
 	if (window == nullptr) return mrb_nil_value();
 
 	return mrb_bool_value(window->_resizable);
@@ -465,7 +465,7 @@ mrb_value Window::mrubyIsResizable(mrb_state *mrb, [[maybe_unused]] mrb_value se
 
 mrb_value Window::mrubySetResizable(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 {
-	Window* window = desktop.getWindow(mrb);
+	std::shared_ptr<Window> window = desktop.getWindow(mrb);
 	if (window == nullptr) return mrb_nil_value();
 
 	mrb_bool resizable;
@@ -477,7 +477,7 @@ mrb_value Window::mrubySetResizable(mrb_state *mrb, [[maybe_unused]] mrb_value s
 
 mrb_value Window::mrubyReload(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 {
-	Window* window = desktop.getWindow(mrb);
+	std::shared_ptr<Window> window = desktop.getWindow(mrb);
 	if (window == nullptr) return mrb_nil_value();
 
 	window->reloadFile();
@@ -487,7 +487,7 @@ mrb_value Window::mrubyReload(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 
 mrb_value Window::mrubyClose(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 {
-	Window* window = desktop.getWindow(mrb);
+	std::shared_ptr<Window> window = desktop.getWindow(mrb);
 	if (window == nullptr) return mrb_nil_value();
 
 	window->_closed = true;
@@ -519,7 +519,7 @@ mrb_value Window::mrubySpawn(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 
 mrb_value Window::mrubyParameters(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 {
-	Window* window = desktop.getWindow(mrb);
+	std::shared_ptr<Window> window = desktop.getWindow(mrb);
 	if (window == nullptr) return mrb_nil_value();
 
 	mrb_value parameters = mrb_ary_new_capa(mrb, window->_programParameters.size());
@@ -534,7 +534,7 @@ mrb_value Window::mrubyParameters(mrb_state *mrb, [[maybe_unused]] mrb_value sel
 
 mrb_value Window::mrubyClear(mrb_state* mrb, [[maybe_unused]] mrb_value self)
 {
-	Window* window = desktop.getWindow(mrb);
+	std::shared_ptr<Window> window = desktop.getWindow(mrb);
 	if (window == nullptr) return mrb_nil_value();
 
 
@@ -548,7 +548,7 @@ mrb_value Window::mrubyClear(mrb_state* mrb, [[maybe_unused]] mrb_value self)
 
 mrb_value Window::mrubyPixel(mrb_state* mrb, [[maybe_unused]] mrb_value self)
 {
-	Window* window = desktop.getWindow(mrb);
+	std::shared_ptr<Window> window = desktop.getWindow(mrb);
 	if (window == nullptr) return mrb_nil_value();
 
 	mrb_int x, y;
@@ -566,7 +566,7 @@ mrb_value Window::mrubyPixel(mrb_state* mrb, [[maybe_unused]] mrb_value self)
 
 mrb_value Window::mrubyLine(mrb_state* mrb, [[maybe_unused]] mrb_value self)
 {
-	Window* window = desktop.getWindow(mrb);
+	std::shared_ptr<Window> window = desktop.getWindow(mrb);
 	if (window == nullptr) return mrb_nil_value();
 
 	mrb_int x1, x2, y1, y2;
@@ -585,7 +585,7 @@ mrb_value Window::mrubyLine(mrb_state* mrb, [[maybe_unused]] mrb_value self)
 
 mrb_value Window::mrubyRectangle(mrb_state* mrb, [[maybe_unused]] mrb_value self)
 {
-	Window* window = desktop.getWindow(mrb);
+	std::shared_ptr<Window> window = desktop.getWindow(mrb);
 	if (window == nullptr) return mrb_nil_value();
 
 	mrb_int x, y, w, h;
@@ -603,7 +603,7 @@ mrb_value Window::mrubyRectangle(mrb_state* mrb, [[maybe_unused]] mrb_value self
 
 mrb_value Window::mrubyCircle(mrb_state* mrb, [[maybe_unused]] mrb_value self)
 {
-	Window* window = desktop.getWindow(mrb);
+	std::shared_ptr<Window> window = desktop.getWindow(mrb);
 	if (window == nullptr) return mrb_nil_value();
 
 	mrb_int x, y, radius;
@@ -621,7 +621,7 @@ mrb_value Window::mrubyCircle(mrb_state* mrb, [[maybe_unused]] mrb_value self)
 
 mrb_value Window::mrubyText(mrb_state* mrb, [[maybe_unused]] mrb_value self)
 {
-	Window* window = desktop.getWindow(mrb);
+	std::shared_ptr<Window> window = desktop.getWindow(mrb);
 	if (window == nullptr) return mrb_nil_value();
 
 	const char* text;
@@ -636,7 +636,7 @@ mrb_value Window::mrubyText(mrb_state* mrb, [[maybe_unused]] mrb_value self)
 
 mrb_value Window::mrubyKey(mrb_state* mrb, [[maybe_unused]] mrb_value self)
 {
-	Window* window = desktop.getWindow(mrb);
+	std::shared_ptr<Window> window = desktop.getWindow(mrb);
 	if (window == nullptr) return mrb_nil_value();
 
 	mrb_int key = -1;

@@ -40,17 +40,17 @@ Desktop::Desktop(unsigned int width, unsigned int height, unsigned char scale, T
 	this->_canvas_view.setSize(sf::Vector2f(this->_width, this->_height));
 	this->_window.setView(this->_canvas_view);
 
+	this->spawn(sf::Vector2i(10, 10), sf::Vector2u(60, 30), "programs/test.rb", {});
+	this->spawn(sf::Vector2i(60, 60), sf::Vector2u(10, 10), "programs/resize.rb", {});
+	this->spawn(sf::Vector2i(30, 8), sf::Vector2u(20, 20), "programs/palette.rb", {});
+	this->spawn(sf::Vector2i(85, 30), sf::Vector2u(40, 40), "programs/key.rb", {});
+	this->spawn(sf::Vector2i(100, 15), sf::Vector2u(40, 20), "programs/xeyes.rb", {});
+	this->spawn(sf::Vector2i(120, 50), sf::Vector2u(40, 40), "programs/snake.rb", {});
+	this->spawn(sf::Vector2i(5, 54), sf::Vector2u(48, 68), "programs/editor.rb", {"programs/editor.rb"});
+	this->spawn(sf::Vector2i(57, 80), sf::Vector2u(60, 42), "programs/terminal.rb", {});
 	this->_focusedWindow = nullptr;
 	this->_focusAction = FocusAction::None;
-	this->_windows.push_back(new Window(sf::Vector2i(10, 10), sf::Vector2u(60, 30), this->_palette, this->_titleBarMode, "programs/test.rb", {}));
-	this->_windows.push_back(new Window(sf::Vector2i(60, 60), sf::Vector2u(10, 10), this->_palette, this->_titleBarMode, "programs/resize.rb", {}));
-	this->_windows.push_back(new Window(sf::Vector2i(30, 8), sf::Vector2u(20, 20), this->_palette, this->_titleBarMode, "programs/palette.rb", {}));
-	this->_windows.push_back(new Window(sf::Vector2i(85, 30), sf::Vector2u(40, 40), this->_palette, this->_titleBarMode, "programs/key.rb", {}));
-	this->_windows.push_back(new Window(sf::Vector2i(100, 15), sf::Vector2u(40, 20), this->_palette, this->_titleBarMode, "programs/xeyes.rb", {}));
-	this->_windows.push_back(new Window(sf::Vector2i(120, 50), sf::Vector2u(40, 40), this->_palette, this->_titleBarMode, "programs/snake.rb", {}));
-	this->_windows.push_back(new Window(sf::Vector2i(5, 54), sf::Vector2u(48, 68), this->_palette, this->_titleBarMode, "programs/editor.rb", {"programs/editor.rb"}));
-	this->_windows.push_back(new Window(sf::Vector2i(57, 80), sf::Vector2u(60, 42), this->_palette, this->_titleBarMode, "programs/terminal.rb", {}));
-	for (Window* window : this->_windows) {
+	for (std::shared_ptr<Window> window : this->_windows) {
 		window->init();
 	}
 }
@@ -88,8 +88,13 @@ void Desktop::run()
 			}
 		}
 
+		for (std::shared_ptr<Window> window : this->_windows) {
+			if (window->isClosed() && this->_focusedWindow == window) {
+				this->_focusedWindow = nullptr;
+			}
+		}
 		this->_windows.erase(
-			std::remove_if(this->_windows.begin(), this->_windows.end(), [](const Window* window) { return window->isClosed(); }),
+			std::remove_if(this->_windows.begin(), this->_windows.end(), [](const std::shared_ptr<Window> window) { return window->isClosed(); }),
 			this->_windows.end()
 		);
 		this->_window.setVerticalSyncEnabled(true);
@@ -100,7 +105,7 @@ void Desktop::run()
 		cursor.setTextureRect(sf::IntRect(0, 6, 4, -6));
 		cursor.setPosition(this->_mouse_coordinated.x, this->_mouse_coordinated.y);
 		this->_window.draw(background);
-		for (Window* window : this->_windows) {
+		for (std::shared_ptr<Window> window : this->_windows) {
 			window->exceptionHandler();
 			this->_window.draw(*window);
 		}
@@ -110,9 +115,9 @@ void Desktop::run()
 	}
 }
 
-Window* Desktop::getWindow(mrb_state* mrb) const
+std::shared_ptr<Window> Desktop::getWindow(mrb_state* mrb) const
 {
-	for (Window* window : this->_windows) {
+	for (std::shared_ptr<Window> window : this->_windows) {
 		if (window->isContext(mrb)) {
 			return window;
 		}
@@ -122,16 +127,21 @@ Window* Desktop::getWindow(mrb_state* mrb) const
 
 bool Desktop::isFocused(const Window* window) const
 {
-	return this->_focusedWindow == window;
+	return this->_focusedWindow.get() == window;
 }
 
 bool Desktop::spawn(const std::string& path, const std::vector<std::string>& parameters)
 {
+	return this->spawn(sf::Vector2i(10, 10), sf::Vector2u(60, 30), path, parameters);
+}
+
+bool Desktop::spawn(sf::Vector2i position, sf::Vector2u size, const std::string& path, const std::vector<std::string>& parameters)
+{
 	try {
-		Window* window = new Window(sf::Vector2i(10, 10), sf::Vector2u(60, 30), this->_palette, this->_titleBarMode, path, parameters);
+		std::shared_ptr<Window> window = std::make_unique<Window>(position, size, this->_palette, this->_titleBarMode, path, parameters);
 		this->_windows.push_back(window);
 		window->init();
-		Window* previous = this->_focusedWindow;
+		std::shared_ptr<Window> previous = this->_focusedWindow;
 		this->_focusedWindow = window;
 		if (previous != nullptr) {
 			previous->focusEvent(false);
@@ -148,9 +158,9 @@ bool Desktop::spawn(const std::string& path, const std::vector<std::string>& par
 void Desktop::closeEvent([[maybe_unused]] sf::Event event)
 {
 	this->_focusedWindow = nullptr;
-	for (Window* window : this->_windows) {
-		delete window;
-	}
+	// for (std::shared_ptr<Window> window : this->_windows) {
+	// 	delete window;
+	// }
 	this->_windows.clear();
 	this->_window.close();
 }
@@ -169,9 +179,9 @@ void Desktop::resizeEvent(sf::Event event)
 
 void Desktop::mouseButtonPressEvent([[maybe_unused]] sf::Event event)
 {
-	Window* previous = this->_focusedWindow;
+	std::shared_ptr<Window> previous = this->_focusedWindow;
 	this->_focusedWindow = nullptr;
-	for (std::vector<Window*>::reverse_iterator it = this->_windows.rbegin(); it != this->_windows.rend(); ++it) {
+	for (std::vector<std::shared_ptr<Window>>::reverse_iterator it = this->_windows.rbegin(); it != this->_windows.rend(); ++it) {
 		if ((*it)->isIn(WindowZone::All, static_cast<sf::Vector2i>(this->_mouse_coordinated))) {
 			this->_focusedWindow = *it;
 			break;
@@ -187,7 +197,7 @@ void Desktop::mouseButtonPressEvent([[maybe_unused]] sf::Event event)
 		this->_focusedWindow->focusEvent(true);
 	}
 	this->_windows.erase(
-		std::remove_if(this->_windows.begin(), this->_windows.end(), [this](Window* window) { return window == this->_focusedWindow; } ),
+		std::remove_if(this->_windows.begin(), this->_windows.end(), [this](std::shared_ptr<Window> window) { return window == this->_focusedWindow; } ),
 		this->_windows.end()
 	);
 	this->_windows.push_back(this->_focusedWindow);
@@ -213,7 +223,7 @@ void Desktop::mouseMoveEvent(sf::Event event)
 	this->_mouse_coordinated = static_cast<sf::Vector2i>(mappedPoint);
 	this->_mouse_coordinated.x = std::max(0, std::min(this->_mouse_coordinated.x, static_cast<int>(this->_width - 1)));
 	this->_mouse_coordinated.y = std::max(0, std::min(this->_mouse_coordinated.y, static_cast<int>(this->_height - 1)));
-	for (Window* window : this->_windows) {
+	for (std::shared_ptr<Window> window : this->_windows) {
 		window->setMousePosition(this->_mouse_coordinated);
 	}
 	switch (this->_focusAction) {
