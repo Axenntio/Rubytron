@@ -166,6 +166,7 @@ bool Desktop::killWindow(unsigned int processId)
 		return false;
 	}
 	this->_windows[processId]->close();
+	return true;
 }
 
 void Desktop::closeEvent([[maybe_unused]] sf::Event event)

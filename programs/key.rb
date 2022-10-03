@@ -19,16 +19,16 @@ class Vector
 end
 
 def init
-	$debug = false
 	$player_pos = Vector.new(0, 0)
 end
 
 def update
-	puts key.inspect if $debug
-	$player_pos.x -= 1 if key 71
-	$player_pos.x += 1 if key 72
-	$player_pos.y -= 1 if key 73
-	$player_pos.y += 1 if key 74
+	$player_pos.x -= 1 if Window.key 71
+	$player_pos.x += 1 if Window.key 72
+	$player_pos.y -= 1 if Window.key 73
+	$player_pos.y += 1 if Window.key 74
 	clear 0
 	circle $player_pos.x, $player_pos.y, 10, 2
+	text 1, 1, Window.key.inspect, 7
+
 end
