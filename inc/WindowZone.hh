@@ -4,5 +4,7 @@ enum class WindowZone {
 	All,
 	TitleBar,
 	Canvas,
-	BottomRight
+	BottomRight,
+	Right,
+	Bottom,
 };

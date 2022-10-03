@@ -217,6 +217,14 @@ void Desktop::mouseButtonPressEvent([[maybe_unused]] sf::Event event)
 		this->_focusAction = FocusAction::Resize;
 		this->_focusInitialDelta = static_cast<sf::Vector2f>(this->_focusedWindow->getSize() - this->_mouse_coordinated);
 	}
+	else if (this->_focusedWindow->isIn(WindowZone::Right, static_cast<sf::Vector2i>(this->_mouse_coordinated))) {
+		this->_focusAction = FocusAction::ResizeH;
+		this->_focusInitialDelta = static_cast<sf::Vector2f>(this->_focusedWindow->getSize() - this->_mouse_coordinated);
+	}
+	else if (this->_focusedWindow->isIn(WindowZone::Bottom, static_cast<sf::Vector2i>(this->_mouse_coordinated))) {
+		this->_focusAction = FocusAction::ResizeV;
+		this->_focusInitialDelta = static_cast<sf::Vector2f>(this->_focusedWindow->getSize() - this->_mouse_coordinated);
+	}
 	else if (this->_focusedWindow->isIn(WindowZone::TitleBar, static_cast<sf::Vector2i>(this->_mouse_coordinated))) {
 		this->_focusAction = FocusAction::Move;
 		this->_focusInitialDelta = this->_focusedWindow->getPosition() - static_cast<sf::Vector2f>(this->_mouse_coordinated);
@@ -241,10 +249,16 @@ void Desktop::mouseMoveEvent(sf::Event event)
 		case FocusAction::None:
 			return;
 		case FocusAction::Move:
-			this->_focusedWindow->setPosition(sf::Vector2f(this->_mouse_coordinated + sf::Vector2i(this->_focusInitialDelta)));
+			this->_focusedWindow->setPosition(sf::Vector2f(this->_mouse_coordinated + static_cast<sf::Vector2i>(this->_focusInitialDelta)));
 			return;
 		case FocusAction::Resize:
-			this->_focusedWindow->resize(this->_mouse_coordinated + sf::Vector2i(this->_focusInitialDelta));
+			this->_focusedWindow->resize(this->_mouse_coordinated + static_cast<sf::Vector2i>(this->_focusInitialDelta));
+			return;
+		case FocusAction::ResizeH:
+			this->_focusedWindow->resizeH(this->_mouse_coordinated.x + static_cast<int>(this->_focusInitialDelta.x));
+			return;
+		case FocusAction::ResizeV:
+			this->_focusedWindow->resizeV(this->_mouse_coordinated.y + static_cast<int>(this->_focusInitialDelta.y));
 			return;
 	}
 }

@@ -196,6 +196,16 @@ void Window::resize(sf::Vector2i size)
 	}
 }
 
+void Window::resizeH(int width)
+{
+	this->resize(sf::Vector2i(width, this->_size.y));
+}
+
+void Window::resizeV(int height)
+{
+	this->resize(sf::Vector2i(this->_size.x, height));
+}
+
 void Window::resizeTrigger()
 {
 	sf::Texture tmp(this->_texture.getTexture());
@@ -272,6 +282,20 @@ bool Window::isIn(WindowZone zone, sf::Vector2i point) const
 					point.y == this->getPosition().y + static_cast<int>(this->_size.y) &&
 					point.x >= this->getPosition().x + static_cast<int>(this->_size.x) - 2 &&
 					point.x < this->getPosition().x + static_cast<int>(this->_size.x) + 1
+				);
+		case WindowZone::Right:
+			return
+				(
+					point.x == this->getPosition().x + static_cast<int>(this->_size.x) &&
+					point.y >= this->getPosition().y &&
+					point.y < this->getPosition().y + static_cast<int>(this->_size.y) - 2
+				);
+		case WindowZone::Bottom:
+			return
+				(
+					point.y == this->getPosition().y + static_cast<int>(this->_size.y) &&
+					point.x >= this->getPosition().x &&
+					point.x < this->getPosition().x + static_cast<int>(this->_size.x) - 2
 				);
 	}
 	return false;

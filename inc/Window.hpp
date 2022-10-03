@@ -22,6 +22,8 @@ public:
 	void exceptionHandler();
 
 	void resize(sf::Vector2i size);
+	void resizeH(int width);
+	void resizeV(int height);
 	bool isContext(mrb_state* mrb) const;
 	bool isIn(WindowZone zone, sf::Vector2i point) const;
 	bool isClosed() const;

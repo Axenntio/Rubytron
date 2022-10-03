@@ -3,5 +3,7 @@
 enum class FocusAction {
 	None,
 	Move,
-	Resize
+	Resize,
+	ResizeH,
+	ResizeV
 };
