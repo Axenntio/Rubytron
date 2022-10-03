@@ -44,6 +44,8 @@ Window::Window(sf::Vector2i position, sf::Vector2u size, const std::vector<sf::C
 	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "close", &Window::mrubyClose, MRB_ARGS_NONE());
 	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "parameters", &Window::mrubyParameters, MRB_ARGS_NONE());
 	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "key", &Window::mrubyKey, MRB_ARGS_OPT(1));
+	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "focused", &Window::mrubyFocused, MRB_ARGS_NONE());
+
 
 	this->_mrbDesktopClass = mrb_define_class(this->_mrb, "Desktop", this->_mrb->object_class);
 	mrb_define_class_method(this->_mrb, this->_mrbDesktopClass, "processes", &Window::mrubyProcesses, MRB_ARGS_NONE());
@@ -521,6 +523,14 @@ mrb_value Window::mrubyParameters(mrb_state *mrb, [[maybe_unused]] mrb_value sel
 	}
 
 	return parameters;
+}
+
+mrb_value Window::mrubyFocused(mrb_state *mrb, [[maybe_unused]] mrb_value self)
+{
+	std::shared_ptr<Window> window = desktop.getWindow(mrb);
+	if (window == nullptr) return mrb_nil_value();
+
+	return mrb_bool_value(desktop.isFocused(window.get()));
 }
 
 

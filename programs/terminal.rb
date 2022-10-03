@@ -13,14 +13,7 @@ class Window
 	end
 
 	def self.key_press_event(key)
-		case key
-		when 3 # ctrl + d
-			close if Window.key.include?(37)
-		when 58 # Enter
-			$terminal.execute
-		when 17 # ctrl + r
-			reload and $terminal.should_blink(true) if Window.key.include?(37)
-		end
+		$terminal.parse_key(key)
 	end
 
 	def self.focus_event(has_focus)
@@ -66,7 +59,7 @@ class Terminal
 		@command_history = []
 		@current_line = ''
 		@current_path = 'programs'
-		@should_blink = false
+		@should_blink = Window.focused
 		update_showable(Window.width, Window.height)
 	end
 
@@ -94,9 +87,20 @@ class Terminal
 	def input_char(char)
 		if char.between?(32, 126)
             @current_line += char.chr
-		elsif char == 8 # Backspace
+		end
+	end
+
+	def parse_key(key)
+		case key
+		when 3 # d
+			Window.close if Window.key.include?(37)
+		when 17 # r
+			Window.reload if Window.key.include?(37)
+		when 58 # Enter
+			execute
+		when 59 # Backspace
 			@current_line.slice!(-1)
-		elsif char == 9 # Tab
+		when 60 # Tab
 			# Pre-parse to auto-complete
 		end
 	end

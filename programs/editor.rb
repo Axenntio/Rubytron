@@ -9,18 +9,7 @@ class Window
 	end
 
 	def self.text_event(char)
-        case char
-        when 1 # ctrl + a
-            $editor.to_start_line
-        when 5 # ctrl + e
-            $editor.to_end_line
-        when 18 # ctrl + r
-            reload
-        when 19 # ctrl + s
-            $editor.save
-        else
-            $editor.add_char(char)
-        end
+        $editor.add_char(char)
 	end
 
     def self.key_press_event(key)
@@ -109,7 +98,27 @@ class Editor
         if char.between?(32, 126) || char == 9 # tab
             @file_content[@cursor.y].insert(@cursor.x, char.chr)
             @cursor.x += 1
-        elsif char == 8 # Backspace
+        end
+        self.update_scope
+    end
+
+    def parse_key(key)
+        case key
+        when 0 # ctrl + a
+            to_start_line if Window.key.include?(37)
+        when 4 # ctrl + e
+            to_end_line if Window.key.include?(37)
+        when 17 # ctrl + r
+            Window.reload if Window.key.include?(37)
+        when 18 # ctrl + s
+            save if Window.key.include?(37)
+        when 58 # Enter
+            new_line = @file_content[@cursor.y].slice!(@cursor.x, @file_content[@cursor.y].length - @cursor.x)
+            @cursor.y += 1
+            @cursor.x = 0
+            new_line ||= '' # Makes sure we have a string since spliting at last pos only provide `nil` value
+            @file_content.insert(@cursor.y, new_line)
+        when 59 # Backspace
             if @cursor.x.positive?
                 @file_content[@cursor.y].slice!(@cursor.x - 1)
                 @cursor.x -= 1
@@ -119,27 +128,6 @@ class Editor
                 @file_content.delete_at(@cursor.y)
                 @cursor.y -= 1
             end
-        elsif char == 13 # Enter
-            new_line = @file_content[@cursor.y].slice!(@cursor.x, @file_content[@cursor.y].length - @cursor.x)
-            @cursor.y += 1
-            @cursor.x = 0
-            new_line ||= '' # Makes sure we have a string since spliting at last pos only provide `nil` value
-            @file_content.insert(@cursor.y, new_line)
-        elsif char == 127 # Del
-            if @file_content[@cursor.y].length > @cursor.x
-                @file_content[@cursor.y].slice!(@cursor.x)
-            else
-                @file_content[@cursor.y] = @file_content[@cursor.y] + @file_content[@cursor.y + 1]
-                @file_content.delete_at(@cursor.y + 1)
-            end
-        else
-            puts "Unhandled #{char}"
-        end
-        self.update_scope
-    end
-
-    def parse_key(key)
-        case key
         when 61 # Page up
             @cursor.y -= @show_line - 2
         when 62 # Page down
@@ -148,6 +136,13 @@ class Editor
             to_end_line
         when 64 # Home
             to_start_line
+        when 66 # Del
+            if @file_content[@cursor.y].length > @cursor.x
+                @file_content[@cursor.y].slice!(@cursor.x)
+            else
+                @file_content[@cursor.y] = @file_content[@cursor.y] + @file_content[@cursor.y + 1]
+                @file_content.delete_at(@cursor.y + 1)
+            end
         when 71 # Left
             @cursor.x -= 1
         when 72 # Right
@@ -162,6 +157,8 @@ class Editor
             if @cursor.x > @file_content[@cursor.y].length
                 @cursor.x = @file_content[@cursor.y].length
             end
+        else
+            puts "Unhandled #{key}"
         end
         self.update_scope
     end

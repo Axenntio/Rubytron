@@ -56,6 +56,7 @@ private:
 	static mrb_value mrubyClose(mrb_state *mrb, mrb_value self);
 	static mrb_value mrubyReload(mrb_state *mrb, mrb_value self);
 	static mrb_value mrubyParameters(mrb_state *mrb, mrb_value self);
+	static mrb_value mrubyFocused(mrb_state *mrb, mrb_value self);
 
 	static mrb_value mrubyProcesses(mrb_state *mrb, mrb_value self);
 	static mrb_value mrubyKillProcess(mrb_state *mrb, mrb_value self);
