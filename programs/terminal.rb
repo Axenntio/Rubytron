@@ -10,6 +10,8 @@ class Window
 
 	def self.text_event(char)
         case char
+		when 4 # ctrl + d
+            close
 		when 13
 			$terminal.execute
         when 18 # ctrl + r
@@ -58,6 +60,7 @@ class Terminal
 		@blink_speed = 12
 		@blink_time = @blink_speed
 		@monospace = false
+		@return_value = false
 		@display_history = []
 		@command_history = []
 		@current_line = ''
@@ -94,6 +97,8 @@ class Terminal
 			@current_line.slice!(-1)
 		elsif char == 9 # Tab
 			# Pre-parse to auto-complete
+		else
+			puts "Unhandled: #{char}"
 		end
 	end
 
@@ -108,18 +113,37 @@ class Terminal
 			value = command[1]
 			@monospace = param_to_bool(value) if param_is_bool(value) unless value.nil?
 			result = @monospace
+		when 'return_value'
+			value = command[1]
+			@return_value = param_to_bool(value) if param_is_bool(value) unless value.nil?
+			result = @return_value
 		when 'spawn'
-			result = Window.spawn "#{@current_path}/#{command[1]}", command.drop(2)
+			result = Desktop.spawn "#{@current_path}/#{command[1]}", command.drop(2)
+		when 'history'
+			history = @command_history
+			history = @command_history[(@command_history.count - command[1].to_i)..@command_history.count] if command[1].to_i.is_a?(Integer) # TODO: Check working
+			history.each_with_index { |command, line| @display_history << "#{line + 1} #{command}" }
 		when 'cd'
 			if command[1].nil?
 				@current_path = 'programs'
 			else
 				@current_path += "/#{command[1]}"
+				paths = @current_path.split('/')
+				# Do magic with '..' and '.'
+				result = @current_path
 			end
 		when 'pwd'
 			result = @current_path
+			@display_history << result
+		when 'ps'
+			result = Desktop.processes
+			result.each { |process| @display_history << process }
+		when 'kill'
+			result = Desktop.kill_process(command[1].to_i) if command[1].to_i.is_a?(Integer)
+		when 'exit'
+			Window.close
 		end
-		@display_history << result.inspect
+		@display_history << result.inspect if @return_value
 		@current_line = ''
 		@cursor.y += 1
 	end

@@ -155,12 +155,22 @@ bool Desktop::spawn(sf::Vector2i position, sf::Vector2u size, const std::string&
 	}
 }
 
+const std::vector<std::shared_ptr<Window>>& Desktop::getWindows() const
+{
+	return this->_windows;
+}
+
+bool Desktop::killWindow(unsigned int processId)
+{
+	if (this->_windows.size() <= processId) {
+		return false;
+	}
+	this->_windows[processId]->close();
+}
+
 void Desktop::closeEvent([[maybe_unused]] sf::Event event)
 {
 	this->_focusedWindow = nullptr;
-	// for (std::shared_ptr<Window> window : this->_windows) {
-	// 	delete window;
-	// }
 	this->_windows.clear();
 	this->_window.close();
 }

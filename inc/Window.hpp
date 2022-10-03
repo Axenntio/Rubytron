@@ -25,6 +25,7 @@ public:
 	bool isContext(mrb_state* mrb) const;
 	bool isIn(WindowZone zone, sf::Vector2i point) const;
 	bool isClosed() const;
+	void close();
 
 	void setMousePosition(sf::Vector2i position);
 	void addKeyPressed(sf::Keyboard::Key key);
@@ -54,8 +55,11 @@ private:
 	static mrb_value mrubySetResizable(mrb_state *mrb, mrb_value self);
 	static mrb_value mrubyClose(mrb_state *mrb, mrb_value self);
 	static mrb_value mrubyReload(mrb_state *mrb, mrb_value self);
-	static mrb_value mrubySpawn(mrb_state *mrb, mrb_value self);
 	static mrb_value mrubyParameters(mrb_state *mrb, mrb_value self);
+
+	static mrb_value mrubyProcesses(mrb_state *mrb, mrb_value self);
+	static mrb_value mrubyKillProcess(mrb_state *mrb, mrb_value self);
+	static mrb_value mrubySpawn(mrb_state *mrb, mrb_value self);
 
 	static mrb_value mrubyClear(mrb_state *mrb, mrb_value self);
 	static mrb_value mrubyPixel(mrb_state *mrb, mrb_value self);
@@ -82,4 +86,5 @@ private:
 	mrb_state* _mrb;
 	mrbc_context* _mrbContext;
 	RClass *_mrbWindowClass;
+	RClass *_mrbDesktopClass;
 };

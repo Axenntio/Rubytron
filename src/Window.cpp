@@ -42,8 +42,12 @@ Window::Window(sf::Vector2i position, sf::Vector2u size, const std::vector<sf::C
 	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "resizable=", &Window::mrubySetResizable, MRB_ARGS_REQ(1));
 	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "reload", &Window::mrubyReload, MRB_ARGS_NONE());
 	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "close", &Window::mrubyClose, MRB_ARGS_NONE());
-	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "spawn", &Window::mrubySpawn, MRB_ARGS_REQ(1) | MRB_ARGS_OPT(1));
 	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "parameters", &Window::mrubyParameters, MRB_ARGS_NONE());
+
+	this->_mrbDesktopClass = mrb_define_class(this->_mrb, "Desktop", this->_mrb->object_class);
+	mrb_define_class_method(this->_mrb, this->_mrbDesktopClass, "processes", &Window::mrubyProcesses, MRB_ARGS_NONE());
+	mrb_define_class_method(this->_mrb, this->_mrbDesktopClass, "kill_process", &Window::mrubyKillProcess, MRB_ARGS_REQ(1) | MRB_ARGS_OPT(1));
+	mrb_define_class_method(this->_mrb, this->_mrbDesktopClass, "spawn", &Window::mrubySpawn, MRB_ARGS_REQ(1) | MRB_ARGS_OPT(1));
 
 
 	mrb_define_method(this->_mrb, this->_mrb->object_class, "clear", &Window::mrubyClear, MRB_ARGS_REQ(1));
@@ -167,6 +171,11 @@ void Window::exceptionHandler()
 bool Window::isClosed() const
 {
 	return this->_closed;
+}
+
+void Window::close()
+{
+	this->_closed = true;
 }
 
 void Window::resize(sf::Vector2i size)
@@ -501,6 +510,20 @@ mrb_value Window::mrubyClose(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 	return mrb_nil_value();
 }
 
+mrb_value Window::mrubyParameters(mrb_state *mrb, [[maybe_unused]] mrb_value self)
+{
+	std::shared_ptr<Window> window = desktop.getWindow(mrb);
+	if (window == nullptr) return mrb_nil_value();
+
+	mrb_value parameters = mrb_ary_new_capa(mrb, window->_programParameters.size());
+	for (const std::string& parameter : window->_programParameters) {
+		mrb_ary_push(mrb, parameters, mrb_str_new(mrb, parameter.c_str(), parameter.length()));
+	}
+
+	return parameters;
+}
+
+
 mrb_value Window::mrubySpawn(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 {
 	const char* path;
@@ -523,17 +546,21 @@ mrb_value Window::mrubySpawn(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 	return mrb_false_value();
 }
 
-mrb_value Window::mrubyParameters(mrb_state *mrb, [[maybe_unused]] mrb_value self)
+mrb_value Window::mrubyProcesses(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 {
-	std::shared_ptr<Window> window = desktop.getWindow(mrb);
-	if (window == nullptr) return mrb_nil_value();
-
-	mrb_value parameters = mrb_ary_new_capa(mrb, window->_programParameters.size());
-	for (const std::string& parameter : window->_programParameters) {
-		mrb_ary_push(mrb, parameters, mrb_str_new(mrb, parameter.c_str(), parameter.length()));
+	mrb_value array = mrb_ary_new_capa(mrb, desktop.getWindows().size());
+	for (const std::shared_ptr<Window>& window : desktop.getWindows()) { // TODO: Do index for kill command
+		mrb_ary_push(mrb, array, mrb_str_new(mrb, window->_programFile.c_str(), window->_programFile.length()));
 	}
 
-	return parameters;
+	return array;
+}
+
+mrb_value Window::mrubyKillProcess(mrb_state *mrb, [[maybe_unused]] mrb_value self)
+{
+	mrb_int processId;
+	mrb_get_args(mrb, "i", &processId);
+	return mrb_bool_value(desktop.killWindow(processId));
 }
 
 // Drawing
