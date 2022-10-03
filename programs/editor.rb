@@ -64,6 +64,19 @@ class Editor
         self.update_show_line(Window.width, Window.height)
     end
 
+    def syntax_color(word)
+        syntaxes = {
+            1 => ['nil'],
+            2 => ['class', 'def', 'end', 'do', 'if'],
+            3 => ['/^[A-Z_]*$/'],
+            9 => ['/^*.\\(/']
+        }
+        syntaxes.each do |color, syntax|
+            return color if syntax.include?(word)
+        end
+        7
+    end
+
     def update_show_line(width, height)
         @show_line = height / FONT_HEIGH + 1
         @show_char = width / FONT_WIDTH + 1 - @side_bar_width
@@ -223,7 +236,14 @@ def update
     end
     y_offset = 1
     $editor.showable_content.each do |line|
+        parts = line.split(' ') # TODO: Split by taking space in account
+        part_offset = 0
         text 1 + editor_canvas.x * FONT_WIDTH, y_offset, line, 7, true
+        #parts.each do |part|
+        #    color = $editor.syntax_color(part)
+        #    text 1 + editor_canvas.x * FONT_WIDTH + part_offset, y_offset, part, color, true
+        #    part_offset += (part.length + 1) * FONT_WIDTH
+        #end
         y_offset += FONT_HEIGH
     end
     cursor = $editor.showable_cursor
