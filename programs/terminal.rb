@@ -9,17 +9,18 @@ class Window
 	end
 
 	def self.text_event(char)
-        case char
-		when 4 # ctrl + d
-            close
-		when 13
+		$terminal.input_char(char)
+	end
+
+	def self.key_press_event(key)
+		case key
+		when 3 # ctrl + d
+			close if Window.key.include?(37)
+		when 58 # Enter
 			$terminal.execute
-        when 18 # ctrl + r
-            reload
-			$terminal.should_blink(true)
-		else
-			$terminal.input_char(char)
-        end
+		when 17 # ctrl + r
+			reload and $terminal.should_blink(true) if Window.key.include?(37)
+		end
 	end
 
 	def self.focus_event(has_focus)
@@ -97,8 +98,6 @@ class Terminal
 			@current_line.slice!(-1)
 		elsif char == 9 # Tab
 			# Pre-parse to auto-complete
-		else
-			puts "Unhandled: #{char}"
 		end
 	end
 
