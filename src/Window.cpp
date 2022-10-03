@@ -273,6 +273,11 @@ void Window::setMousePosition(sf::Vector2i position)
 
 void Window::addKeyPressed(sf::Keyboard::Key key)
 {
+	if (this->_mrb->exc) {
+		this->_closed = true;
+		desktop.spawn(static_cast<sf::Vector2i>(this->getPosition()), static_cast<sf::Vector2u>(this->_size), this->_programFile, this->_programParameters);
+		return;
+	}
 	if (std::find(this->_keyPressed.begin(), this->_keyPressed.end(), static_cast<sf::Keyboard::Key>(key)) == this->_keyPressed.end()) {
 		this->_keyPressed.push_back(key);
 	}
@@ -481,6 +486,7 @@ mrb_value Window::mrubyReload(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 	if (window == nullptr) return mrb_nil_value();
 
 	window->reloadFile();
+	window->_keyPressed = {};
 
 	return mrb_nil_value();
 }
