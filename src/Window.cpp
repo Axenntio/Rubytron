@@ -163,8 +163,8 @@ void Window::exceptionHandler()
 		if (mrb_array_p(backtraceObj)) {
 			mrb_int backtraceLength = RARRAY_LEN(backtraceObj);
 			mrb_value *backtrace = RARRAY_PTR(backtraceObj);
-			for (unsigned int i = 0; i < backtraceLength; ++i) {
-				drawText(this->_texture, 1, (i + 1) * (FONT_HEIGHT + 1) + 1, mrb_str_to_cstr(this->_mrb, backtrace[i]) , this->_palette[8], false);
+			for (unsigned int i = 0; i < backtraceLength - 1; ++i) {
+				drawText(this->_texture, 1, (i + 1) * (FONT_HEIGHT + 1) + 1, mrb_str_to_cstr(this->_mrb, backtrace[i]) , this->_palette[5], false); // Palette 9 also render nice
 			}
 		}
 	}
