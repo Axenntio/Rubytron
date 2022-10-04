@@ -55,10 +55,10 @@ class Editor
 
   def syntax_color(word)
     syntaxes = {
-      1 => [/^[A-Z_]+$/],
-      2 => ['module', 'class', 'def', 'end', 'do', 'if'],
+      2 => ['module', 'class', 'def', 'end', 'do', 'if', 'elsif', 'else', 'case', 'when'],
       3 => [/^[A-Z]{1}[a-z_]*$/],
-      # 9 => [/^[A-Za-z_]*\(/], # method
+      8 => [/^[A-Z_]+$/],
+      # 9 => [/^[A-Za-z_]*\(/], # method when previous is . or after is (
       10 => [/^\d+$/],
       12 => [/^[@:\$][A-Za-z_]+$/, 'nil', 'self', 'new', 'attr_accessor', 'attr_reader', 'attr_writer'],
     }
@@ -240,7 +240,7 @@ def update
   end
   y_offset = 1
   $editor.showable_content.each do |line|
-    parts = line.split(/([\s.,=+-]+)/)
+    parts = line.split(/([\s.,\[\]\(\)]+)/)
     part_offset = 0
     parts.each do |part|
        color = $editor.syntax_color(part)
