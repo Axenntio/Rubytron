@@ -1,34 +1,33 @@
 class Window
-	def self.text_event(char)
-		$debug = !$debug if char == 32
-	end
+  def self.text_event(char)
+    $debug = !$debug if char == 32
+  end
 end
 
 class Vector
-	attr_accessor :x
-	attr_accessor :y
+  attr_accessor :x
+  attr_accessor :y
 
-	def initialize(x, y)
-		self.x = x
-		self.y = y
-	end
+  def initialize(x, y)
+    self.x = x
+    self.y = y
+  end
 
-	def +(other)
-		Vector.new(self.x + other.x, self.y + other.y)
-	end
+  def +(other)
+    Vector.new(self.x + other.x, self.y + other.y)
+  end
 end
 
 def init
-	$player_pos = Vector.new(0, 0)
+  $player_pos = Vector.new(0, 0)
 end
 
 def update
-	$player_pos.x -= 1 if Window.key 71
-	$player_pos.x += 1 if Window.key 72
-	$player_pos.y -= 1 if Window.key 73
-	$player_pos.y += 1 if Window.key 74
-	clear 0
-	circle $player_pos.x, $player_pos.y, 10, 2
-	text 1, 1, Window.key.inspect, 7
-
+  $player_pos.x -= 1 if Window.key 71
+  $player_pos.x += 1 if Window.key 72
+  $player_pos.y -= 1 if Window.key 73
+  $player_pos.y += 1 if Window.key 74
+  clear 0
+  circle $player_pos.x, $player_pos.y, 10, 2
+  text 1, 1, Window.key.inspect, 7
 end
