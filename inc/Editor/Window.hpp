@@ -1,38 +1,20 @@
 #pragma once
 
-#include <SFML/Graphics.hpp>
 #include <mruby/compile.h>
-#include <WindowZone.hh>
-#include <TitleBarMode.hh>
+#include <Shared/AbstractWindow.hpp>
+#include <Editor/WindowZone.hh>
+#include <Editor/TitleBarMode.hh>
 
-class Window : public sf::Drawable, public sf::Transformable {
+class Window : public AbstractWindow {
 public:
 	Window(sf::Vector2i position, sf::Vector2u size, const std::vector<sf::Color>& palette, TitleBarMode _titleBarMode, const std::string& programPath, const std::vector<std::string>& parameters);
-	~Window();
 
-	void loadFile();
-	void reloadFile();
-	void execute(const std::string& string);
-
-	void init();
 	virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
 
-	sf::Vector2i getSize() const;
-
-	void exceptionHandler();
-
-	void resize(sf::Vector2i size);
-	void resizeH(int width);
-	void resizeV(int height);
 	bool isContext(mrb_state* mrb) const;
 	bool isIn(WindowZone zone, sf::Vector2i point) const;
-	bool isClosed() const;
-	void close();
 
-	void setMousePosition(sf::Vector2i position);
 	void addKeyPressed(sf::Keyboard::Key key);
-	void removeKeyPressed(sf::Keyboard::Key key);
-	void textEnteredEvent(sf::Uint32 unicode);
 	void focusEvent(bool isFocused);
 
 private:
@@ -72,22 +54,7 @@ private:
 	static mrb_value mrubyText(mrb_state *mrb, mrb_value self);
 	static mrb_value mrubyKey(mrb_state *mrb, mrb_value self);
 
-	sf::RenderTexture _texture;
 	sf::RenderTexture _barTexture;
-	std::vector<sf::Color> _palette;
-	sf::Vector2i _size;
-	sf::Vector2i _minSize;
-	sf::Vector2i _mousePosition;
-	std::vector<sf::Keyboard::Key> _keyPressed;
-	std::string _title;
 	TitleBarMode _titleBarMode;
-	bool _resizable;
-	bool _closed;
-
-	std::string _programFile;
-	std::vector<std::string> _programParameters;
-	mrb_state* _mrb;
-	mrbc_context* _mrbContext;
-	RClass *_mrbWindowClass;
-	RClass *_mrbDesktopClass;
+	bool _isFocused;
 };

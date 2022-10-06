@@ -5,7 +5,7 @@
 			"name": "Rubytron Debug",
 			"type": "cppdbg",
 			"request": "launch",
-			"program": "${workspaceFolder}/build/src/rubytron",
+			"program": "${workspaceFolder}/build/src/Editor/rubytron",
 			"args": [],
 			"stopAtEntry": false,
 			"cwd": "${workspaceFolder}",

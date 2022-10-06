@@ -1,4 +1,4 @@
-#include <sprites.hh>
+#include <Shared/sprites.hh>
 
 unsigned char spr_cursor[SPR_CURSOR_HEIGHT] = {
 	0b10000000,

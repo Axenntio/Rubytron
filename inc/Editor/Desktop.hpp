@@ -4,9 +4,9 @@
 #include <memory>
 #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
-#include <Window.hpp>
-#include <TitleBarMode.hh>
-#include <FocusAction.hh>
+#include <Editor/Window.hpp>
+#include <Editor/TitleBarMode.hh>
+#include <Editor/FocusAction.hh>
 
 class Desktop {
 public:

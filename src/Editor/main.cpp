@@ -1,4 +1,4 @@
-#include <Desktop.hpp>
+#include <Editor/Desktop.hpp>
 
 Desktop desktop(192, 128, 8, TitleBarMode::Full);
 

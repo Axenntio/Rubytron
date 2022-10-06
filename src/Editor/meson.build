@@ -2,8 +2,7 @@ sources = [
 	'main.cpp',
 	'Desktop.cpp',
 	'Window.cpp',
-	'helper.cpp',
-	'sprites.cpp'
+	shared_src
 ]
 
 add_global_arguments('-g3', language : 'cpp')

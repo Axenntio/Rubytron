@@ -1,5 +1,5 @@
-#include <helper.hh>
-#include <iostream>
+#include <Shared/helper.hh>
+
 void drawOnTexture(sf::RenderTexture& texture, int x, int y, const unsigned char* sprBytes, unsigned char height, sf::Color color)
 {
 	sf::RectangleShape pixel(sf::Vector2f(1, 1));

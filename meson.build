@@ -12,4 +12,11 @@ sfml = dependency('sfml-graphics')
 mruby_inc = include_directories('./mruby/include/')
 mruby = declare_dependency(link_args: meson.source_root() + '/mruby/build/host/lib/libmruby.a', include_directories: mruby_inc)
 
-subdir('src')
+shared_src = [
+	'../Shared/AbstractWindow.cpp',
+	'../Shared/helper.cpp',
+	'../Shared/sprites.cpp'
+]
+
+subdir('src/Editor')
+# subdir('src/Runtime')

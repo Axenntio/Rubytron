@@ -1,6 +1,6 @@
-#include <Desktop.hpp>
-#include <helper.hh>
-#include <sprites.hh>
+#include <Editor/Desktop.hpp>
+#include <Shared/helper.hh>
+#include <Shared/sprites.hh>
 
 Desktop::Desktop(unsigned int width, unsigned int height, unsigned char scale, TitleBarMode titleBarMode) : _width(width), _height(height), _titleBarMode(titleBarMode)
 {
@@ -48,6 +48,9 @@ Desktop::Desktop(unsigned int width, unsigned int height, unsigned char scale, T
 	this->spawn(sf::Vector2i(120, 50), sf::Vector2u(40, 40), "programs/snake.rb", {});
 	this->spawn(sf::Vector2i(5, 54), sf::Vector2u(48, 68), "programs/editor.rb", {"programs/editor.rb"});
 	this->spawn(sf::Vector2i(57, 80), sf::Vector2u(60, 42), "programs/terminal.rb", {});
+	if (this->_focusedWindow != nullptr) {
+		this->_focusedWindow->focusEvent(false);
+	}
 	this->_focusedWindow = nullptr;
 	this->_focusAction = FocusAction::None;
 	for (std::shared_ptr<Window> window : this->_windows) {
