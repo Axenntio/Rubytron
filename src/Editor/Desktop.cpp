@@ -138,7 +138,6 @@ bool Desktop::isFocused(const Window* window) const
 #include <runtimes.h>
 bool Desktop::programExport(const std::string& path) const
 {
-	return false; // TODO: This is WIP
 	std::vector<std::string> archs = {
 #ifdef __APPLE__
 		"macos"

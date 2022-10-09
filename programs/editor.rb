@@ -224,6 +224,7 @@ class Editor
 end
 
 def init
+  raise StandardError.new("Looks like you didn't pass any file as parameter") if Window.parameters[0].nil?
   $editor = Editor.new(Window.parameters[0])
 end
 

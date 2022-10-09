@@ -1,5 +1,6 @@
 sources = [
 	'main.cpp',
+	'Player.cpp',
 	shared_src
 ]
 

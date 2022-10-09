@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <SFML/Graphics.hpp>
 #include <mruby/compile.h>
 #include <Editor/WindowZone.hh>

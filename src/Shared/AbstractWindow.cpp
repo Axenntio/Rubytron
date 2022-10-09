@@ -64,14 +64,14 @@ void AbstractWindow::execute(const std::string& string)
 void AbstractWindow::init()
 {
 	if (mrb_obj_respond_to(this->_mrb, this->_mrb->object_class, mrb_intern_cstr(this->_mrb, "init"))) {
-		mrb_funcall(this->_mrb, mrb_nil_value(), "init", 0);
+		mrb_funcall(this->_mrb, mrb_obj_value(this->_mrb->object_class), "init", 0);
 	}
 }
 
 void AbstractWindow::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {
 	if (this->_mrb->exc == nullptr && mrb_obj_respond_to(this->_mrb, this->_mrb->object_class, mrb_intern_cstr(this->_mrb, "update"))) {
-		mrb_funcall(this->_mrb, mrb_nil_value(), "update", 0);
+		mrb_funcall(this->_mrb, mrb_obj_value(this->_mrb->object_class), "update", 0);
 	}
 
 	states.transform *= getTransform();

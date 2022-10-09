@@ -1,7 +1,15 @@
-#include <iostream>
+#include <Runtime/Player.hpp>
 
-int main()
+std::shared_ptr<Player> player_ptr;
+
+int main(int argc, char** argv)
 {
-	std::cout << "I'm the runtime thay will run the 'program.rb' file" << std::endl;
+	std::vector<std::string> params;
+	for (int i  = 1; i < argc; ++i) {
+		params.push_back(std::string(argv[i]));
+	}
+	player_ptr = std::make_shared<Player>(sf::Vector2u(192, 128), 8, params);
+	player_ptr->init();
+	player_ptr->run();
 	return 0;
 }
