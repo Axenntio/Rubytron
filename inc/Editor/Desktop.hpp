@@ -16,6 +16,7 @@ public:
 	std::shared_ptr<Window> getWindow(mrb_state *mrb) const;
 	bool isFocused(const Window* window) const;
 
+	bool programExport(const std::string& path) const;
 	bool spawn(const std::string& path, const std::vector<std::string>& parameters);
 	bool spawn(sf::Vector2i position, sf::Vector2u size, const std::string& path, const std::vector<std::string>& parameters);
 	const std::vector<std::shared_ptr<Window>>& getWindows() const;

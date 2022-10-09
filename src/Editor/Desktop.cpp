@@ -1,3 +1,5 @@
+#include <filesystem>
+#include <fstream>
 #include <Editor/Desktop.hpp>
 #include <Shared/helper.hh>
 #include <Shared/sprites.hh>
@@ -131,6 +133,49 @@ std::shared_ptr<Window> Desktop::getWindow(mrb_state* mrb) const
 bool Desktop::isFocused(const Window* window) const
 {
 	return this->_focusedWindow.get() == window;
+}
+
+#include <runtimes.h>
+bool Desktop::programExport(const std::string& path) const
+{
+	return false; // TODO: This is WIP
+	std::vector<std::string> archs = {
+#ifdef __APPLE__
+		"macos"
+#endif
+#ifdef __linux__
+		"linux"
+#endif
+#ifdef _WIN32
+		"windows"
+#endif
+	};
+	std::filesystem::create_directory(path + ".bin");
+	for (const std::string& arch : archs) {
+		// Expose runtime
+		std::filesystem::create_directory(path + ".bin/" + arch);
+		std::ofstream runtimeFile(path + ".bin/" + arch + "/runtime", std::ios::binary);
+		if (!runtimeFile.is_open()) {
+			return false;
+		}
+		runtimeFile.write((char *)src_Runtime_runtime, src_Runtime_runtime_len);
+		runtimeFile.close();
+		std::filesystem::permissions(path + ".bin/" + arch + "/runtime",
+			std::filesystem::perms::owner_exec,
+			std::filesystem::perm_options::add
+		);
+
+		// Output file
+		std::ifstream programFileContent(path, std::ios::binary);
+		std::ofstream programFile(path + ".bin/" + arch + "/program.rb");
+		if (!programFile.is_open()) {
+			return false;
+		}
+		programFile << programFileContent.rdbuf();
+		programFile.close();
+		programFileContent.close();
+	}
+	return true;
 }
 
 bool Desktop::spawn(const std::string& path, const std::vector<std::string>& parameters)

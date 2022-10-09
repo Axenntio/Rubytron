@@ -1,9 +1,11 @@
 project(
 	'Rubytron',
 	'cpp',
-	version : '0.1',
-	default_options : ['warning_level=3', 'cpp_std=c++17']
+	version: '0.1',
+	default_options: ['warning_level=3', 'cpp_std=c++17']
 )
+
+add_global_arguments('-g3', language: 'cpp')
 
 inc = include_directories('inc')
 
@@ -18,5 +20,5 @@ shared_src = [
 	'../Shared/sprites.cpp'
 ]
 
+subdir('src/Runtime')
 subdir('src/Editor')
-# subdir('src/Runtime')

@@ -5,11 +5,17 @@ sources = [
 	shared_src
 ]
 
-add_global_arguments('-g3', language : 'cpp')
+xxd = find_program('xxd')
+runtime_code = custom_target('objectify-data',
+	output: 'runtimes.h',
+	input: runtime_exe,
+	command: [ xxd, '-i', '@INPUT@', '@OUTPUT@' ],
+	depends: runtime_exe
+)
 
 executable(
 	'rubytron',
-	sources,
+	[sources, runtime_code],
 	include_directories: inc,
-	dependencies : [sfml, mruby]
+	dependencies: [sfml, mruby]
 )

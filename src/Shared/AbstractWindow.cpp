@@ -78,14 +78,6 @@ void AbstractWindow::draw(sf::RenderTarget& target, sf::RenderStates states) con
 
 	states.texture = NULL;
 
-	unsigned char height = 8;
-	if (this->_titleBarMode == TitleBarMode::Minimal) {
-		height = 5;
-	}
-	if (this->_titleBarMode == TitleBarMode::None) {
-		height = 1;
-	}
-
 	sf::Sprite canvas(this->_texture.getTexture());
 	canvas.setTextureRect(sf::IntRect(0, this->_size.y, this->_size.x, -this->_size.y));
 	target.draw(canvas, states);
@@ -346,23 +338,28 @@ mrb_value AbstractWindow::mrubyParameters(std::shared_ptr<AbstractWindow> window
 	return parameters;
 }
 
-mrb_value AbstractWindow::mrubyFocused(std::shared_ptr<AbstractWindow> window, [[maybe_unused]] mrb_state *mrb, [[maybe_unused]] mrb_value self)
+mrb_value AbstractWindow::mrubyFocused([[maybe_unused]] std::shared_ptr<AbstractWindow> window, [[maybe_unused]] mrb_state *mrb, [[maybe_unused]] mrb_value self)
 {
 	return mrb_false_value();
 }
 
 
-mrb_value AbstractWindow::mrubySpawn(std::shared_ptr<AbstractWindow> window, [[maybe_unused]] mrb_state *mrb, [[maybe_unused]] mrb_value self)
+mrb_value AbstractWindow::mrubySpawn([[maybe_unused]] std::shared_ptr<AbstractWindow> window, [[maybe_unused]] mrb_state *mrb, [[maybe_unused]] mrb_value self)
 {
 	return mrb_false_value();
 }
 
-mrb_value AbstractWindow::mrubyProcesses(std::shared_ptr<AbstractWindow> window, [[maybe_unused]] mrb_state *mrb, [[maybe_unused]] mrb_value self)
+mrb_value AbstractWindow::mrubyExport([[maybe_unused]] std::shared_ptr<AbstractWindow> window, [[maybe_unused]] mrb_state *mrb, [[maybe_unused]] mrb_value self)
+{
+	return mrb_false_value();
+}
+
+mrb_value AbstractWindow::mrubyProcesses([[maybe_unused]] std::shared_ptr<AbstractWindow> window, [[maybe_unused]] mrb_state *mrb, [[maybe_unused]] mrb_value self)
 {
 	return mrb_nil_value();
 }
 
-mrb_value AbstractWindow::mrubyKillProcess(std::shared_ptr<AbstractWindow> window, [[maybe_unused]] mrb_state *mrb, [[maybe_unused]] mrb_value self)
+mrb_value AbstractWindow::mrubyKillProcess([[maybe_unused]] std::shared_ptr<AbstractWindow> window, [[maybe_unused]] mrb_state *mrb, [[maybe_unused]] mrb_value self)
 {
 	return mrb_nil_value();
 }

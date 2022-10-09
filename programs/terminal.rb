@@ -122,6 +122,8 @@ class Terminal
       result = @return_value
     when 'spawn'
       result = Desktop.spawn "#{@current_path}/#{command[1]}", command.drop(2)
+    when 'export'
+      result = Desktop.export "#{@current_path}/#{command[1]}"
     when 'history'
       history = @command_history
       history = @command_history[(@command_history.count - command[1].to_i)..@command_history.count] if command[1].to_i.is_a?(Integer) # TODO: Check working

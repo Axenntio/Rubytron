@@ -60,6 +60,7 @@ protected:
 	static mrb_value mrubyProcesses(std::shared_ptr<AbstractWindow> window, mrb_state *mrb, mrb_value self);
 	static mrb_value mrubyKillProcess(std::shared_ptr<AbstractWindow> window, mrb_state *mrb, mrb_value self);
 	static mrb_value mrubySpawn(std::shared_ptr<AbstractWindow> window, mrb_state *mrb, mrb_value self);
+	static mrb_value mrubyExport(std::shared_ptr<AbstractWindow> window, mrb_state *mrb, mrb_value self);
 
 	static mrb_value mrubyClear(std::shared_ptr<AbstractWindow> window, mrb_state *mrb, mrb_value self);
 	static mrb_value mrubyPixel(std::shared_ptr<AbstractWindow> window, mrb_state *mrb, mrb_value self);
