@@ -1,3 +1,4 @@
+#include <filesystem>
 #include <Shared/AbstractWindow.hpp>
 #include <Shared/helper.hh>
 #include <Shared/sprites.hh>
@@ -38,9 +39,9 @@ AbstractWindow::~AbstractWindow()
 
 void AbstractWindow::loadFile()
 {
-	FILE *file = fopen(this->_programFile.c_str(), "r");
+	FILE *file = fopen((std::filesystem::current_path() / this->_programFile).c_str(), "r");
 	if (file == nullptr) {
-		throw std::runtime_error("The file '" + this->_programFile + "' can't be opened");
+		throw std::runtime_error("The file '" + std::string(std::filesystem::current_path() / this->_programFile) + "' can't be opened");
 	}
 	this->_mrbContext = mrbc_context_new(this->_mrb);
 	this->_mrbContext->capture_errors = true;
