@@ -32,6 +32,8 @@ public:
 	void setMousePosition(sf::Vector2i position);
 	virtual void addKeyPressed(sf::Keyboard::Key key);
 	void removeKeyPressed(sf::Keyboard::Key key);
+	void addButtonPressed(sf::Mouse::Button button);
+	void removeButtonPressed(sf::Mouse::Button button);
 	void textEnteredEvent(sf::Uint32 unicode);
 	virtual void focusEvent(bool isFocused);
 
@@ -60,6 +62,8 @@ protected:
 	static mrb_value mrubyClose(mrb_state *mrb, mrb_value self);
 	static mrb_value mrubyReload(mrb_state *mrb, mrb_value self);
 	static mrb_value mrubyParameters(mrb_state *mrb, mrb_value self);
+	static mrb_value mrubyKey(mrb_state *mrb, mrb_value self);
+	static mrb_value mrubyButton(mrb_state *mrb, mrb_value self);
 	static mrb_value mrubyFocused(mrb_state *mrb, mrb_value self);
 
 	static mrb_value mrubyProcesses(mrb_state *mrb, mrb_value self);
@@ -73,7 +77,6 @@ protected:
 	static mrb_value mrubyRectangle(mrb_state *mrb, mrb_value self);
 	static mrb_value mrubyCircle(mrb_state *mrb, mrb_value self);
 	static mrb_value mrubyText(mrb_state *mrb, mrb_value self);
-	static mrb_value mrubyKey(mrb_state *mrb, mrb_value self);
 	static mrb_value mrubySound(mrb_state *mrb, mrb_value self);
 
 	sf::RenderTexture _texture;
@@ -83,6 +86,7 @@ protected:
 	sf::Vector2i _minSize;
 	sf::Vector2i _mousePosition;
 	std::vector<sf::Keyboard::Key> _keyPressed;
+	std::vector<sf::Mouse::Button> _buttonPressed;
 	std::string _title;
 	TitleBarMode _titleBarMode;
 	bool _isFocused;

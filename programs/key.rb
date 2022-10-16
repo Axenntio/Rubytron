@@ -30,4 +30,6 @@ def update
   clear 0
   circle $player_pos.x, $player_pos.y, 10, 2
   text 1, 1, Window.key.inspect, 7
+  text 1, 7, Window.button.inspect, 7
+  text 1, 13, "[#{Window.mouse_x}, #{Window.mouse_y}]", 7
 end

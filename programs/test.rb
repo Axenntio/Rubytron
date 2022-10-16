@@ -11,6 +11,22 @@ class Window
     puts "Received text event (#{char})"
   end
 
+  def self.key_press_event(key)
+    puts "Key pressed (#{key})"
+  end
+
+  def self.key_release_event(key)
+    puts "Key released (#{key})"
+  end
+
+  def self.button_press_event(button)
+    puts "Button pressed (#{button})"
+  end
+
+  def self.button_release_event(button)
+    puts "Button released (#{button})"
+  end
+
   def self.focus_event(has_focus)
     puts "Focus changed (#{has_focus})"
     $has_focus = has_focus

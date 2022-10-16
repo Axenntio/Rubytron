@@ -254,6 +254,9 @@ void Desktop::mouseButtonPressEvent([[maybe_unused]] sf::Event event)
 	if (this->_focusedWindow != previous) {
 		this->_focusedWindow->focusEvent(true);
 	}
+	if (this->_focusedWindow == previous && this->_focusedWindow->isIn(WindowZone::Canvas, static_cast<sf::Vector2i>(this->_mouse_coordinated))) {
+		this->_focusedWindow->addButtonPressed(event.mouseButton.button);
+	}
 	this->_windows.erase(
 		std::remove_if(this->_windows.begin(), this->_windows.end(), [this](std::shared_ptr<Window> window) { return window == this->_focusedWindow; } ),
 		this->_windows.end()
@@ -281,6 +284,9 @@ void Desktop::mouseButtonPressEvent([[maybe_unused]] sf::Event event)
 void Desktop::mouseButtonReleaseEvent([[maybe_unused]] sf::Event event)
 {
 	this->_focusAction = FocusAction::None;
+	if (this->_focusedWindow != nullptr && this->_focusedWindow->isIn(WindowZone::Canvas, static_cast<sf::Vector2i>(this->_mouse_coordinated))) {
+		this->_focusedWindow->removeButtonPressed(event.mouseButton.button);
+	}
 }
 
 void Desktop::mouseMoveEvent(sf::Event event)

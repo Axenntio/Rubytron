@@ -45,6 +45,7 @@ AbstractWindow::AbstractWindow(sf::Vector2i position, sf::Vector2u size, const s
 	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "close", &AbstractWindow::mrubyClose, MRB_ARGS_NONE());
 	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "parameters", &AbstractWindow::mrubyParameters, MRB_ARGS_NONE());
 	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "key", &AbstractWindow::mrubyKey, MRB_ARGS_OPT(1));
+	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "button", &AbstractWindow::mrubyButton, MRB_ARGS_OPT(1));
 	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "focused", &AbstractWindow::mrubyFocused, MRB_ARGS_OPT(1));
 
 	mrb_define_method(this->_mrb, this->_mrb->object_class, "clear", &AbstractWindow::mrubyClear, MRB_ARGS_REQ(1));
@@ -216,6 +217,30 @@ void AbstractWindow::removeKeyPressed(sf::Keyboard::Key key)
 	mrb_value obj = mrb_const_get(this->_mrb, mrb_obj_value(this->_mrb->object_class), mrb_intern_cstr(this->_mrb, "Window"));
 	if (mrb_respond_to(this->_mrb, obj, mrb_intern_cstr(this->_mrb, "key_release_event"))) {
 		mrb_funcall(this->_mrb, obj, "key_release_event", 1, mrb_int_value(this->_mrb, key));
+	}
+}
+
+void AbstractWindow::addButtonPressed(sf::Mouse::Button button)
+{
+	if (std::find(this->_buttonPressed.begin(), this->_buttonPressed.end(), static_cast<sf::Mouse::Button>(button)) == this->_buttonPressed.end()) {
+		this->_buttonPressed.push_back(button);
+	}
+	mrb_value obj = mrb_const_get(this->_mrb, mrb_obj_value(this->_mrb->object_class), mrb_intern_cstr(this->_mrb, "Window"));
+	if (mrb_respond_to(this->_mrb, obj, mrb_intern_cstr(this->_mrb, "button_press_event"))) {
+		mrb_funcall(this->_mrb, obj, "button_press_event", 1, mrb_int_value(this->_mrb, button));
+	}
+}
+
+void AbstractWindow::removeButtonPressed(sf::Mouse::Button button)
+{
+	if (std::find(this->_buttonPressed.begin(), this->_buttonPressed.end(), static_cast<sf::Mouse::Button>(button)) != this->_buttonPressed.end()) {
+		this->_buttonPressed.erase(
+			std::remove_if(this->_buttonPressed.begin(), this->_buttonPressed.end(), [button](sf::Mouse::Button testButton) { return testButton == button; } )
+		);
+	}
+	mrb_value obj = mrb_const_get(this->_mrb, mrb_obj_value(this->_mrb->object_class), mrb_intern_cstr(this->_mrb, "Window"));
+	if (mrb_respond_to(this->_mrb, obj, mrb_intern_cstr(this->_mrb, "button_release_event"))) {
+		mrb_funcall(this->_mrb, obj, "button_release_event", 1, mrb_int_value(this->_mrb, button));
 	}
 }
 
@@ -544,6 +569,24 @@ mrb_value AbstractWindow::mrubyKey(mrb_state* mrb, [[maybe_unused]] mrb_value se
 	mrb_value array = mrb_ary_new_capa(mrb, window->_keyPressed.size());
 	for (const sf::Keyboard::Key& key : window->_keyPressed) {
 		mrb_ary_push(mrb, array, mrb_int_value(mrb, key));
+	}
+
+	return array;
+}
+
+mrb_value AbstractWindow::mrubyButton(mrb_state* mrb, [[maybe_unused]] mrb_value self)
+{
+	AbstractWindow* window = mrubyGetWindowObject(mrb);
+	mrb_int button = -1;
+	mrb_get_args(mrb, "|i", &button);
+
+	if (button != -1) {
+		return mrb_bool_value(std::find(window->_buttonPressed.begin(), window->_buttonPressed.end(), static_cast<sf::Mouse::Button>(button)) != window->_buttonPressed.end());
+	}
+
+	mrb_value array = mrb_ary_new_capa(mrb, window->_buttonPressed.size());
+	for (const sf::Mouse::Button& button : window->_buttonPressed) {
+		mrb_ary_push(mrb, array, mrb_int_value(mrb, button));
 	}
 
 	return array;
