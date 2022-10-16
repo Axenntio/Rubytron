@@ -18,6 +18,8 @@ private:
 	void keyReleaseEvent(sf::Event event);
 	void textEvent(sf::Event event);
 
+	void changeTitleTrigger();
+
 	sf::RenderWindow _window;
 	sf::RenderTexture _cursor_texture;
 	sf::Vector2i _mouse_coordinated;

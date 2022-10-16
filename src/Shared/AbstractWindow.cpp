@@ -186,6 +186,10 @@ void AbstractWindow::resizeTrigger()
 	this->_texture.draw(tmpSprite);
 }
 
+void AbstractWindow::changeTitleTrigger()
+{
+}
+
 void AbstractWindow::setMousePosition(sf::Vector2i position)
 {
 	this->_mousePosition = position - sf::Vector2i(this->getPosition());
@@ -243,14 +247,14 @@ AbstractWindow* AbstractWindow::mrubyGetWindowObject(mrb_state *mrb)
 	return reinterpret_cast<AbstractWindow*>(pointer);
 }
 
-mrb_value AbstractWindow::mrubyGetWidth([[maybe_unused]] mrb_state *mrb, [[maybe_unused]] mrb_value self)
+mrb_value AbstractWindow::mrubyGetWidth(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 {
 	AbstractWindow* window = mrubyGetWindowObject(mrb);
 
 	return mrb_int_value(mrb, window->_size.x);
 }
 
-mrb_value AbstractWindow::mrubySetWidth([[maybe_unused]] mrb_state *mrb, [[maybe_unused]] mrb_value self)
+mrb_value AbstractWindow::mrubySetWidth(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 {
 	AbstractWindow* window = mrubyGetWindowObject(mrb);
 	mrb_int newWidth;
@@ -261,14 +265,14 @@ mrb_value AbstractWindow::mrubySetWidth([[maybe_unused]] mrb_state *mrb, [[maybe
 	return mrb_nil_value();
 }
 
-mrb_value AbstractWindow::mrubyGetHeight([[maybe_unused]] mrb_state *mrb, [[maybe_unused]] mrb_value self)
+mrb_value AbstractWindow::mrubyGetHeight(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 {
 	AbstractWindow* window = mrubyGetWindowObject(mrb);
 
 	return mrb_int_value(mrb, window->_size.y);
 }
 
-mrb_value AbstractWindow::mrubySetHeight([[maybe_unused]] mrb_state *mrb, [[maybe_unused]] mrb_value self)
+mrb_value AbstractWindow::mrubySetHeight(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 {
 	AbstractWindow* window = mrubyGetWindowObject(mrb);
 	mrb_int newHeight;
@@ -279,14 +283,14 @@ mrb_value AbstractWindow::mrubySetHeight([[maybe_unused]] mrb_state *mrb, [[mayb
 	return mrb_nil_value();
 }
 
-mrb_value AbstractWindow::mrubyGetMinWidth([[maybe_unused]] mrb_state *mrb, [[maybe_unused]] mrb_value self)
+mrb_value AbstractWindow::mrubyGetMinWidth(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 {
 	AbstractWindow* window = mrubyGetWindowObject(mrb);
 
 	return mrb_int_value(mrb, window->_minSize.x);
 }
 
-mrb_value AbstractWindow::mrubySetMinWidth([[maybe_unused]] mrb_state *mrb, [[maybe_unused]] mrb_value self)
+mrb_value AbstractWindow::mrubySetMinWidth(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 {
 	AbstractWindow* window = mrubyGetWindowObject(mrb);
 	mrb_int newWidth;
@@ -296,14 +300,14 @@ mrb_value AbstractWindow::mrubySetMinWidth([[maybe_unused]] mrb_state *mrb, [[ma
 	return mrb_nil_value();
 }
 
-mrb_value AbstractWindow::mrubyGetMinHeight([[maybe_unused]] mrb_state *mrb, [[maybe_unused]] mrb_value self)
+mrb_value AbstractWindow::mrubyGetMinHeight(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 {
 	AbstractWindow* window = mrubyGetWindowObject(mrb);
 
 	return mrb_int_value(mrb, window->_minSize.y);
 }
 
-mrb_value AbstractWindow::mrubySetMinHeight([[maybe_unused]] mrb_state *mrb, [[maybe_unused]] mrb_value self)
+mrb_value AbstractWindow::mrubySetMinHeight(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 {
 	AbstractWindow* window = mrubyGetWindowObject(mrb);
 	mrb_int newHeight;
@@ -313,14 +317,14 @@ mrb_value AbstractWindow::mrubySetMinHeight([[maybe_unused]] mrb_state *mrb, [[m
 	return mrb_nil_value();
 }
 
-mrb_value AbstractWindow::mrubyGetMouseX([[maybe_unused]] mrb_state *mrb, [[maybe_unused]] mrb_value self)
+mrb_value AbstractWindow::mrubyGetMouseX(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 {
 	AbstractWindow* window = mrubyGetWindowObject(mrb);
 
 	return mrb_int_value(mrb, window->_mousePosition.x);
 }
 
-mrb_value AbstractWindow::mrubySetMouseX([[maybe_unused]] mrb_state *mrb, [[maybe_unused]] mrb_value self)
+mrb_value AbstractWindow::mrubySetMouseX(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 {
 	AbstractWindow* window = mrubyGetWindowObject(mrb);
 	mrb_int newX;
@@ -330,14 +334,14 @@ mrb_value AbstractWindow::mrubySetMouseX([[maybe_unused]] mrb_state *mrb, [[mayb
 	return mrb_nil_value();
 }
 
-mrb_value AbstractWindow::mrubyGetMouseY([[maybe_unused]] mrb_state *mrb, [[maybe_unused]] mrb_value self)
+mrb_value AbstractWindow::mrubyGetMouseY(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 {
 	AbstractWindow* window = mrubyGetWindowObject(mrb);
 
 	return mrb_int_value(mrb, window->_mousePosition.y);
 }
 
-mrb_value AbstractWindow::mrubySetMouseY([[maybe_unused]] mrb_state *mrb, [[maybe_unused]] mrb_value self)
+mrb_value AbstractWindow::mrubySetMouseY(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 {
 	AbstractWindow* window = mrubyGetWindowObject(mrb);
 	mrb_int newY;
@@ -347,30 +351,31 @@ mrb_value AbstractWindow::mrubySetMouseY([[maybe_unused]] mrb_state *mrb, [[mayb
 	return mrb_nil_value();
 }
 
-mrb_value AbstractWindow::mrubyGetTitle([[maybe_unused]] mrb_state *mrb, [[maybe_unused]] mrb_value self)
+mrb_value AbstractWindow::mrubyGetTitle(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 {
 	AbstractWindow* window = mrubyGetWindowObject(mrb);
 	return mrb_str_new(mrb, window->_title.c_str(), window->_title.length());
 }
 
-mrb_value AbstractWindow::mrubySetTitle([[maybe_unused]] mrb_state *mrb, [[maybe_unused]] mrb_value self)
+mrb_value AbstractWindow::mrubySetTitle(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 {
 	AbstractWindow* window = mrubyGetWindowObject(mrb);
 	const char* title;
 	mrb_get_args(mrb, "z", &title);
 	window->_title = std::string(title);
+	window->changeTitleTrigger();
 
 	return mrb_nil_value();
 }
 
-mrb_value AbstractWindow::mrubyIsResizable([[maybe_unused]] mrb_state *mrb, [[maybe_unused]] mrb_value self)
+mrb_value AbstractWindow::mrubyIsResizable(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 {
 	AbstractWindow* window = mrubyGetWindowObject(mrb);
 
 	return mrb_bool_value(window->_resizable);
 }
 
-mrb_value AbstractWindow::mrubySetResizable([[maybe_unused]] mrb_state *mrb, [[maybe_unused]] mrb_value self)
+mrb_value AbstractWindow::mrubySetResizable(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 {
 	AbstractWindow* window = mrubyGetWindowObject(mrb);
 	mrb_bool resizable;
@@ -380,7 +385,7 @@ mrb_value AbstractWindow::mrubySetResizable([[maybe_unused]] mrb_state *mrb, [[m
 	return mrb_nil_value();
 }
 
-mrb_value AbstractWindow::mrubyReload([[maybe_unused]] mrb_state *mrb, [[maybe_unused]] mrb_value self)
+mrb_value AbstractWindow::mrubyReload(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 {
 	AbstractWindow* window = mrubyGetWindowObject(mrb);
 	window->reloadFile();
@@ -389,7 +394,7 @@ mrb_value AbstractWindow::mrubyReload([[maybe_unused]] mrb_state *mrb, [[maybe_u
 	return mrb_nil_value();
 }
 
-mrb_value AbstractWindow::mrubyClose([[maybe_unused]] mrb_state *mrb, [[maybe_unused]] mrb_value self)
+mrb_value AbstractWindow::mrubyClose(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 {
 	AbstractWindow* window = mrubyGetWindowObject(mrb);
 	window->_closed = true;
@@ -397,7 +402,7 @@ mrb_value AbstractWindow::mrubyClose([[maybe_unused]] mrb_state *mrb, [[maybe_un
 	return mrb_nil_value();
 }
 
-mrb_value AbstractWindow::mrubyParameters([[maybe_unused]] mrb_state *mrb, [[maybe_unused]] mrb_value self)
+mrb_value AbstractWindow::mrubyParameters(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 {
 	AbstractWindow* window = mrubyGetWindowObject(mrb);
 	mrb_value parameters = mrb_ary_new_capa(mrb, window->_programParameters.size());
@@ -408,29 +413,29 @@ mrb_value AbstractWindow::mrubyParameters([[maybe_unused]] mrb_state *mrb, [[may
 	return parameters;
 }
 
-mrb_value AbstractWindow::mrubyFocused([[maybe_unused]] [[maybe_unused]] mrb_state *mrb, [[maybe_unused]] mrb_value self)
+mrb_value AbstractWindow::mrubyFocused([[maybe_unused]] mrb_state *mrb, [[maybe_unused]] mrb_value self)
 {
 	AbstractWindow* window = mrubyGetWindowObject(mrb);
 
 	return mrb_bool_value(window->_isFocused);
 }
 
-mrb_value AbstractWindow::mrubySpawn([[maybe_unused]] [[maybe_unused]] mrb_state *mrb, [[maybe_unused]] mrb_value self)
+mrb_value AbstractWindow::mrubySpawn([[maybe_unused]] mrb_state *mrb, [[maybe_unused]] mrb_value self)
 {
 	return mrb_false_value();
 }
 
-mrb_value AbstractWindow::mrubyExport([[maybe_unused]] [[maybe_unused]] mrb_state *mrb, [[maybe_unused]] mrb_value self)
+mrb_value AbstractWindow::mrubyExport([[maybe_unused]] mrb_state *mrb, [[maybe_unused]] mrb_value self)
 {
 	return mrb_false_value();
 }
 
-mrb_value AbstractWindow::mrubyProcesses([[maybe_unused]] [[maybe_unused]] mrb_state *mrb, [[maybe_unused]] mrb_value self)
+mrb_value AbstractWindow::mrubyProcesses([[maybe_unused]] mrb_state *mrb, [[maybe_unused]] mrb_value self)
 {
 	return mrb_nil_value();
 }
 
-mrb_value AbstractWindow::mrubyKillProcess([[maybe_unused]] [[maybe_unused]] mrb_state *mrb, [[maybe_unused]] mrb_value self)
+mrb_value AbstractWindow::mrubyKillProcess([[maybe_unused]] mrb_state *mrb, [[maybe_unused]] mrb_value self)
 {
 	return mrb_nil_value();
 }

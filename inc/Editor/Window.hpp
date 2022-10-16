@@ -19,6 +19,7 @@ public:
 
 private:
 	void resizeTrigger();
+	void changeTitleTrigger();
 	void titleBarRefresh();
 
 	static mrb_value mrubyProcesses(mrb_state *mrb, mrb_value self);

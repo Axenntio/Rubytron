@@ -65,6 +65,12 @@ void Window::resizeTrigger()
 	this->titleBarRefresh();
 }
 
+void Window::changeTitleTrigger()
+{
+	this->titleBarRefresh();
+	AbstractWindow::changeTitleTrigger();
+}
+
 void Window::titleBarRefresh()
 {
 	if (this->_titleBarMode == TitleBarMode::None) {
@@ -79,10 +85,12 @@ void Window::titleBarRefresh()
 	this->_barTexture.clear(sf::Color::Transparent);
 	if (this->_titleBarMode == TitleBarMode::Full) {
 		drawText(this->_barTexture, 0, 0, this->_title, this->_palette[palette], false);
+		drawOnTexture(this->_barTexture, this->_size.x - 11, 0, spr_maximise_full, SPR_MAXIMISE_FULL_HEIGHT, this->_palette[palette]);
 		drawOnTexture(this->_barTexture, this->_size.x - 5, 0, spr_close_full, SPR_CLOSE_FULL_HEIGHT, this->_palette[palette]);
 	}
 	if (this->_titleBarMode == TitleBarMode::Minimal) {
 		drawOnTexture(this->_barTexture, this->_size.x - 3, 0, spr_close_minimal, SPR_CLOSE_MINIMAL_HEIGHT, this->_palette[palette]);
+		drawOnTexture(this->_barTexture, this->_size.x - 7, 0, spr_maximise_minimal, SPR_MAXIMISE_MINIMAL_HEIGHT, this->_palette[palette]);
 	}
 }
 

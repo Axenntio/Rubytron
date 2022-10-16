@@ -37,6 +37,7 @@ public:
 
 protected:
 	virtual void resizeTrigger();
+	virtual void changeTitleTrigger();
 
 	static AbstractWindow* mrubyGetWindowObject(mrb_state *mrb);
 

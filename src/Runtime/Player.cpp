@@ -28,7 +28,7 @@ Player::Player(sf::Vector2u size, unsigned char scale, const std::vector<std::st
 		sf::Color(255, 204, 170)  // #FFCCAA
 	};
 
-	this->_window.create(sf::VideoMode(this->_size.x * scale, this->_size.y * scale), "Rubytron");
+	this->_window.create(sf::VideoMode(this->_size.x * scale, this->_size.y * scale), this->_title);
 	this->_window.setMouseCursorVisible(false);
 	this->_cursor_texture.create(4, 6);
 	this->_cursor_texture.clear(sf::Color::Transparent);
@@ -139,4 +139,10 @@ void Player::keyReleaseEvent(sf::Event event)
 void Player::textEvent(sf::Event event)
 {
 	this->textEnteredEvent(event.text.unicode);
+}
+
+void Player::changeTitleTrigger()
+{
+	this->_window.setTitle(this->_title);
+	AbstractWindow::changeTitleTrigger();
 }
