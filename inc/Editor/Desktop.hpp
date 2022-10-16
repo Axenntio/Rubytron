@@ -14,6 +14,7 @@ public:
 
 	void run();
 	std::shared_ptr<Window> getWindow(mrb_state *mrb) const;
+	sf::Vector2u getSize() const;
 	bool isFocused(const Window* window) const;
 
 	bool programExport(const std::string& path) const;
@@ -39,8 +40,7 @@ private:
 	sf::Vector2i _mouse_coordinated;
 	std::vector<sf::Color> _palette;
 	sf::View _canvas_view;
-	unsigned int _width;
-	unsigned int _height;
+	sf::Vector2u _size;
 	TitleBarMode _titleBarMode;
 
 	std::shared_ptr<Window> _focusedWindow;

@@ -26,6 +26,7 @@ public:
 	void resize(sf::Vector2i size);
 	void resizeH(int width);
 	void resizeV(int height);
+	virtual void toggleFullscreen();
 	bool isClosed() const;
 	void close();
 
@@ -82,6 +83,8 @@ protected:
 	sf::RenderTexture _texture;
 	sf::RenderTexture _barTexture;
 	std::vector<sf::Color> _palette;
+	sf::Vector2f _prevPosition;
+	sf::Vector2i _prevSize;
 	sf::Vector2i _size;
 	sf::Vector2i _minSize;
 	sf::Vector2i _mousePosition;
@@ -89,9 +92,10 @@ protected:
 	std::vector<sf::Mouse::Button> _buttonPressed;
 	std::string _title;
 	TitleBarMode _titleBarMode;
-	bool _isFocused;
+	bool _focused;
 	bool _resizable;
 	bool _closed;
+	bool _fullscreened;
 
 	std::string _programFile;
 	std::vector<std::string> _programParameters;

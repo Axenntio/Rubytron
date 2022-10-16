@@ -8,7 +8,7 @@
 #include <mruby/string.h>
 #include <mruby/error.h>
 
-AbstractWindow::AbstractWindow(sf::Vector2i position, sf::Vector2u size, const std::vector<sf::Color>& palette, const std::string& programPath, const std::vector<std::string>& parameters) : _size(size), _title(programPath), _isFocused(false), _resizable(true), _closed(false), _programFile(programPath), _programParameters(parameters)
+AbstractWindow::AbstractWindow(sf::Vector2i position, sf::Vector2u size, const std::vector<sf::Color>& palette, const std::string& programPath, const std::vector<std::string>& parameters) : _size(size), _title(programPath), _focused(false), _resizable(true), _closed(false), _fullscreened(false), _programFile(programPath), _programParameters(parameters)
 {
 	this->setPosition(sf::Vector2f(position));
 	this->_minSize = sf::Vector2i(8, 4);
@@ -141,6 +141,10 @@ void AbstractWindow::exceptionHandler()
 	}
 }
 
+void AbstractWindow::toggleFullscreen()
+{
+}
+
 bool AbstractWindow::isClosed() const
 {
 	return this->_closed;
@@ -158,6 +162,10 @@ void AbstractWindow::resize(sf::Vector2i size)
 	}
 	this->_size.x = std::max(this->_minSize.x, size.x);
 	this->_size.y = std::max(this->_minSize.y, size.y);
+
+	if (this->_fullscreened) {
+		this->_size = size;
+	}
 
 	this->resizeTrigger();
 
@@ -252,12 +260,12 @@ void AbstractWindow::textEnteredEvent(sf::Uint32 unicode)
 	}
 }
 
-void AbstractWindow::focusEvent(bool isFocused)
+void AbstractWindow::focusEvent(bool focused)
 {
-	this->_isFocused = isFocused;
+	this->_focused = focused;
 	mrb_value obj = mrb_const_get(this->_mrb, mrb_obj_value(this->_mrb->object_class), mrb_intern_cstr(this->_mrb, "Window"));
 	if (mrb_respond_to(this->_mrb, obj, mrb_intern_cstr(this->_mrb, "focus_event"))) {
-		mrb_funcall(this->_mrb, obj, "focus_event", 1, mrb_bool_value(isFocused));
+		mrb_funcall(this->_mrb, obj, "focus_event", 1, mrb_bool_value(this->_focused));
 	}
 }
 
@@ -282,6 +290,9 @@ mrb_value AbstractWindow::mrubyGetWidth(mrb_state *mrb, [[maybe_unused]] mrb_val
 mrb_value AbstractWindow::mrubySetWidth(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 {
 	AbstractWindow* window = mrubyGetWindowObject(mrb);
+	if (window->_fullscreened) {
+		return mrb_nil_value();
+	}
 	mrb_int newWidth;
 	mrb_get_args(mrb, "i", &newWidth);
 	window->_size.x = std::max(window->_minSize.x, static_cast<int>(newWidth));
@@ -300,6 +311,9 @@ mrb_value AbstractWindow::mrubyGetHeight(mrb_state *mrb, [[maybe_unused]] mrb_va
 mrb_value AbstractWindow::mrubySetHeight(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 {
 	AbstractWindow* window = mrubyGetWindowObject(mrb);
+	if (window->_fullscreened) {
+		return mrb_nil_value();
+	}
 	mrb_int newHeight;
 	mrb_get_args(mrb, "i", &newHeight);
 	window->_size.y = std::max(window->_minSize.y, static_cast<int>(newHeight));
@@ -320,7 +334,7 @@ mrb_value AbstractWindow::mrubySetMinWidth(mrb_state *mrb, [[maybe_unused]] mrb_
 	AbstractWindow* window = mrubyGetWindowObject(mrb);
 	mrb_int newWidth;
 	mrb_get_args(mrb, "i", &newWidth);
-	window->_minSize.x = std::max(1u, static_cast<unsigned int>(newWidth));
+	window->_minSize.x = std::max(1, static_cast<int>(newWidth));
 
 	return mrb_nil_value();
 }
@@ -337,7 +351,7 @@ mrb_value AbstractWindow::mrubySetMinHeight(mrb_state *mrb, [[maybe_unused]] mrb
 	AbstractWindow* window = mrubyGetWindowObject(mrb);
 	mrb_int newHeight;
 	mrb_get_args(mrb, "i", &newHeight);
-	window->_minSize.y = std::max(1u, static_cast<unsigned int>(newHeight));
+	window->_minSize.y = std::max(1, static_cast<int>(newHeight));
 
 	return mrb_nil_value();
 }
@@ -442,7 +456,7 @@ mrb_value AbstractWindow::mrubyFocused([[maybe_unused]] mrb_state *mrb, [[maybe_
 {
 	AbstractWindow* window = mrubyGetWindowObject(mrb);
 
-	return mrb_bool_value(window->_isFocused);
+	return mrb_bool_value(window->_focused);
 }
 
 mrb_value AbstractWindow::mrubySpawn([[maybe_unused]] mrb_state *mrb, [[maybe_unused]] mrb_value self)

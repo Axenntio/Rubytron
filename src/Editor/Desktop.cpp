@@ -4,7 +4,7 @@
 #include <Shared/helper.hh>
 #include <Shared/sprites.hh>
 
-Desktop::Desktop(unsigned int width, unsigned int height, unsigned char scale, TitleBarMode titleBarMode) : _width(width), _height(height), _titleBarMode(titleBarMode)
+Desktop::Desktop(unsigned int width, unsigned int height, unsigned char scale, TitleBarMode titleBarMode) : _size(sf::Vector2u(width, height)), _titleBarMode(titleBarMode)
 {
 	this->_palette = std::vector<sf::Color> {
 		sf::Color(  0,   0,   0), // #000000
@@ -25,11 +25,11 @@ Desktop::Desktop(unsigned int width, unsigned int height, unsigned char scale, T
 		sf::Color(255, 204, 170)  // #FFCCAA
 	};
 
-	this->_window.create(sf::VideoMode(this->_width * scale, this->_height * scale), "Rubytron");
+	this->_window.create(sf::VideoMode(this->_size.x * scale, this->_size.y * scale), "Rubytron");
 	this->_window.setMouseCursorVisible(false);
-	this->_background_texture.create(this->_width, this->_height);
+	this->_background_texture.create(this->_size.x, this->_size.y);
 	this->_background_texture.clear(this->_palette[1]);
-	this->_foreground_texture.create(this->_width, this->_height);
+	this->_foreground_texture.create(this->_size.x, this->_size.y);
 	this->_foreground_texture.clear(sf::Color::Transparent);
 	this->_cursor_texture.create(4, 6);
 	this->_cursor_texture.clear(sf::Color::Transparent);
@@ -37,9 +37,9 @@ Desktop::Desktop(unsigned int width, unsigned int height, unsigned char scale, T
 	drawOnTexture(this->_cursor_texture, 0, 0, spr_cursor, SPR_CURSOR_HEIGHT, this->_palette[7]);
 
 
-	this->_canvas_view.setCenter(this->_width / 2, this->_height / 2);
+	this->_canvas_view.setCenter(this->_size.x / 2, this->_size.y / 2);
 	this->_canvas_view.setViewport(sf::FloatRect(0, 0, 1, 1));
-	this->_canvas_view.setSize(sf::Vector2f(this->_width, this->_height));
+	this->_canvas_view.setSize(sf::Vector2f(this->_size.x, this->_size.y));
 	this->_window.setView(this->_canvas_view);
 
 	this->spawn(sf::Vector2i(10, 10), sf::Vector2u(60, 30), "programs/test.rb", {});
@@ -128,6 +128,11 @@ std::shared_ptr<Window> Desktop::getWindow(mrb_state* mrb) const
 		}
 	}
 	return nullptr;
+}
+
+sf::Vector2u Desktop::getSize() const
+{
+	return this->_size;
 }
 
 bool Desktop::isFocused(const Window* window) const
@@ -226,8 +231,8 @@ void Desktop::closeEvent([[maybe_unused]] sf::Event event)
 void Desktop::resizeEvent(sf::Event event)
 {
 	sf::Vector2f factors = sf::Vector2f(
-		static_cast<float>(this->_width) / event.size.width,
-		static_cast<float>(this->_height) / event.size.height
+		static_cast<float>(this->_size.x) / event.size.width,
+		static_cast<float>(this->_size.y) / event.size.height
 	);
 	float maxFactor = std::max(factors.x, factors.y);
 	factors /= maxFactor;
@@ -293,8 +298,8 @@ void Desktop::mouseMoveEvent(sf::Event event)
 {
 	sf::Vector2f mappedPoint = this->_window.mapPixelToCoords(sf::Vector2i(event.mouseMove.x, event.mouseMove.y));
 	this->_mouse_coordinated = static_cast<sf::Vector2i>(mappedPoint);
-	this->_mouse_coordinated.x = std::max(0, std::min(this->_mouse_coordinated.x, static_cast<int>(this->_width - 1)));
-	this->_mouse_coordinated.y = std::max(0, std::min(this->_mouse_coordinated.y, static_cast<int>(this->_height - 1)));
+	this->_mouse_coordinated.x = std::max(0, std::min(this->_mouse_coordinated.x, static_cast<int>(this->_size.x - 1)));
+	this->_mouse_coordinated.y = std::max(0, std::min(this->_mouse_coordinated.y, static_cast<int>(this->_size.y - 1)));
 	for (std::shared_ptr<Window> window : this->_windows) {
 		window->setMousePosition(this->_mouse_coordinated);
 	}
@@ -320,6 +325,18 @@ void Desktop::keyPressEvent(sf::Event event)
 {
 	if (this->_focusedWindow == nullptr) {
 		return;
+	}
+	if (event.key.control) {
+		switch (event.key.code) {
+			case sf::Keyboard::Key::F:
+				this->_focusedWindow->toggleFullscreen();
+				return;
+			case sf::Keyboard::Key::Q:
+				this->_focusedWindow->close();
+				return;
+			default:
+				break;
+		}
 	}
 	this->_focusedWindow->addKeyPressed(event.key.code);
 }

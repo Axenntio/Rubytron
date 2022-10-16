@@ -13,6 +13,7 @@ public:
 
 	bool isContext(mrb_state* mrb) const;
 	bool isIn(WindowZone zone, sf::Vector2i point) const;
+	void toggleFullscreen();
 
 	void addKeyPressed(sf::Keyboard::Key key);
 	void focusEvent(bool isFocused);

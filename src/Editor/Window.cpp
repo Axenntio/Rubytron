@@ -40,7 +40,7 @@ void Window::draw(sf::RenderTarget& target, sf::RenderStates states) const
 	sf::RectangleShape decorator(static_cast<sf::Vector2f>(this->_size + sf::Vector2i(2, height + 1)));
 	decorator.setPosition(sf::Vector2f(-1, -height));
 	unsigned char palette = 5;
-	if (this->_isFocused) {
+	if (this->_focused) {
 		palette = 6;
 	}
 	decorator.setOutlineColor(this->_palette[palette]);
@@ -57,41 +57,6 @@ void Window::draw(sf::RenderTarget& target, sf::RenderStates states) const
 	sf::Sprite canvas(this->_texture.getTexture());
 	canvas.setTextureRect(sf::IntRect(0, this->_size.y, this->_size.x, -this->_size.y));
 	target.draw(canvas, states);
-}
-
-void Window::resizeTrigger()
-{
-	AbstractWindow::resizeTrigger();
-	this->titleBarRefresh();
-}
-
-void Window::changeTitleTrigger()
-{
-	this->titleBarRefresh();
-	AbstractWindow::changeTitleTrigger();
-}
-
-void Window::titleBarRefresh()
-{
-	if (this->_titleBarMode == TitleBarMode::None) {
-		return;
-	}
-	unsigned char height = (this->_titleBarMode == TitleBarMode::Minimal) ? 3 : 6;
-	unsigned char palette = 6;
-	if (this->_isFocused) {
-		palette = 0;
-	}
-	this->_barTexture.create(this->_size.x, height);
-	this->_barTexture.clear(sf::Color::Transparent);
-	if (this->_titleBarMode == TitleBarMode::Full) {
-		drawText(this->_barTexture, 0, 0, this->_title, this->_palette[palette], false);
-		drawOnTexture(this->_barTexture, this->_size.x - 11, 0, spr_maximise_full, SPR_MAXIMISE_FULL_HEIGHT, this->_palette[palette]);
-		drawOnTexture(this->_barTexture, this->_size.x - 5, 0, spr_close_full, SPR_CLOSE_FULL_HEIGHT, this->_palette[palette]);
-	}
-	if (this->_titleBarMode == TitleBarMode::Minimal) {
-		drawOnTexture(this->_barTexture, this->_size.x - 3, 0, spr_close_minimal, SPR_CLOSE_MINIMAL_HEIGHT, this->_palette[palette]);
-		drawOnTexture(this->_barTexture, this->_size.x - 7, 0, spr_maximise_minimal, SPR_MAXIMISE_MINIMAL_HEIGHT, this->_palette[palette]);
-	}
 }
 
 bool Window::isContext(mrb_state* mrb) const
@@ -156,6 +121,22 @@ bool Window::isIn(WindowZone zone, sf::Vector2i point) const
 	return false;
 }
 
+void Window::toggleFullscreen()
+{
+	if (this->_fullscreened) {
+		this->_fullscreened = false;
+		this->setPosition(this->_prevPosition);
+		this->resize(this->_prevSize);
+	}
+	else {
+		this->_fullscreened = true;
+		this->_prevSize = this->_size;
+		this->_prevPosition = this->getPosition();
+		this->setPosition(sf::Vector2f(0, 0));
+		this->resize(static_cast<sf::Vector2i>(desktop.getSize()));
+	}
+}
+
 void Window::addKeyPressed(sf::Keyboard::Key key)
 {
 	if (this->_mrb->exc) {
@@ -166,11 +147,46 @@ void Window::addKeyPressed(sf::Keyboard::Key key)
 	AbstractWindow::addKeyPressed(key);
 }
 
-void Window::focusEvent(bool isFocused)
+void Window::focusEvent(bool focused)
 {
-	this->_isFocused = isFocused;
+	this->_focused = focused;
 	this->titleBarRefresh();
-	AbstractWindow::focusEvent(isFocused);
+	AbstractWindow::focusEvent(focused);
+}
+
+void Window::resizeTrigger()
+{
+	AbstractWindow::resizeTrigger();
+	this->titleBarRefresh();
+}
+
+void Window::changeTitleTrigger()
+{
+	this->titleBarRefresh();
+	AbstractWindow::changeTitleTrigger();
+}
+
+void Window::titleBarRefresh()
+{
+	if (this->_titleBarMode == TitleBarMode::None) {
+		return;
+	}
+	unsigned char height = (this->_titleBarMode == TitleBarMode::Minimal) ? 3 : 6;
+	unsigned char palette = 6;
+	if (this->_focused) {
+		palette = 0;
+	}
+	this->_barTexture.create(this->_size.x, height);
+	this->_barTexture.clear(sf::Color::Transparent);
+	if (this->_titleBarMode == TitleBarMode::Full) {
+		drawText(this->_barTexture, 0, 0, this->_title, this->_palette[palette], false);
+		drawOnTexture(this->_barTexture, this->_size.x - 11, 0, spr_maximise_full, SPR_MAXIMISE_FULL_HEIGHT, this->_palette[palette]);
+		drawOnTexture(this->_barTexture, this->_size.x - 5, 0, spr_close_full, SPR_CLOSE_FULL_HEIGHT, this->_palette[palette]);
+	}
+	if (this->_titleBarMode == TitleBarMode::Minimal) {
+		drawOnTexture(this->_barTexture, this->_size.x - 3, 0, spr_close_minimal, SPR_CLOSE_MINIMAL_HEIGHT, this->_palette[palette]);
+		drawOnTexture(this->_barTexture, this->_size.x - 7, 0, spr_maximise_minimal, SPR_MAXIMISE_MINIMAL_HEIGHT, this->_palette[palette]);
+	}
 }
 
 mrb_value Window::mrubySpawn(mrb_state *mrb, [[maybe_unused]] mrb_value self)
