@@ -1,6 +1,6 @@
 #include <Editor/Desktop.hpp>
 
-Desktop desktop(192, 128, 8, TitleBarMode::Full);
+Desktop desktop(400, 240, 8, TitleBarMode::Full);
 
 int main()
 {

@@ -8,5 +8,5 @@ runtime_exe = executable(
 	'runtime',
 	sources,
 	include_directories: inc,
-	dependencies: [sfml, mruby]
+	dependencies: [dep_sfml_graphics, dep_sfml_audio, mruby]
 )

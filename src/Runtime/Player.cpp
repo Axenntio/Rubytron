@@ -7,8 +7,6 @@
 #include <mruby/string.h>
 #include <mruby/error.h>
 
-extern std::shared_ptr<Player> player_ptr;
-
 Player::Player(sf::Vector2u size, unsigned char scale, const std::vector<std::string>& parameters) : AbstractWindow(sf::Vector2i(0, 0), size, std::vector<sf::Color> {sf::Color(0, 0, 0)}, "program.rb", parameters)
 {
 	this->_palette = std::vector<sf::Color> {
@@ -41,41 +39,6 @@ Player::Player(sf::Vector2u size, unsigned char scale, const std::vector<std::st
 	this->_canvas_view.setViewport(sf::FloatRect(0, 0, 1, 1));
 	this->_canvas_view.setSize(sf::Vector2f(this->_size.x, this->_size.y));
 	this->_window.setView(this->_canvas_view);
-
-	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "width", &Player::mrubyGetWidth, MRB_ARGS_NONE());
-	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "width=", &Player::mrubySetWidth, MRB_ARGS_REQ(1));
-	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "height", &Player::mrubyGetHeight, MRB_ARGS_NONE());
-	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "height=", &Player::mrubySetHeight, MRB_ARGS_REQ(1));
-	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "min_width", &Player::mrubyGetMinWidth, MRB_ARGS_NONE());
-	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "min_width=", &Player::mrubySetMinWidth, MRB_ARGS_REQ(1));
-	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "min_height", &Player::mrubyGetMinHeight, MRB_ARGS_NONE());
-	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "min_height=", &Player::mrubySetMinHeight, MRB_ARGS_REQ(1));
-	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "mouse_x", &Player::mrubyGetMouseX, MRB_ARGS_NONE());
-	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "mouse_x=", &Player::mrubySetMouseX, MRB_ARGS_REQ(1));
-	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "mouse_y", &Player::mrubyGetMouseY, MRB_ARGS_NONE());
-	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "mouse_y=", &Player::mrubySetMouseY, MRB_ARGS_REQ(1));
-	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "title", &Player::mrubyGetTitle, MRB_ARGS_NONE());
-	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "title=", &Player::mrubySetTitle, MRB_ARGS_REQ(1));
-	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "resizable", &Player::mrubyIsResizable, MRB_ARGS_NONE());
-	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "resizable=", &Player::mrubySetResizable, MRB_ARGS_REQ(1));
-	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "reload", &Player::mrubyReload, MRB_ARGS_NONE());
-	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "close", &Player::mrubyClose, MRB_ARGS_NONE());
-	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "parameters", &Player::mrubyParameters, MRB_ARGS_NONE());
-	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "key", &Player::mrubyKey, MRB_ARGS_OPT(1));
-	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "focused", &Player::mrubyFocused, MRB_ARGS_NONE());
-
-
-	mrb_define_class_method(this->_mrb, this->_mrbDesktopClass, "processes", &Player::mrubyProcesses, MRB_ARGS_NONE());
-	mrb_define_class_method(this->_mrb, this->_mrbDesktopClass, "kill_process", &Player::mrubyKillProcess, MRB_ARGS_REQ(1) | MRB_ARGS_OPT(1));
-	mrb_define_class_method(this->_mrb, this->_mrbDesktopClass, "spawn", &Player::mrubySpawn, MRB_ARGS_REQ(1) | MRB_ARGS_OPT(1));
-	mrb_define_class_method(this->_mrb, this->_mrbDesktopClass, "export", &Player::mrubyExport, MRB_ARGS_REQ(1));
-
-	mrb_define_method(this->_mrb, this->_mrb->object_class, "clear", &Player::mrubyClear, MRB_ARGS_REQ(1));
-	mrb_define_method(this->_mrb, this->_mrb->object_class, "pixel", &Player::mrubyPixel, MRB_ARGS_REQ(2) | MRB_ARGS_OPT(1));
-	mrb_define_method(this->_mrb, this->_mrb->object_class, "line", &Player::mrubyLine, MRB_ARGS_REQ(4) | MRB_ARGS_OPT(1));
-	mrb_define_method(this->_mrb, this->_mrb->object_class, "rect", &Player::mrubyRectangle, MRB_ARGS_REQ(4) | MRB_ARGS_OPT(1));
-	mrb_define_method(this->_mrb, this->_mrb->object_class, "circle", &Player::mrubyCircle, MRB_ARGS_REQ(3) | MRB_ARGS_OPT(1));
-	mrb_define_method(this->_mrb, this->_mrb->object_class, "text", &Player::mrubyText, MRB_ARGS_REQ(3) | MRB_ARGS_OPT(2));
 }
 
 void Player::run()
@@ -110,11 +73,9 @@ void Player::run()
 				this->textEvent(event);
 			}
 			if (event.type == sf::Event::GainedFocus) {
-				this->_isFocused = true;
 				this->focusEvent(true);
 			}
 			if (event.type == sf::Event::LostFocus) {
-				this->_isFocused = false;
 				this->focusEvent(false);
 			}
 		}
@@ -178,161 +139,4 @@ void Player::keyReleaseEvent(sf::Event event)
 void Player::textEvent(sf::Event event)
 {
 	this->textEnteredEvent(event.text.unicode);
-}
-
-mrb_value Player::mrubyGetWidth(mrb_state *mrb, [[maybe_unused]] mrb_value self)
-{
-	return AbstractWindow::mrubyGetWidth(player_ptr, mrb, self);
-}
-
-mrb_value Player::mrubySetWidth(mrb_state *mrb, [[maybe_unused]] mrb_value self)
-{
-	return AbstractWindow::mrubySetWidth(player_ptr, mrb, self);
-}
-
-mrb_value Player::mrubyGetHeight(mrb_state *mrb, [[maybe_unused]] mrb_value self)
-{
-	return AbstractWindow::mrubyGetHeight(player_ptr, mrb, self);
-}
-
-mrb_value Player::mrubySetHeight(mrb_state *mrb, [[maybe_unused]] mrb_value self)
-{
-	return AbstractWindow::mrubySetHeight(player_ptr, mrb, self);
-}
-
-mrb_value Player::mrubyGetMinWidth(mrb_state *mrb, [[maybe_unused]] mrb_value self)
-{
-	return AbstractWindow::mrubyGetMinWidth(player_ptr, mrb, self);
-}
-
-mrb_value Player::mrubySetMinWidth(mrb_state *mrb, [[maybe_unused]] mrb_value self)
-{
-	return AbstractWindow::mrubySetMinWidth(player_ptr, mrb, self);
-}
-
-mrb_value Player::mrubyGetMinHeight(mrb_state *mrb, [[maybe_unused]] mrb_value self)
-{
-	return AbstractWindow::mrubyGetMinHeight(player_ptr, mrb, self);
-}
-
-mrb_value Player::mrubySetMinHeight(mrb_state *mrb, [[maybe_unused]] mrb_value self)
-{
-	return AbstractWindow::mrubySetMinHeight(player_ptr, mrb, self);
-}
-
-mrb_value Player::mrubyGetMouseX(mrb_state *mrb, [[maybe_unused]] mrb_value self)
-{
-	return AbstractWindow::mrubyGetMouseX(player_ptr, mrb, self);
-}
-
-mrb_value Player::mrubySetMouseX(mrb_state *mrb, [[maybe_unused]] mrb_value self)
-{
-	return AbstractWindow::mrubySetMouseX(player_ptr, mrb, self);
-}
-
-mrb_value Player::mrubyGetMouseY(mrb_state *mrb, [[maybe_unused]] mrb_value self)
-{
-	return AbstractWindow::mrubyGetMouseY(player_ptr, mrb, self);
-}
-
-mrb_value Player::mrubySetMouseY(mrb_state *mrb, [[maybe_unused]] mrb_value self)
-{
-	return AbstractWindow::mrubySetMouseY(player_ptr, mrb, self);
-}
-
-mrb_value Player::mrubyGetTitle(mrb_state *mrb, [[maybe_unused]] mrb_value self)
-{
-	return AbstractWindow::mrubyGetTitle(player_ptr, mrb, self);
-}
-
-mrb_value Player::mrubySetTitle(mrb_state *mrb, [[maybe_unused]] mrb_value self)
-{
-	return AbstractWindow::mrubySetTitle(player_ptr, mrb, self);
-}
-
-mrb_value Player::mrubyIsResizable(mrb_state *mrb, [[maybe_unused]] mrb_value self)
-{
-	return AbstractWindow::mrubyIsResizable(player_ptr, mrb, self);
-}
-
-mrb_value Player::mrubySetResizable(mrb_state *mrb, [[maybe_unused]] mrb_value self)
-{
-	return AbstractWindow::mrubySetResizable(player_ptr, mrb, self);
-}
-
-mrb_value Player::mrubyReload(mrb_state *mrb, [[maybe_unused]] mrb_value self)
-{
-	return AbstractWindow::mrubyReload(player_ptr, mrb, self);
-}
-
-mrb_value Player::mrubyClose(mrb_state *mrb, [[maybe_unused]] mrb_value self)
-{
-	return AbstractWindow::mrubyClose(player_ptr, mrb, self);
-}
-
-mrb_value Player::mrubyParameters(mrb_state *mrb, [[maybe_unused]] mrb_value self)
-{
-	return AbstractWindow::mrubyParameters(player_ptr, mrb, self);
-}
-
-mrb_value Player::mrubyFocused([[maybe_unused]] mrb_state *mrb, [[maybe_unused]] mrb_value self)
-{
-	return mrb_bool_value(player_ptr->_isFocused);
-}
-
-mrb_value Player::mrubySpawn([[maybe_unused]] mrb_state *mrb, [[maybe_unused]] mrb_value self)
-{
-	return mrb_false_value();
-}
-
-mrb_value Player::mrubyExport([[maybe_unused]] mrb_state *mrb, [[maybe_unused]] mrb_value self)
-{
-	return mrb_false_value();
-}
-
-mrb_value Player::mrubyProcesses([[maybe_unused]] mrb_state *mrb, [[maybe_unused]] mrb_value self)
-{
-	return mrb_nil_value();
-}
-
-mrb_value Player::mrubyKillProcess([[maybe_unused]] mrb_state *mrb, [[maybe_unused]] mrb_value self)
-{
-	return mrb_false_value();
-}
-
-// Drawing
-
-mrb_value Player::mrubyClear(mrb_state* mrb, [[maybe_unused]] mrb_value self)
-{
-	return AbstractWindow::mrubyClear(player_ptr, mrb, self);
-}
-
-mrb_value Player::mrubyPixel(mrb_state* mrb, [[maybe_unused]] mrb_value self)
-{
-	return AbstractWindow::mrubyPixel(player_ptr, mrb, self);
-}
-
-mrb_value Player::mrubyLine(mrb_state* mrb, [[maybe_unused]] mrb_value self)
-{
-	return AbstractWindow::mrubyLine(player_ptr, mrb, self);
-}
-
-mrb_value Player::mrubyRectangle(mrb_state* mrb, [[maybe_unused]] mrb_value self)
-{
-	return AbstractWindow::mrubyRectangle(player_ptr, mrb, self);
-}
-
-mrb_value Player::mrubyCircle(mrb_state* mrb, [[maybe_unused]] mrb_value self)
-{
-	return AbstractWindow::mrubyCircle(player_ptr, mrb, self);
-}
-
-mrb_value Player::mrubyText(mrb_state* mrb, [[maybe_unused]] mrb_value self)
-{
-	return AbstractWindow::mrubyText(player_ptr, mrb, self);
-}
-
-mrb_value Player::mrubyKey(mrb_state* mrb, [[maybe_unused]] mrb_value self)
-{
-	return AbstractWindow::mrubyKey(player_ptr, mrb, self);
 }

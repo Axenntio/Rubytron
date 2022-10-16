@@ -9,7 +9,8 @@ add_global_arguments('-g3', language: 'cpp')
 
 inc = include_directories('inc')
 
-sfml = dependency('sfml-graphics')
+dep_sfml_graphics = dependency('sfml-graphics')
+dep_sfml_audio = dependency('sfml-audio')
 
 mruby_inc = include_directories('./mruby/include/')
 mruby = declare_dependency(link_args: meson.source_root() + '/mruby/build/host/lib/libmruby.a', include_directories: mruby_inc)

@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>
 #include <mruby/compile.h>
 #include <Editor/WindowZone.hh>
 #include <Editor/TitleBarMode.hh>
@@ -37,39 +38,42 @@ public:
 protected:
 	virtual void resizeTrigger();
 
-	static mrb_value mrubyGetWidth(std::shared_ptr<AbstractWindow> window, mrb_state *mrb, mrb_value self);
-	static mrb_value mrubySetWidth(std::shared_ptr<AbstractWindow> window, mrb_state *mrb, mrb_value self);
-	static mrb_value mrubyGetHeight(std::shared_ptr<AbstractWindow> window, mrb_state *mrb, mrb_value self);
-	static mrb_value mrubySetHeight(std::shared_ptr<AbstractWindow> window, mrb_state *mrb, mrb_value self);
-	static mrb_value mrubyGetMinWidth(std::shared_ptr<AbstractWindow> window, mrb_state *mrb, mrb_value self);
-	static mrb_value mrubySetMinWidth(std::shared_ptr<AbstractWindow> window, mrb_state *mrb, mrb_value self);
-	static mrb_value mrubyGetMinHeight(std::shared_ptr<AbstractWindow> window, mrb_state *mrb, mrb_value self);
-	static mrb_value mrubySetMinHeight(std::shared_ptr<AbstractWindow> window, mrb_state *mrb, mrb_value self);
-	static mrb_value mrubyGetMouseX(std::shared_ptr<AbstractWindow> window, mrb_state *mrb, mrb_value self);
-	static mrb_value mrubySetMouseX(std::shared_ptr<AbstractWindow> window, mrb_state *mrb, mrb_value self);
-	static mrb_value mrubyGetMouseY(std::shared_ptr<AbstractWindow> window, mrb_state *mrb, mrb_value self);
-	static mrb_value mrubySetMouseY(std::shared_ptr<AbstractWindow> window, mrb_state *mrb, mrb_value self);
-	static mrb_value mrubyGetTitle(std::shared_ptr<AbstractWindow> window, mrb_state *mrb, mrb_value self);
-	static mrb_value mrubySetTitle(std::shared_ptr<AbstractWindow> window, mrb_state *mrb, mrb_value self);
-	static mrb_value mrubyIsResizable(std::shared_ptr<AbstractWindow> window, mrb_state *mrb, mrb_value self);
-	static mrb_value mrubySetResizable(std::shared_ptr<AbstractWindow> window, mrb_state *mrb, mrb_value self);
-	static mrb_value mrubyClose(std::shared_ptr<AbstractWindow> window, mrb_state *mrb, mrb_value self);
-	static mrb_value mrubyReload(std::shared_ptr<AbstractWindow> window, mrb_state *mrb, mrb_value self);
-	static mrb_value mrubyParameters(std::shared_ptr<AbstractWindow> window, mrb_state *mrb, mrb_value self);
-	static mrb_value mrubyFocused(std::shared_ptr<AbstractWindow> window, mrb_state *mrb, mrb_value self);
+	static AbstractWindow* mrubyGetWindowObject(mrb_state *mrb);
 
-	static mrb_value mrubyProcesses(std::shared_ptr<AbstractWindow> window, mrb_state *mrb, mrb_value self);
-	static mrb_value mrubyKillProcess(std::shared_ptr<AbstractWindow> window, mrb_state *mrb, mrb_value self);
-	static mrb_value mrubySpawn(std::shared_ptr<AbstractWindow> window, mrb_state *mrb, mrb_value self);
-	static mrb_value mrubyExport(std::shared_ptr<AbstractWindow> window, mrb_state *mrb, mrb_value self);
+	static mrb_value mrubyGetWidth(mrb_state *mrb, mrb_value self);
+	static mrb_value mrubySetWidth(mrb_state *mrb, mrb_value self);
+	static mrb_value mrubyGetHeight(mrb_state *mrb, mrb_value self);
+	static mrb_value mrubySetHeight(mrb_state *mrb, mrb_value self);
+	static mrb_value mrubyGetMinWidth(mrb_state *mrb, mrb_value self);
+	static mrb_value mrubySetMinWidth(mrb_state *mrb, mrb_value self);
+	static mrb_value mrubyGetMinHeight(mrb_state *mrb, mrb_value self);
+	static mrb_value mrubySetMinHeight(mrb_state *mrb, mrb_value self);
+	static mrb_value mrubyGetMouseX(mrb_state *mrb, mrb_value self);
+	static mrb_value mrubySetMouseX(mrb_state *mrb, mrb_value self);
+	static mrb_value mrubyGetMouseY(mrb_state *mrb, mrb_value self);
+	static mrb_value mrubySetMouseY(mrb_state *mrb, mrb_value self);
+	static mrb_value mrubyGetTitle(mrb_state *mrb, mrb_value self);
+	static mrb_value mrubySetTitle(mrb_state *mrb, mrb_value self);
+	static mrb_value mrubyIsResizable(mrb_state *mrb, mrb_value self);
+	static mrb_value mrubySetResizable(mrb_state *mrb, mrb_value self);
+	static mrb_value mrubyClose(mrb_state *mrb, mrb_value self);
+	static mrb_value mrubyReload(mrb_state *mrb, mrb_value self);
+	static mrb_value mrubyParameters(mrb_state *mrb, mrb_value self);
+	static mrb_value mrubyFocused(mrb_state *mrb, mrb_value self);
 
-	static mrb_value mrubyClear(std::shared_ptr<AbstractWindow> window, mrb_state *mrb, mrb_value self);
-	static mrb_value mrubyPixel(std::shared_ptr<AbstractWindow> window, mrb_state *mrb, mrb_value self);
-	static mrb_value mrubyLine(std::shared_ptr<AbstractWindow> window, mrb_state *mrb, mrb_value self);
-	static mrb_value mrubyRectangle(std::shared_ptr<AbstractWindow> window, mrb_state *mrb, mrb_value self);
-	static mrb_value mrubyCircle(std::shared_ptr<AbstractWindow> window, mrb_state *mrb, mrb_value self);
-	static mrb_value mrubyText(std::shared_ptr<AbstractWindow> window, mrb_state *mrb, mrb_value self);
-	static mrb_value mrubyKey(std::shared_ptr<AbstractWindow> window, mrb_state *mrb, mrb_value self);
+	static mrb_value mrubyProcesses(mrb_state *mrb, mrb_value self);
+	static mrb_value mrubyKillProcess(mrb_state *mrb, mrb_value self);
+	static mrb_value mrubySpawn(mrb_state *mrb, mrb_value self);
+	static mrb_value mrubyExport(mrb_state *mrb, mrb_value self);
+
+	static mrb_value mrubyClear(mrb_state *mrb, mrb_value self);
+	static mrb_value mrubyPixel(mrb_state *mrb, mrb_value self);
+	static mrb_value mrubyLine(mrb_state *mrb, mrb_value self);
+	static mrb_value mrubyRectangle(mrb_state *mrb, mrb_value self);
+	static mrb_value mrubyCircle(mrb_state *mrb, mrb_value self);
+	static mrb_value mrubyText(mrb_state *mrb, mrb_value self);
+	static mrb_value mrubyKey(mrb_state *mrb, mrb_value self);
+	static mrb_value mrubySound(mrb_state *mrb, mrb_value self);
 
 	sf::RenderTexture _texture;
 	sf::RenderTexture _barTexture;
@@ -80,6 +84,7 @@ protected:
 	std::vector<sf::Keyboard::Key> _keyPressed;
 	std::string _title;
 	TitleBarMode _titleBarMode;
+	bool _isFocused;
 	bool _resizable;
 	bool _closed;
 
@@ -89,4 +94,12 @@ protected:
 	mrbc_context* _mrbContext;
 	RClass *_mrbWindowClass;
 	RClass *_mrbDesktopClass;
+
+private:
+	short generateSineWave(double time, double frequency, double amplitude);
+	short generateSquareWave(double time, double frequency, double amplitude);
+	short generateNoise(double amplitude);
+
+	sf::SoundBuffer _soundBuffer;
+	sf::Sound _sound;
 };
