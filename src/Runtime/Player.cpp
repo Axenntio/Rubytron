@@ -7,7 +7,7 @@
 #include <mruby/string.h>
 #include <mruby/error.h>
 
-Player::Player(sf::Vector2u size, unsigned char scale, const std::vector<std::string>& parameters) : AbstractWindow(sf::Vector2i(0, 0), size, std::vector<sf::Color> {sf::Color(0, 0, 0)}, "program.rb", parameters)
+Player::Player(sf::Vector2u size, unsigned char scale, const std::vector<std::string>& parameters) : AbstractWindow(sf::Vector2i(0, 0), size, std::vector<sf::Color> {sf::Color(0, 0, 0)}, "program.rb", parameters), _scale(scale)
 {
 	this->_palette = std::vector<sf::Color> {
 		sf::Color(  0,   0,   0), // #000000
@@ -28,7 +28,7 @@ Player::Player(sf::Vector2u size, unsigned char scale, const std::vector<std::st
 		sf::Color(255, 204, 170)  // #FFCCAA
 	};
 
-	this->_window.create(sf::VideoMode(this->_size.x * scale, this->_size.y * scale), this->_title);
+	this->_window.create(sf::VideoMode(this->_size.x * this->_scale, this->_size.y * this->_scale), this->_title);
 	this->_window.setMouseCursorVisible(false);
 	this->_cursor_texture.create(4, 6);
 	this->_cursor_texture.clear(sf::Color::Transparent);
@@ -139,6 +139,22 @@ void Player::keyReleaseEvent(sf::Event event)
 void Player::textEvent(sf::Event event)
 {
 	this->textEnteredEvent(event.text.unicode);
+}
+
+void Player::resizeTrigger()
+{
+	// This can pin the window on the top left corner, but is buggy
+	// sf::Vector2i size = static_cast<sf::Vector2i>(this->_window.getSize());
+	// this->_window.setPosition(this->_window.getPosition() - sf::Vector2i(0, size.y - this->_size.y));
+	this->_window.setSize(sf::Vector2u(this->_size.x * this->_scale, this->_size.y * this->_scale));
+
+	// This properly resize window but issue on fullscreen
+	this->_canvas_view.setViewport(sf::FloatRect(0, 0, 1, 1));
+	this->_canvas_view.setSize(sf::Vector2f(this->_size.x, this->_size.y));
+	this->_canvas_view.setCenter(static_cast<float>(this->_size.x) / 2, static_cast<float>(this->_size.y) / 2);
+	this->_window.setView(this->_canvas_view);
+
+	AbstractWindow::resizeTrigger();
 }
 
 void Player::changeTitleTrigger()

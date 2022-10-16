@@ -18,10 +18,12 @@ private:
 	void keyReleaseEvent(sf::Event event);
 	void textEvent(sf::Event event);
 
+	void resizeTrigger();
 	void changeTitleTrigger();
 
 	sf::RenderWindow _window;
 	sf::RenderTexture _cursor_texture;
 	sf::Vector2i _mouse_coordinated;
 	sf::View _canvas_view;
+	unsigned char _scale;
 };
