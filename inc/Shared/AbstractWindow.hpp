@@ -37,6 +37,7 @@ public:
 	void removeButtonPressed(sf::Mouse::Button button);
 	void textEnteredEvent(sf::Uint32 unicode);
 	virtual void focusEvent(bool isFocused);
+	void mouseWheelEvent(sf::Event::MouseWheelScrollEvent wheel);
 
 protected:
 	virtual void resizeTrigger();

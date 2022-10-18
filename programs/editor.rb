@@ -15,15 +15,27 @@ class Window
   def self.key_press_event(key)
     $editor.parse_key(key)
   end
+
+  def self.mouse_wheel_event(horizontal, vertical)
+    $editor.scroll(horizontal, vertical)
+  end
 end
 
 class Vector
-  attr_accessor :x
-  attr_accessor :y
+  attr_writer :x
+  attr_writer :y
 
   def initialize(x, y)
     self.x = x
     self.y = y
+  end
+
+  def x
+    @x.to_i
+  end
+
+  def y
+    @y.to_i
   end
 
   def +(other)
@@ -107,6 +119,13 @@ class Editor
       @cursor.x += 1
     end
     self.update_scope
+  end
+
+  def scroll(h, v)
+    @code_shift.x -= h*2
+    @code_shift.y -= v*2
+    @code_shift.x = [[0, @code_shift.x].max, @file_content.max_by(&:length).length - 1].min
+    @code_shift.y = [[0, @code_shift.y].max, @file_content.length - 1].min
   end
 
   def parse_key(key)

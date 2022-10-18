@@ -78,6 +78,9 @@ void Player::run()
 			if (event.type == sf::Event::LostFocus) {
 				this->focusEvent(false);
 			}
+			if (event.type == sf::Event::MouseWheelScrolled) {
+				this->mouseWheelEvent(event);
+			}
 		}
 
 		this->_window.setVerticalSyncEnabled(true);
@@ -139,6 +142,11 @@ void Player::keyReleaseEvent(sf::Event event)
 void Player::textEvent(sf::Event event)
 {
 	this->textEnteredEvent(event.text.unicode);
+}
+
+void Player::mouseWheelEvent(sf::Event event)
+{
+	AbstractWindow::mouseWheelEvent(event.mouseWheelScroll);
 }
 
 void Player::resizeTrigger()

@@ -91,6 +91,9 @@ void Desktop::run()
 			if (event.type == sf::Event::TextEntered) {
 				this->textEvent(event);
 			}
+			if (event.type == sf::Event::MouseWheelScrolled) {
+				this->mouseWheelEvent(event);
+			}
 		}
 
 		for (std::shared_ptr<Window> window : this->_windows) {
@@ -355,4 +358,12 @@ void Desktop::textEvent(sf::Event event)
 		return;
 	}
 	this->_focusedWindow->textEnteredEvent(event.text.unicode);
+}
+
+void Desktop::mouseWheelEvent(sf::Event event)
+{
+	if (this->_focusedWindow == nullptr) {
+		return;
+	}
+	this->_focusedWindow->mouseWheelEvent(event.mouseWheelScroll);
 }

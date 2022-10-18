@@ -32,6 +32,7 @@ private:
 	void keyPressEvent(sf::Event event);
 	void keyReleaseEvent(sf::Event event);
 	void textEvent(sf::Event event);
+	void mouseWheelEvent(sf::Event event);
 
 	sf::RenderWindow _window;
 	sf::RenderTexture _background_texture;

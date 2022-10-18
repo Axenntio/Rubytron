@@ -31,6 +31,10 @@ class Window
     puts "Focus changed (#{has_focus})"
     $has_focus = has_focus
   end
+
+  def self.mouse_wheel_event(horizontal, vertical)
+    puts "Mouse wheel scroll [#{horizontal}, #{vertical}]"
+  end
 end
 
 def init

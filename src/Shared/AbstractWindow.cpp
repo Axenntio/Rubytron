@@ -260,6 +260,16 @@ void AbstractWindow::textEnteredEvent(sf::Uint32 unicode)
 	}
 }
 
+void AbstractWindow::mouseWheelEvent(sf::Event::MouseWheelScrollEvent wheel)
+{
+	mrb_value obj = mrb_const_get(this->_mrb, mrb_obj_value(this->_mrb->object_class), mrb_intern_cstr(this->_mrb, "Window"));
+	if (mrb_respond_to(this->_mrb, obj, mrb_intern_cstr(this->_mrb, "mouse_wheel_event"))) {
+		mrb_value horizontal = mrb_float_value(this->_mrb, wheel.wheel == sf::Mouse::HorizontalWheel ? wheel.delta : 0);
+		mrb_value vertical = mrb_float_value(this->_mrb, wheel.wheel == sf::Mouse::VerticalWheel ? wheel.delta : 0);
+		mrb_funcall(this->_mrb, obj, "mouse_wheel_event", 2, horizontal, vertical);
+	}
+}
+
 void AbstractWindow::focusEvent(bool focused)
 {
 	this->_focused = focused;
