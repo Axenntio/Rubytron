@@ -8,6 +8,8 @@
 class Window : public AbstractWindow {
 public:
 	Window(sf::Vector2i position, sf::Vector2u size, const std::vector<sf::Color>& palette, TitleBarMode _titleBarMode, const std::string& programPath, const std::vector<std::string>& parameters);
+	Window(sf::Vector2i position, sf::Vector2u size, sf::Vector2i prevPosition, sf::Vector2u prevSize, bool fullscreened, const std::vector<sf::Color>& palette, TitleBarMode titleBarMode, const std::string& programPath, const std::vector<std::string>& parameters);
+
 
 	virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
 

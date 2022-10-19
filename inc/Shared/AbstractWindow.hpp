@@ -84,8 +84,8 @@ protected:
 	sf::RenderTexture _texture;
 	sf::RenderTexture _barTexture;
 	std::vector<sf::Color> _palette;
-	sf::Vector2f _prevPosition;
-	sf::Vector2i _prevSize;
+	sf::Vector2i _prevPosition;
+	sf::Vector2u _prevSize;
 	sf::Vector2i _size;
 	sf::Vector2i _minSize;
 	sf::Vector2i _mousePosition;

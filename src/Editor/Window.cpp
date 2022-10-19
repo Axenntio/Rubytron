@@ -9,6 +9,13 @@
 
 extern Desktop desktop;
 
+Window::Window(sf::Vector2i position, sf::Vector2u size, sf::Vector2i prevPosition, sf::Vector2u prevSize, bool fullscreened, const std::vector<sf::Color>& palette, TitleBarMode titleBarMode, const std::string& programPath, const std::vector<std::string>& parameters) : Window(position, size, palette, titleBarMode, programPath, parameters)
+{
+	this->_prevPosition = prevPosition;
+	this->_prevSize = prevSize;
+	this->_fullscreened = fullscreened;
+}
+
 Window::Window(sf::Vector2i position, sf::Vector2u size, const std::vector<sf::Color>& palette, TitleBarMode titleBarMode, const std::string& programPath, const std::vector<std::string>& parameters) : AbstractWindow(position, size, palette, programPath, parameters), _titleBarMode(titleBarMode)
 {
 	this->titleBarRefresh();
@@ -125,13 +132,13 @@ void Window::toggleFullscreen()
 {
 	if (this->_fullscreened) {
 		this->_fullscreened = false;
-		this->setPosition(this->_prevPosition);
-		this->resize(this->_prevSize);
+		this->setPosition(static_cast<sf::Vector2f>(this->_prevPosition));
+		this->resize(static_cast<sf::Vector2i>(this->_prevSize));
 	}
 	else {
 		this->_fullscreened = true;
-		this->_prevSize = this->_size;
-		this->_prevPosition = this->getPosition();
+		this->_prevSize = static_cast<sf::Vector2u>(this->_size);
+		this->_prevPosition = static_cast<sf::Vector2i>(this->getPosition());
 		this->setPosition(sf::Vector2f(0, 0));
 		this->resize(static_cast<sf::Vector2i>(desktop.getSize()));
 	}
@@ -141,7 +148,7 @@ void Window::addKeyPressed(sf::Keyboard::Key key)
 {
 	if (this->_mrb->exc) {
 		this->_closed = true;
-		desktop.spawn(static_cast<sf::Vector2i>(this->getPosition()), static_cast<sf::Vector2u>(this->_size), this->_programFile, this->_programParameters);
+		desktop.spawn(static_cast<sf::Vector2i>(this->getPosition()), static_cast<sf::Vector2u>(this->_size), this->_prevPosition, this->_prevSize, this->_fullscreened, this->_programFile, this->_programParameters);
 		return;
 	}
 	AbstractWindow::addKeyPressed(key);

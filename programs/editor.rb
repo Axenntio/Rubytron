@@ -16,6 +16,10 @@ class Window
     $editor.parse_key(key)
   end
 
+  def self.button_press_event(button)
+    $editor.click(Window.mouse_x, Window.mouse_y)
+  end
+
   def self.mouse_wheel_event(horizontal, vertical)
     $editor.scroll(horizontal, vertical)
   end
@@ -91,7 +95,7 @@ class Editor
     Window.title = "#{@path} - #{width}x#{height}"
   end
 
-  def showable_content_postition
+  def showable_content_position
     Vector.new(@side_bar_width, 0)
   end
 
@@ -110,7 +114,7 @@ class Editor
   end
 
   def showable_cursor
-    @cursor - @code_shift + self.showable_content_postition
+    @cursor - @code_shift + self.showable_content_position
   end
 
   def add_char(char)
@@ -126,6 +130,13 @@ class Editor
     @code_shift.y -= v*2
     @code_shift.x = [[0, @code_shift.x].max, @file_content.max_by(&:length).length - 1].min
     @code_shift.y = [[0, @code_shift.y].max, @file_content.length - 1].min
+  end
+
+  def click(x, y)
+    position = self.showable_content_position
+    @cursor = Vector.new((x + FONT_WIDTH / 2) / FONT_WIDTH, y / FONT_HEIGH) - position + @code_shift
+    @cursor.y = [[0, @cursor.y].max, @file_content.count - 1].min
+    @cursor.x = [[0, @cursor.x].max, @file_content[@cursor.y].length].min
   end
 
   def parse_key(key)
@@ -250,14 +261,8 @@ end
 def update
   showable = 10
   clear 0
-  editor_canvas = $editor.showable_content_postition
-  rect 0, 0, editor_canvas.x * FONT_WIDTH, Window.height, 1
-  y_offset = 1
-  $editor.content_lines.each do |number|
-    line = number.to_s
-    text 1 + (editor_canvas.x - line.length) * FONT_WIDTH, y_offset, line, 13, true
-    y_offset += FONT_HEIGH
-  end
+  editor_canvas = $editor.showable_content_position
+  # Drawing editor
   y_offset = 1
   $editor.showable_content.each do |line|
     parts = line.split(/([\s.,\[\]\(\)]+)/)
@@ -269,6 +274,15 @@ def update
     end
     y_offset += FONT_HEIGH
   end
+  # Drawing cursor
   cursor = $editor.showable_cursor
   line cursor.x * FONT_WIDTH + 1, cursor.y * FONT_HEIGH, cursor.x * FONT_WIDTH + 1, cursor.y * FONT_HEIGH + FONT_HEIGH + 1, 8
+  # Drawing sidebar
+  rect 0, 0, editor_canvas.x * FONT_WIDTH, Window.height, 1
+  y_offset = 1
+  $editor.content_lines.each do |number|
+    line = number.to_s
+    text 1 + (editor_canvas.x - line.length) * FONT_WIDTH, y_offset, line, 13, true
+    y_offset += FONT_HEIGH
+  end
 end
