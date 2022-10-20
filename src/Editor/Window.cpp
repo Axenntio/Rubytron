@@ -183,14 +183,24 @@ void Window::titleBarRefresh()
 	if (this->_focused) {
 		palette = 0;
 	}
-	this->_barTexture.create(this->_size.x, height);
-	this->_barTexture.clear(sf::Color::Transparent);
 	if (this->_titleBarMode == TitleBarMode::Full) {
-		drawText(this->_barTexture, 0, 0, this->_title, this->_palette[palette], false);
+		this->_barTexture.create(std::max(1, this->_size.x - 12), height);
+		this->_barTexture.clear(sf::Color::Transparent);
+		if (this->_size.x - 12 > 0) {
+			drawText(this->_barTexture, 0, 0, this->_title, this->_palette[palette], false);
+		}
+		sf::Texture tmp(this->_barTexture.getTexture());
+		this->_barTexture.create(this->_size.x, height);
+		this->_barTexture.clear(sf::Color::Transparent);
+		sf::Sprite tmpSprite(tmp);
+		tmpSprite.setTextureRect(sf::IntRect(0, tmp.getSize().y, tmp.getSize().x, -tmp.getSize().y));
+		this->_barTexture.draw(tmpSprite);
 		drawOnTexture(this->_barTexture, this->_size.x - 11, 0, spr_maximise_full, SPR_MAXIMISE_FULL_HEIGHT, this->_palette[palette]);
 		drawOnTexture(this->_barTexture, this->_size.x - 5, 0, spr_close_full, SPR_CLOSE_FULL_HEIGHT, this->_palette[palette]);
 	}
 	if (this->_titleBarMode == TitleBarMode::Minimal) {
+		this->_barTexture.create(this->_size.x, height);
+		this->_barTexture.clear(sf::Color::Transparent);
 		drawOnTexture(this->_barTexture, this->_size.x - 3, 0, spr_close_minimal, SPR_CLOSE_MINIMAL_HEIGHT, this->_palette[palette]);
 		drawOnTexture(this->_barTexture, this->_size.x - 7, 0, spr_maximise_minimal, SPR_MAXIMISE_MINIMAL_HEIGHT, this->_palette[palette]);
 	}
