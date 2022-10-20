@@ -62,8 +62,12 @@ class Editor
     @path = path
     @cursor = Vector.new(0, 0)
     @code_shift = Vector.new(0, 0)
-    @file_content = File.open(@path, 'r') do |file|
-      file.read.split("\n")
+    begin
+      @file_content = File.open(@path, 'r') do |file|
+        file.read.split("\n")
+      end
+    rescue Errno::ENOENT
+      @file_content = ['']
     end
     @side_bar_width = @file_content.count.to_s.length
     self.update_show_line(Window.width, Window.height)
@@ -102,7 +106,7 @@ class Editor
   def showable_content
     @file_content[@code_shift.y, @show_line].map do |line|
       if line.length >= @code_shift.x
-        line[@code_shift.x, @show_char]
+        line[@code_shift.x, @show_char] || ''
       else
         ''
       end
@@ -115,6 +119,10 @@ class Editor
 
   def showable_cursor
     @cursor - @code_shift + self.showable_content_position
+  end
+
+  def showable_scrollbar(size)
+    (@code_shift.y.to_f) / (@file_content.length - 1) * (Window.height - size)
   end
 
   def add_char(char)
@@ -285,4 +293,8 @@ def update
     text 1 + (editor_canvas.x - line.length) * FONT_WIDTH, y_offset, line, 13, true
     y_offset += FONT_HEIGH
   end
+  # Drawing scrollbar
+  scrollbar_size = 10;
+  scroll = $editor.showable_scrollbar(scrollbar_size)
+  rect Window.width - 1, scroll, Window.width - 1, scrollbar_size, 6
 end
