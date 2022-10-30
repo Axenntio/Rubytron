@@ -22,11 +22,12 @@ def init
   $player_pos = Vector.new(0, 0)
 end
 
-def update
-  $player_pos.x -= 1 if Window.key 71
-  $player_pos.x += 1 if Window.key 72
-  $player_pos.y -= 1 if Window.key 73
-  $player_pos.y += 1 if Window.key 74
+def update(elapsed)
+  move = 0.5 * elapsed
+  $player_pos.x -= move if Window.key 71
+  $player_pos.x += move if Window.key 72
+  $player_pos.y -= move if Window.key 73
+  $player_pos.y += move if Window.key 74
   clear 0
   circle $player_pos.x, $player_pos.y, 10, 2
   text 1, 1, Window.key.inspect, 7

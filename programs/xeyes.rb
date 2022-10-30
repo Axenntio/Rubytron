@@ -18,7 +18,7 @@ def init
   Window.min_height = 8
 end
 
-def update
+def update(elapsed)
   if Window.width / 4 <= Window.height / 2
     radius = Window.width / 4
     offset = Vector.new(0, Window.height / 2 - radius)

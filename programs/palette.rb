@@ -6,7 +6,7 @@ def init
   Window.height = Window.min_height
 end
 
-def update
+def update(elapsed)
   scale = (Window.width - 2) / 16
   Window.height = 2 + scale
   clear 0

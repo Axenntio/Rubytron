@@ -7,8 +7,8 @@ def init
   Window.min_height = 1
 end
 
-def update
-  $value += 0.05
+def update(elapsed)
+  $value += elapsed / 20
   Window.width = $initial_width + Math.cos($value) * $initial_width / 2
   Window.height = $initial_height + Math.sin($value) * $initial_height / 2
   clear $color_index

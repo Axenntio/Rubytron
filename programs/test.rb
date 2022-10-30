@@ -43,9 +43,9 @@ def init
   $value = 0
 end
 
-def update
+def update(elapsed)
   clear $color_index
-  $value += 0.1 if $has_focus
+  $value += elapsed / 10 if $has_focus
   pixel 0, 0, 1
   pixel 0, Window.height - 1, 2
   pixel Window.width - 1, 0, 3

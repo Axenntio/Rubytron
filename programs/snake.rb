@@ -112,7 +112,7 @@ def init
   new_apple(scoring: false)
 end
 
-def update
+def update(elapsed)
   $snake.update
   clear 0
   pixel $apple.x, $apple.y, 3

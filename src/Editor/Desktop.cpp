@@ -116,6 +116,7 @@ void Desktop::run()
 		for (std::shared_ptr<Window> window : this->_windows) {
 			window->exceptionHandler();
 			this->_window.draw(*window);
+			window->resetClock();
 		}
 		this->_window.draw(foreground);
 		this->_window.draw(cursor);

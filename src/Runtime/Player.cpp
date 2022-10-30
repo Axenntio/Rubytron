@@ -92,6 +92,7 @@ void Player::run()
 		this->_window.draw(*this);
 		this->_window.draw(cursor);
 		this->_window.display();
+		this->resetClock();
 	}
 }
 

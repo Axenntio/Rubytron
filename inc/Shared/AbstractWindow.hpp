@@ -22,6 +22,7 @@ public:
 	sf::Vector2i getSize() const;
 
 	void exceptionHandler();
+	void resetClock();
 
 	void resize(sf::Vector2i size);
 	void resizeH(int width);
@@ -81,6 +82,8 @@ protected:
 	static mrb_value mrubyText(mrb_state *mrb, mrb_value self);
 	static mrb_value mrubySound(mrb_state *mrb, mrb_value self);
 
+	sf::Clock _windowClock;
+	sf::Time _windowElapsedTime;
 	sf::RenderTexture _texture;
 	sf::RenderTexture _barTexture;
 	std::vector<sf::Color> _palette;

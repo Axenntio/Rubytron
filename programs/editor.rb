@@ -266,7 +266,7 @@ def init
   $editor = Editor.new(Window.parameters[0])
 end
 
-def update
+def update(elapsed)
   showable = 10
   clear 0
   editor_canvas = $editor.showable_content_position

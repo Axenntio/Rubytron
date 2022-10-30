@@ -51,7 +51,7 @@ class Terminal
     Window.min_width = 9
     @cursor = Vector.new(0, 0)
     @blink = true
-    @blink_speed = 12
+    @blink_speed = 20
     @blink_time = @blink_speed
     @monospace = false
     @return_value = false
@@ -73,11 +73,11 @@ class Terminal
     @blink = true
   end
 
-  def showable_display
+  def showable_display(elapsed)(elapsed)
     cursor = ''
-    @blink_time -= 1 if @should_blink
-    if @blink_time.zero?
-      @blink_time = @blink_speed
+    @blink_time -= 1 * elapsed if @should_blink
+    if @blink_time.zero? || @blink_time.negative?
+      @blink_time += @blink_speed
       @blink = !@blink
     end
     cursor = '_' if @blink
@@ -176,10 +176,10 @@ def init
   $terminal = Terminal.new
 end
 
-def update
+def update(elapsed)
   clear 5
   y_offset = 0;
-  $terminal.showable_display.each do |line|
+  $terminal.showable_display(elapsed).each do |line|
     text 1, 1 + y_offset, line, 7, $terminal.monospace
     y_offset += FONT_HEIGH
   end
