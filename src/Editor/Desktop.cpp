@@ -50,7 +50,7 @@ Desktop::Desktop(unsigned int width, unsigned int height, unsigned char scale, T
 	this->spawn(sf::Vector2i(120, 50), sf::Vector2u(40, 40), "programs/snake.rb", {});
 	this->spawn(sf::Vector2i(5, 54), sf::Vector2u(48, 68), "programs/editor.rb", {"programs/editor.rb"});
 	this->spawn(sf::Vector2i(57, 80), sf::Vector2u(60, 42), "programs/terminal.rb", {});
-	this->spawn(sf::Vector2i(1, 8), sf::Vector2u(128, 128), "programs/background.rb", {});
+
 	if (this->_focusedWindow != nullptr) {
 		this->_focusedWindow->focusEvent(false);
 	}
