@@ -4,7 +4,7 @@
 #include <Shared/helper.hh>
 #include <Shared/sprites.hh>
 
-Desktop::Desktop(unsigned int width, unsigned int height, unsigned char scale, TitleBarMode titleBarMode) : _size(sf::Vector2u(width, height)), _titleBarMode(titleBarMode)
+Desktop::Desktop(unsigned int width, unsigned int height, unsigned char scale, TitleBarMode titleBarMode) : _size(sf::Vector2u(width, height)), _titleBarMode(titleBarMode), _windowsPid(0)
 {
 	this->_palette = std::vector<sf::Color> {
 		sf::Color(  0,   0,   0), // #000000
@@ -50,6 +50,7 @@ Desktop::Desktop(unsigned int width, unsigned int height, unsigned char scale, T
 	this->spawn(sf::Vector2i(120, 50), sf::Vector2u(40, 40), "programs/snake.rb", {});
 	this->spawn(sf::Vector2i(5, 54), sf::Vector2u(48, 68), "programs/editor.rb", {"programs/editor.rb"});
 	this->spawn(sf::Vector2i(57, 80), sf::Vector2u(60, 42), "programs/terminal.rb", {});
+	this->spawn(sf::Vector2i(1, 8), sf::Vector2u(128, 128), "programs/background.rb", {});
 	if (this->_focusedWindow != nullptr) {
 		this->_focusedWindow->focusEvent(false);
 	}
@@ -199,7 +200,7 @@ bool Desktop::spawn(sf::Vector2i position, sf::Vector2u size, const std::string&
 bool Desktop::spawn(sf::Vector2i position, sf::Vector2u size, sf::Vector2i prevPosition, sf::Vector2u prevSize, bool fullscreened, const std::string& path, const std::vector<std::string>& parameters)
 {
 	try {
-		std::shared_ptr<Window> window = std::make_unique<Window>(position, size, prevPosition, prevSize, fullscreened, this->_palette, this->_titleBarMode, path, parameters);
+		std::shared_ptr<Window> window = std::make_unique<Window>(this->_windowsPid, position, size, prevPosition, prevSize, fullscreened, this->_palette, this->_titleBarMode, path, parameters);
 		this->_windows.push_back(window);
 		window->init();
 		std::shared_ptr<Window> previous = this->_focusedWindow;
@@ -208,6 +209,7 @@ bool Desktop::spawn(sf::Vector2i position, sf::Vector2u size, sf::Vector2i prevP
 			previous->focusEvent(false);
 		}
 		this->_focusedWindow->focusEvent(true);
+		this->_windowsPid++;
 
 		return true;
 	}
@@ -223,10 +225,16 @@ const std::vector<std::shared_ptr<Window>>& Desktop::getWindows() const
 
 bool Desktop::killWindow(unsigned int processId)
 {
-	if (this->_windows.size() <= processId) {
+	std::shared_ptr<Window> matchingWindow = nullptr;
+	for (const std::shared_ptr<Window>& window: this->_windows) {
+		if (window->getPid() == processId) {
+			matchingWindow = window;
+		}
+	}
+	if (matchingWindow == nullptr) {
 		return false;
 	}
-	this->_windows[processId]->close();
+	matchingWindow->close();
 	return true;
 }
 

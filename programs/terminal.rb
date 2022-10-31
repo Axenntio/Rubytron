@@ -142,7 +142,8 @@ class Terminal
       @display_history << result
     when 'ps'
       result = Desktop.processes
-      result.each { |process| @display_history << process }
+      pid_max_digits = result.max_by { |k, v| k.to_s.length }[0].to_s.length
+      result.each { |pid, process| @display_history << "#{sprintf("%#{pid_max_digits}d", pid.to_i)} #{process}" }
     when 'kill'
       result = Desktop.kill_process(command[1].to_i) if command[1].to_i.is_a?(Integer)
     when 'exit'

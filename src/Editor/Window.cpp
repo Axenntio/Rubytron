@@ -4,19 +4,20 @@
 #include <mruby/internal.h>
 #include <mruby/variable.h>
 #include <mruby/array.h>
+#include <mruby/hash.h>
 #include <mruby/string.h>
 #include <mruby/error.h>
 
 extern Desktop desktop;
 
-Window::Window(sf::Vector2i position, sf::Vector2u size, sf::Vector2i prevPosition, sf::Vector2u prevSize, bool fullscreened, const std::vector<sf::Color>& palette, TitleBarMode titleBarMode, const std::string& programPath, const std::vector<std::string>& parameters) : Window(position, size, palette, titleBarMode, programPath, parameters)
+Window::Window(unsigned int pid, sf::Vector2i position, sf::Vector2u size, sf::Vector2i prevPosition, sf::Vector2u prevSize, bool fullscreened, const std::vector<sf::Color>& palette, TitleBarMode titleBarMode, const std::string& programPath, const std::vector<std::string>& parameters) : Window(pid, position, size, palette, titleBarMode, programPath, parameters)
 {
 	this->_prevPosition = prevPosition;
 	this->_prevSize = prevSize;
 	this->_fullscreened = fullscreened;
 }
 
-Window::Window(sf::Vector2i position, sf::Vector2u size, const std::vector<sf::Color>& palette, TitleBarMode titleBarMode, const std::string& programPath, const std::vector<std::string>& parameters) : AbstractWindow(position, size, palette, programPath, parameters), _titleBarMode(titleBarMode)
+Window::Window(unsigned int pid, sf::Vector2i position, sf::Vector2u size, const std::vector<sf::Color>& palette, TitleBarMode titleBarMode, const std::string& programPath, const std::vector<std::string>& parameters) : AbstractWindow(position, size, palette, programPath, parameters), _pid(pid), _titleBarMode(titleBarMode)
 {
 	this->titleBarRefresh();
 
@@ -144,6 +145,11 @@ void Window::toggleFullscreen()
 	}
 }
 
+unsigned int Window::getPid() const
+{
+	return this->_pid;
+}
+
 void Window::addKeyPressed(sf::Keyboard::Key key)
 {
 	if (this->_mrb->exc) {
@@ -238,12 +244,12 @@ mrb_value Window::mrubyExport(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 
 mrb_value Window::mrubyProcesses(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 {
-	mrb_value array = mrb_ary_new_capa(mrb, desktop.getWindows().size());
-	for (const std::shared_ptr<Window>& window : desktop.getWindows()) { // TODO: Do index for kill command
-		mrb_ary_push(mrb, array, mrb_str_new(mrb, window->_programFile.c_str(), window->_programFile.length()));
+	mrb_value hash = mrb_hash_new_capa(mrb, desktop.getWindows().size());
+	for (const std::shared_ptr<Window>& window : desktop.getWindows()) {
+		mrb_hash_set(mrb, hash, mrb_int_value(mrb, window->getPid()), mrb_str_new(mrb, window->_programFile.c_str(), window->_programFile.length()));
 	}
 
-	return array;
+	return hash;
 }
 
 mrb_value Window::mrubyKillProcess(mrb_state *mrb, [[maybe_unused]] mrb_value self)

@@ -49,4 +49,5 @@ private:
 	FocusAction _focusAction;
 	sf::Vector2f _focusInitialDelta;
 	std::vector<std::shared_ptr<Window>> _windows;
+	unsigned int _windowsPid;
 };
