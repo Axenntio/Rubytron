@@ -113,12 +113,14 @@ void Player::resizeEvent(sf::Event event)
 	this->_window.setView(this->_canvas_view);
 }
 
-void Player::mouseButtonPressEvent([[maybe_unused]] sf::Event event)
+void Player::mouseButtonPressEvent(sf::Event event)
 {
+	this->addButtonPressed(event.mouseButton.button);
 }
 
-void Player::mouseButtonReleaseEvent([[maybe_unused]] sf::Event event)
+void Player::mouseButtonReleaseEvent(sf::Event event)
 {
+	this->removeButtonPressed(event.mouseButton.button);
 }
 
 void Player::mouseMoveEvent(sf::Event event)
