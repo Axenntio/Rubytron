@@ -1,5 +1,5 @@
 FONT_WIDTH = 5.freeze
-FONT_HEIGH = 6.freeze
+FONT_HEIGHT = 6.freeze
 
 $editor = nil
 
@@ -55,11 +55,35 @@ class Vector
   end
 end
 
+class Notification
+  def initialize(message, duration)
+    @pop_up = true
+    @uncover = 0
+    @uncover_goal = FONT_HEIGHT + 3
+    @message = message
+    @duration = duration
+  end
+
+  def draw(elapsed)
+    return if !@duration.positive? && @pop_up == false && @uncover.zero?
+
+    @uncover = [@uncover + @uncover_goal * elapsed * 0.1, @uncover_goal].min if @pop_up == true
+    @uncover = [@uncover - @uncover_goal * elapsed * 0.1, 0].max if @pop_up == false
+
+    line 0, Window.height - @uncover, Window.width, Window.height - @uncover, 13
+    rect 0, Window.height - @uncover + 1, Window.width, @uncover - 1, 1
+    text 1, Window.height - @uncover + 2, @message, 13
+    @duration -= elapsed * 10 if @uncover == @uncover_goal
+    @pop_up = @duration.positive?
+  end
+end
+
 class Editor
   attr_accessor :cursor
 
   def initialize(path)
     @path = path
+    @notification = nil
     @cursor = Vector.new(0, 0)
     @code_shift = Vector.new(0, 0)
     begin
@@ -94,7 +118,7 @@ class Editor
   end
 
   def update_show_line(width, height)
-    @show_line = height / FONT_HEIGH + 1
+    @show_line = height / FONT_HEIGHT + 1
     @show_char = width / FONT_WIDTH + 1 - @side_bar_width
     Window.title = "#{@path} - #{width}x#{height}"
   end
@@ -145,7 +169,7 @@ class Editor
 
   def click(x, y)
     position = self.showable_content_position
-    @cursor = Vector.new((x + FONT_WIDTH / 2) / FONT_WIDTH, y / FONT_HEIGH) - position + @code_shift
+    @cursor = Vector.new((x + FONT_WIDTH / 2) / FONT_WIDTH, y / FONT_HEIGHT) - position + @code_shift
     @cursor.y = [[0, @cursor.y].max, @file_content.count - 1].min
     @cursor.x = [[0, @cursor.x].max, @file_content[@cursor.y].length].min
   end
@@ -207,6 +231,9 @@ class Editor
       end
     when 89 # F5
       Desktop.spawn @path
+    when 91 # F7
+      Desktop.export @path
+      @notification = Notification.new('Project exported', 3000)
     else
       puts "Unhandled #{key}"
     end
@@ -263,6 +290,11 @@ class Editor
     File.open(@path, 'w') do |file|
       file.write(@file_content.join("\n"))
     end
+    @notification = Notification.new('Project saved', 2000)
+  end
+
+  def notification
+    @notification
   end
 end
 
@@ -285,21 +317,23 @@ def update(elapsed)
        text 1 + editor_canvas.x * FONT_WIDTH + part_offset, y_offset, part, color, true
        part_offset += part.length * FONT_WIDTH
     end
-    y_offset += FONT_HEIGH
+    y_offset += FONT_HEIGHT
   end
   # Drawing cursor
   cursor = $editor.showable_cursor
-  line cursor.x * FONT_WIDTH + 1, cursor.y * FONT_HEIGH, cursor.x * FONT_WIDTH + 1, cursor.y * FONT_HEIGH + FONT_HEIGH + 1, 8
+  line cursor.x * FONT_WIDTH + 1, cursor.y * FONT_HEIGHT, cursor.x * FONT_WIDTH + 1, cursor.y * FONT_HEIGHT + FONT_HEIGHT + 1, 8
   # Drawing sidebar
   rect 0, 0, editor_canvas.x * FONT_WIDTH, Window.height, 1
   y_offset = 1
   $editor.content_lines.each do |number|
     line = number.to_s
     text 1 + (editor_canvas.x - line.length) * FONT_WIDTH, y_offset, line, 13, true
-    y_offset += FONT_HEIGH
+    y_offset += FONT_HEIGHT
   end
   # Drawing scrollbar
   scrollbar_size = 10;
   scroll = $editor.showable_scrollbar(scrollbar_size)
   rect Window.width - 1, scroll, Window.width - 1, scrollbar_size, 6
+  # Drawing notification
+  $editor.notification&.draw(elapsed)
 end
