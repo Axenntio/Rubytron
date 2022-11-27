@@ -122,7 +122,10 @@ class Editor
   end
 
   def showable_scrollbar(size)
-    (@code_shift.y.to_f) / (@file_content.length - 1) * (Window.height - size)
+    divider = (@file_content.length - 1)
+    return 0 if divider.zero?
+
+    (@code_shift.y.to_f) / divider * (Window.height - size)
   end
 
   def add_char(char)
@@ -202,6 +205,8 @@ class Editor
       if @cursor.x > @file_content[@cursor.y].length
         @cursor.x = @file_content[@cursor.y].length
       end
+    when 89 # F5
+      Desktop.spawn @path
     else
       puts "Unhandled #{key}"
     end
