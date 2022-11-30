@@ -73,7 +73,7 @@ class Terminal
     @blink = true
   end
 
-  def showable_display(elapsed)(elapsed)
+  def showable_display(elapsed)
     cursor = ''
     @blink_time -= 1 * elapsed if @should_blink
     if @blink_time.zero? || @blink_time.negative?
@@ -112,15 +112,15 @@ class Terminal
     command = @current_line.split(' ')
     result = nil
     case command[0]
-    when 'monospace'
+    when 'mnsp'
       value = command[1]
       @monospace = param_to_bool(value) if param_is_bool(value) unless value.nil?
       result = @monospace
-    when 'return_value'
+    when 'ret_val'
       value = command[1]
       @return_value = param_to_bool(value) if param_is_bool(value) unless value.nil?
       result = @return_value
-    when 'spawn'
+    when 'sp'
       result = Desktop.spawn "#{@current_path}/#{command[1]}", command.drop(2)
     when 'export'
       result = Desktop.export "#{@current_path}/#{command[1]}"
@@ -148,6 +148,8 @@ class Terminal
       result = Desktop.kill_process(command[1].to_i) if command[1].to_i.is_a?(Integer)
     when 'exit'
       Window.close
+    when 'eval'
+      result = eval(command.drop(1).join(' '))
     end
     @display_history << result.inspect if @return_value
     @current_line = ''

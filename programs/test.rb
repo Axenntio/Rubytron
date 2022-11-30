@@ -1,6 +1,7 @@
 class Window
   def self.resize_event(new_width, new_height)
     puts "Received resize event (#{new_width}, #{new_height})"
+    $should_update = true
   end
 
   def self.close_event
@@ -38,12 +39,15 @@ class Window
 end
 
 def init
-  $has_focus = false;
+  $has_focus = false
+  $should_update = true
   $color_index = 0
   $value = 0
 end
 
 def update(elapsed)
+  return if $has_focus && !$should_update
+
   clear $color_index
   $value += elapsed / 10 if $has_focus
   pixel 0, 0, 1

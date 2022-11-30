@@ -6,22 +6,27 @@ $editor = nil
 class Window
   def self.resize_event(new_width, new_height)
     $editor.update_show_line(new_width, new_height)
+    $editor.redraw = true
   end
 
   def self.text_event(char)
     $editor.add_char(char)
+    $editor.redraw = true
   end
 
   def self.key_press_event(key)
     $editor.parse_key(key)
+    $editor.redraw = true
   end
 
   def self.button_press_event(button)
     $editor.click(Window.mouse_x, Window.mouse_y)
+    $editor.redraw = true
   end
 
   def self.mouse_wheel_event(horizontal, vertical)
     $editor.scroll(horizontal, vertical)
+    $editor.redraw = true
   end
 end
 
@@ -65,7 +70,7 @@ class Notification
   end
 
   def draw(elapsed)
-    return if !@duration.positive? && @pop_up == false && @uncover.zero?
+    return false if !@duration.positive? && @pop_up == false && @uncover.zero?
 
     @uncover = [@uncover + @uncover_goal * elapsed * 0.1, @uncover_goal].min if @pop_up == true
     @uncover = [@uncover - @uncover_goal * elapsed * 0.1, 0].max if @pop_up == false
@@ -75,13 +80,16 @@ class Notification
     text 1, Window.height - @uncover + 2, @message, 13
     @duration -= elapsed * 10 if @uncover == @uncover_goal
     @pop_up = @duration.positive?
+    true
   end
 end
 
 class Editor
   attr_accessor :cursor
+  attr_accessor :redraw
 
   def initialize(path)
+    @redraw = true
     @path = path
     @notification = nil
     @cursor = Vector.new(0, 0)
@@ -296,6 +304,41 @@ class Editor
   def notification
     @notification
   end
+
+  def draw(elapsed)
+    showable = 10
+    clear 0
+    editor_canvas = self.showable_content_position
+    # Drawing editor
+    y_offset = 1
+    self.showable_content.each do |line|
+      parts = line.split(/([\s.,\[\]\(\)]+)/)
+      part_offset = 0
+      parts.each do |part|
+        color = self.syntax_color(part)
+        text 1 + editor_canvas.x * FONT_WIDTH + part_offset, y_offset, part, color, true
+        part_offset += part.length * FONT_WIDTH
+      end
+      y_offset += FONT_HEIGHT
+    end
+    # Drawing cursor
+    cursor = self.showable_cursor
+    line cursor.x * FONT_WIDTH + 1, cursor.y * FONT_HEIGHT, cursor.x * FONT_WIDTH + 1, cursor.y * FONT_HEIGHT + FONT_HEIGHT + 1, 8
+    # Drawing sidebar
+    rect 0, 0, editor_canvas.x * FONT_WIDTH, Window.height, 1
+    y_offset = 1
+    self.content_lines.each do |number|
+      line = number.to_s
+      text 1 + (editor_canvas.x - line.length) * FONT_WIDTH, y_offset, line, 13, true
+      y_offset += FONT_HEIGHT
+    end
+    # Drawing scrollbar
+    scrollbar_size = 10;
+    scroll = self.showable_scrollbar(scrollbar_size)
+    rect Window.width - 1, scroll, Window.width - 1, scrollbar_size, 6
+    # Drawing notification
+    @redraw = self.notification&.draw(elapsed) || false
+  end
 end
 
 def init
@@ -304,36 +347,5 @@ def init
 end
 
 def update(elapsed)
-  showable = 10
-  clear 0
-  editor_canvas = $editor.showable_content_position
-  # Drawing editor
-  y_offset = 1
-  $editor.showable_content.each do |line|
-    parts = line.split(/([\s.,\[\]\(\)]+)/)
-    part_offset = 0
-    parts.each do |part|
-       color = $editor.syntax_color(part)
-       text 1 + editor_canvas.x * FONT_WIDTH + part_offset, y_offset, part, color, true
-       part_offset += part.length * FONT_WIDTH
-    end
-    y_offset += FONT_HEIGHT
-  end
-  # Drawing cursor
-  cursor = $editor.showable_cursor
-  line cursor.x * FONT_WIDTH + 1, cursor.y * FONT_HEIGHT, cursor.x * FONT_WIDTH + 1, cursor.y * FONT_HEIGHT + FONT_HEIGHT + 1, 8
-  # Drawing sidebar
-  rect 0, 0, editor_canvas.x * FONT_WIDTH, Window.height, 1
-  y_offset = 1
-  $editor.content_lines.each do |number|
-    line = number.to_s
-    text 1 + (editor_canvas.x - line.length) * FONT_WIDTH, y_offset, line, 13, true
-    y_offset += FONT_HEIGHT
-  end
-  # Drawing scrollbar
-  scrollbar_size = 10;
-  scroll = $editor.showable_scrollbar(scrollbar_size)
-  rect Window.width - 1, scroll, Window.width - 1, scrollbar_size, 6
-  # Drawing notification
-  $editor.notification&.draw(elapsed)
+  $editor.draw(elapsed) if $editor.redraw
 end
