@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         submodules: recursive
     - name: Install dependencies
@@ -30,7 +30,7 @@ jobs:
     runs-on: macos-latest
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         submodules: recursive
     - name: Install dependencies
@@ -43,6 +43,28 @@ jobs:
         cd mruby
         MRUBY_CONFIG=rubytron rake
     - name: Setup Rubytron
-      run: meson setup build
+      run: PKG_CONFIG_PATH="${PKG_CONFIG_PATH}:/opt/homebrew/opt/openal-soft/lib/pkgconfig" meson setup build
     - name: Compile Rubytron
       run: ninja -C build
+    - name: Create binary
+      run: |
+        mkdir -p Rubytron.app/Contents/MacOS
+        mkdir -p Rubytron.app/Contents/Resources
+        echo '<?xml version="1.0" encoding="UTF-8"?>\n<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">\n<plist version="1.0">\n<dict>\n  <key>CFBundleGetInfoString</key>\n  <string>Rubytron</string>\n  <key>CFBundleExecutable</key>\n  <string>launch.sh</string>\n  <key>CFBundleIdentifier</key>\n  <string>com.axenntio.rubytron</string>\n  <key>CFBundleName</key>\n  <string>rubytron</string>\n  <key>CFBundleIconFile</key>\n  <string>rubytron.icns</string>\n  <key>CFBundleShortVersionString</key>\n  <string>0.01</string>\n  <key>CFBundleInfoDictionaryVersion</key>\n  <string>6.0</string>\n  <key>CFBundlePackageType</key>\n  <string>APPL</string>\n  <key>IFMajorVersion</key>\n  <integer>0</integer>\n  <key>IFMinorVersion</key>\n  <integer>1</integer>\n</dict>\n</plist>' > Rubytron.app/Contents/Info.plist
+        cp build/src/Editor/rubytron Rubytron.app/Contents/MacOS/.
+        cp /opt/homebrew/opt/sfml/lib/libsfml-graphics.2.5.dylib Rubytron.app/Contents/MacOS/.
+        cp /opt/homebrew/opt/sfml/lib/libsfml-window.2.5.dylib Rubytron.app/Contents/MacOS/.
+        cp /opt/homebrew/opt/sfml/lib/libsfml-system.2.5.dylib Rubytron.app/Contents/MacOS/.
+        cp /opt/homebrew/opt/sfml/lib/libsfml-audio.2.5.dylib Rubytron.app/Contents/MacOS/.
+        install_name_tool -change /opt/homebrew/opt/sfml/lib/libsfml-graphics.2.5.dylib @executable_path/libsfml-graphics.2.5.dylib Rubytron.app/Contents/MacOS/rubytron
+        install_name_tool -change /opt/homebrew/opt/sfml/lib/libsfml-window.2.5.dylib @executable_path/libsfml-window.2.5.dylib Rubytron.app/Contents/MacOS/rubytron
+        install_name_tool -change /opt/homebrew/opt/sfml/lib/libsfml-system.2.5.dylib @executable_path/libsfml-system.2.5.dylib Rubytron.app/Contents/MacOS/rubytron
+        install_name_tool -change /opt/homebrew/opt/sfml/lib/libsfml-audio.2.5.dylib @executable_path/libsfml-audio.2.5.dylib Rubytron.app/Contents/MacOS/rubytron
+        cp -r programs Rubytron.app/Contents/MacOS/.
+        echo '#!/bin/bash\ncd "${0%/*}"\n./rubytron' > Rubytron.app/Contents/MacOS/launch.sh
+        chmod +x Rubytron.app/Contents/MacOS/launch.sh
+    - name: Upload macOS app
+        uses: actions/upload-artifact@v3
+        with:
+          name: rubytron-macos
+          path: Rubytron.app
