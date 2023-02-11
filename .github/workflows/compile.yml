@@ -25,6 +25,18 @@ jobs:
       run: meson setup build
     - name: Compile Rubytron
       run: ninja -C build
+    - name: Make Linux bundle
+      run: |
+        mkdir rubytron
+        cp build/src/Editor/rubytron rubytron/.
+        cp -r programs rubytron/.
+        tar -czvf rubytron.tar.gz rubytron
+    - name: Upload Linux bundle
+      uses: actions/upload-artifact@v3
+      with:
+        name: rubytron-linux
+        path: rubytron.tar.gz
+        retention-days: 5
 
   macos:
     runs-on: macos-latest
@@ -35,7 +47,7 @@ jobs:
         submodules: recursive
     - name: Install dependencies
       run: |
-        brew install meson sfml openal
+        brew install meson sfml openal-soft
     - name: Copy mruby config file
       run: cp rubytron.rb mruby/build_config/.
     - name: Compile mruby
@@ -68,3 +80,4 @@ jobs:
       with:
         name: rubytron-macos
         path: Rubytron.app
+        retention-days: 5
