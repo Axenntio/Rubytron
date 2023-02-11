@@ -25,3 +25,24 @@ jobs:
       run: meson setup build
     - name: Compile Rubytron
       run: ninja -C build
+
+  macos:
+    runs-on: macos-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+      with:
+        submodules: recursive
+    - name: Install dependencies
+      run: |
+        brew install meson sfml
+    - name: Copy mruby config file
+      run: cp rubytron.rb mruby/build_config/.
+    - name: Compile mruby
+      run: |
+        cd mruby
+        MRUBY_CONFIG=rubytron rake
+    - name: Setup Rubytron
+      run: meson setup build
+    - name: Compile Rubytron
+      run: ninja -C build
