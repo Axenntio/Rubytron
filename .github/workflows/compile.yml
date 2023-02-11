@@ -35,7 +35,7 @@ jobs:
         submodules: recursive
     - name: Install dependencies
       run: |
-        brew install meson sfml
+        brew install meson sfml openal
     - name: Copy mruby config file
       run: cp rubytron.rb mruby/build_config/.
     - name: Compile mruby
@@ -46,7 +46,7 @@ jobs:
       run: PKG_CONFIG_PATH="${PKG_CONFIG_PATH}:/opt/homebrew/opt/openal-soft/lib/pkgconfig" meson setup build
     - name: Compile Rubytron
       run: ninja -C build
-    - name: Create binary
+    - name: Create macOS app
       run: |
         mkdir -p Rubytron.app/Contents/MacOS
         mkdir -p Rubytron.app/Contents/Resources
