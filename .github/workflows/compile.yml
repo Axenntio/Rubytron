@@ -64,7 +64,7 @@ jobs:
         mkdir -p Rubytron.app/Contents/MacOS
         mkdir -p Rubytron.app/Contents/Resources
         echo '<?xml version="1.0" encoding="UTF-8"?>\n<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">\n<plist version="1.0">\n<dict>\n  <key>CFBundleGetInfoString</key>\n  <string>Rubytron</string>\n  <key>CFBundleExecutable</key>\n  <string>launch.sh</string>\n  <key>CFBundleIdentifier</key>\n  <string>com.axenntio.rubytron</string>\n  <key>CFBundleName</key>\n  <string>rubytron</string>\n  <key>CFBundleIconFile</key>\n  <string>rubytron.icns</string>\n  <key>CFBundleShortVersionString</key>\n  <string>0.01</string>\n  <key>CFBundleInfoDictionaryVersion</key>\n  <string>6.0</string>\n  <key>CFBundlePackageType</key>\n  <string>APPL</string>\n  <key>IFMajorVersion</key>\n  <integer>0</integer>\n  <key>IFMinorVersion</key>\n  <integer>1</integer>\n</dict>\n</plist>' > Rubytron.app/Contents/Info.plist
-        cp build/src/Editor/rubytron Rubytron.app/Contents/MacOS/.
+        cp ../build/src/Editor/rubytron Rubytron.app/Contents/MacOS/.
         cp /usr/local/opt/sfml/lib/libsfml-graphics.2.5.dylib Rubytron.app/Contents/MacOS/.
         cp /usr/local/opt/sfml/lib/libsfml-window.2.5.dylib Rubytron.app/Contents/MacOS/.
         cp /usr/local/opt/sfml/lib/libsfml-system.2.5.dylib Rubytron.app/Contents/MacOS/.
