@@ -19,7 +19,7 @@ Code: mruby 3.1 (2.x ruby)
 ```console
 $ cp rubytron.rb mruby/build_config/. && cd mruby && MRUBY_CONFIG=rubytron rake && cd ..
 [...]
-$ meson build
+$ meson setup build
 [...]
 $ ninja -C build
 ```

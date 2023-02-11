@@ -1,0 +1,25 @@
+name: Compile
+on:
+  push:
+    branches:
+      - main
+jobs:
+  linux:
+    runs-on: ruby:3.2
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+    - name: Install dependencies
+      run:
+        - apt update
+        - apt install -y git g++ libsfml-dev meson xxd
+    - name: Copy mruby config file
+      run: cp rubytron.rb mruby/build_config/.
+    - name: Compile mruby
+      run:
+        - cd mruby
+        - MRUBY_CONFIG=rubytron rake
+    - name: Setup Rubytron
+      run: meson setup build
+    - name: Compile Rubytron
+      run: ninja -C build
