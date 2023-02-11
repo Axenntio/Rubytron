@@ -68,10 +68,10 @@ jobs:
         cp /usr/local/opt/sfml/lib/libsfml-window.2.5.dylib bundle/Rubytron.app/Contents/MacOS/.
         cp /usr/local/opt/sfml/lib/libsfml-system.2.5.dylib bundle/Rubytron.app/Contents/MacOS/.
         cp /usr/local/opt/sfml/lib/libsfml-audio.2.5.dylib bundle/Rubytron.app/Contents/MacOS/.
-        install_name_tool -change /usr/local/opt/sfml/lib/libsfml-graphics.2.5.dylib @executable_path/libsfml-graphics.2.5.dylib Rubytron.app/Contents/MacOS/rubytron
-        install_name_tool -change /usr/local/opt/sfml/lib/libsfml-window.2.5.dylib @executable_path/libsfml-window.2.5.dylib Rubytron.app/Contents/MacOS/rubytron
-        install_name_tool -change /usr/local/opt/sfml/lib/libsfml-system.2.5.dylib @executable_path/libsfml-system.2.5.dylib Rubytron.app/Contents/MacOS/rubytron
-        install_name_tool -change /usr/local/opt/sfml/lib/libsfml-audio.2.5.dylib @executable_path/libsfml-audio.2.5.dylib Rubytron.app/Contents/MacOS/rubytron
+        install_name_tool -change /usr/local/opt/sfml/lib/libsfml-graphics.2.5.dylib @executable_path/libsfml-graphics.2.5.dylib bundle/Rubytron.app/Contents/MacOS/rubytron
+        install_name_tool -change /usr/local/opt/sfml/lib/libsfml-window.2.5.dylib @executable_path/libsfml-window.2.5.dylib bundle/Rubytron.app/Contents/MacOS/rubytron
+        install_name_tool -change /usr/local/opt/sfml/lib/libsfml-system.2.5.dylib @executable_path/libsfml-system.2.5.dylib bundle/Rubytron.app/Contents/MacOS/rubytron
+        install_name_tool -change /usr/local/opt/sfml/lib/libsfml-audio.2.5.dylib @executable_path/libsfml-audio.2.5.dylib bundle/Rubytron.app/Contents/MacOS/rubytron
         cp -r programs bundle/Rubytron.app/Contents/MacOS/.
         echo '#!/bin/bash\ncd "${0%/*}"\n./rubytron' > bundle/Rubytron.app/Contents/MacOS/launch.sh
         chmod +x bundle/Rubytron.app/Contents/MacOS/launch.sh
