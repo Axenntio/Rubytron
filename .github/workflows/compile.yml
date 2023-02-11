@@ -55,7 +55,13 @@ jobs:
         cd mruby
         MRUBY_CONFIG=rubytron rake
     - name: Setup Rubytron
-      run: PKG_CONFIG_PATH="${PKG_CONFIG_PATH}:/opt/homebrew/opt/openal-soft/lib/pkgconfig" meson setup build
+      run: |
+        ls -d ls /opt/homebrew
+        ls -d ls /opt/homebrew/opt
+        ls -d ls /opt/homebrew/opt/openal-soft
+        ls -d ls /opt/homebrew/opt/openal-soft/lib
+        ls /opt/homebrew/opt/openal-soft/lib/pkgconfig
+        PKG_CONFIG_PATH="${PKG_CONFIG_PATH}:/opt/homebrew/opt/openal-soft/lib/pkgconfig" meson setup build
     - name: Compile Rubytron
       run: ninja -C build
     - name: Create macOS app
