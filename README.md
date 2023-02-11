@@ -1,5 +1,7 @@
 # Rubytron
 
+![Rubytron Desktop](media/interface.png)
+
 ## :warning: This project is currently work in progress, so do not expect anything working / usefull for now
 
 ## Inspiration
