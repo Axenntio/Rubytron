@@ -64,7 +64,7 @@ jobs:
         echo '#!/bin/bash\ncd "${0%/*}"\n./rubytron' > Rubytron.app/Contents/MacOS/launch.sh
         chmod +x Rubytron.app/Contents/MacOS/launch.sh
     - name: Upload macOS app
-        uses: actions/upload-artifact@v3
-        with:
-          name: rubytron-macos
-          path: Rubytron.app
+      uses: actions/upload-artifact@v3
+      with:
+        name: rubytron-macos
+        path: Rubytron.app
