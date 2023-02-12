@@ -97,9 +97,13 @@ jobs:
         echo -e '#!/bin/bash\ncd "${0%/*}"\n./rubytron' > Rubytron.app/Contents/MacOS/launch.sh
         chmod +x Rubytron.app/Contents/MacOS/launch.sh
         xattr -c Rubytron.app
+    - name: Create macOS DMG
+      run: |
+        hdiutil create /tmp/tmp.dmg -ov -volname "Rubytron" -fs HFS+ -srcfolder bundle
+        hdiutil convert /tmp/tmp.dmg -format UDZO -o Rubytron.dmg
     - name: Upload macOS app
       uses: actions/upload-artifact@v3
       with:
         name: rubytron-macos
-        path: bundle
+        path: Rubytron.dmg
         retention-days: 5
