@@ -72,6 +72,7 @@ jobs:
         cp /usr/local/opt/libvorbis/lib/libvorbis.0.dylib Rubytron.app/Contents/MacOS/.
         cp /usr/local/opt/libvorbis/lib/libvorbisenc.2.dylib Rubytron.app/Contents/MacOS/.
         cp /usr/local/opt/libvorbis/lib/libvorbisfile.3.dylib Rubytron.app/Contents/MacOS/.
+        cp /usr/local/opt/libogg/lib/libogg.0.dylib Rubytron.app/Contents/MacOS/.
         cp /usr/local/opt/flac/lib/libFLAC.12.dylib Rubytron.app/Contents/MacOS/.
         cp /usr/local/opt/freetype/lib/libfreetype.6.dylib Rubytron.app/Contents/MacOS/.
         cp /usr/local/opt/libpng/lib/libpng16.16.dylib Rubytron.app/Contents/MacOS/.
@@ -82,6 +83,7 @@ jobs:
         install_name_tool -change /usr/local/opt/libvorbis/lib/libvorbis.0.dylib @executable_path/libvorbis.0.dylib Rubytron.app/Contents/MacOS/libsfml-audio.2.5.dylib
         install_name_tool -change /usr/local/opt/libvorbis/lib/libvorbisenc.2.dylib @executable_path/libvorbisenc.2.dylib Rubytron.app/Contents/MacOS/libsfml-audio.2.5.dylib
         install_name_tool -change /usr/local/opt/libvorbis/lib/libvorbisfile.3.dylib @executable_path/libvorbisfile.3.dylib Rubytron.app/Contents/MacOS/libsfml-audio.2.5.dylib
+        install_name_tool -change /usr/local/opt/libogg/lib/libogg.0.dylib @executable_path/libogg.0.dylib Rubytron.app/Contents/MacOS/libsfml-audio.2.5.dylib
         install_name_tool -change /usr/local/opt/flac/lib/libFLAC.12.dylib @executable_path/libFLAC.12.dylib Rubytron.app/Contents/MacOS/libsfml-audio.2.5.dylib
         install_name_tool -change /usr/local/opt/freetype/lib/libfreetype.6.dylib @executable_path/libfreetype.6.dylib Rubytron.app/Contents/MacOS/libsfml-graphics.2.5.dylib
         install_name_tool -change /usr/local/opt/libpng/lib/libpng16.16.dylib @executable_path//libpng16.16.dylib Rubytron.app/Contents/MacOS/libfreetype.6.dylib
