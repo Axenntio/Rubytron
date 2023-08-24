@@ -84,6 +84,8 @@ jobs:
     - uses: actions/download-artifact@v2
       with:
         name: macos-runtime-header
+    - name: Debug path
+      run: ls /home/runner/work/Rubytron/Rubytron
     - name: Compile Rubytron
       run: ninja -C build
     - name: Make Linux bundle
