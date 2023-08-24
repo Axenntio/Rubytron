@@ -7,7 +7,7 @@ sources = [
 
 xxd = find_program('xxd')
 runtime_code = custom_target('objectify-data',
-	output: 'runtimes.h',
+	output: 'runtime-' + host_machine.system() + '.h',
 	input: runtime_exe,
 	command: [ xxd, '-i', '@INPUT@', '@OUTPUT@' ],
 	depends: runtime_exe

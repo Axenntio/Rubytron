@@ -4,7 +4,7 @@ on:
     branches:
       - main
 jobs:
-  linux:
+  linux-runtime:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository
@@ -25,19 +25,13 @@ jobs:
       run: meson setup build
     - name: Compile Rubytron
       run: ninja -C build
-    - name: Make Linux bundle
-      run: |
-        mkdir bundle
-        cp build/src/Editor/rubytron bundle/.
-        cp -r programs bundle/.
-    - name: Upload Linux bundle
+    - name: Upload Linux Runtime Header
       uses: actions/upload-artifact@v3
       with:
-        name: rubytron-linux
-        path: bundle
-        retention-days: 5
+        name: linux-runtime-header
+        path: build/src/Editor/runtime-linux.h
 
-  macos:
+  macos-runtime:
     runs-on: macos-latest
     steps:
     - name: Checkout repository
@@ -56,6 +50,80 @@ jobs:
     - name: Setup Rubytron
       run: |
         PKG_CONFIG_PATH="${PKG_CONFIG_PATH}:/usr/local/opt/openal-soft/lib/pkgconfig" meson setup build
+    - name: Compile Rubytron
+      run: ninja -C build
+    - name: Upload macOS Runtime Header
+      uses: actions/upload-artifact@v3
+      with:
+        name: macos-runtime-header
+        path: build/src/Editor/runtime-darwin.h
+
+  linux:
+    needs: [
+      linux-runtime
+      macos-runtime
+    ]
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+      with:
+        submodules: recursive
+    - name: Install dependencies
+      run: |
+        sudo apt update
+        sudo apt install -y git g++ libsfml-dev meson ruby xxd
+    - name: Copy mruby config file
+      run: cp rubytron.rb mruby/build_config/.
+    - name: Compile mruby
+      run: |
+        cd mruby
+        MRUBY_CONFIG=rubytron rake
+    - name: Setup Rubytron
+      run: meson setup build -Dcpp_args=-DMULTI_EXPORT
+    - uses: actions/download-artifact@v2
+      with:
+        name: macos-runtime-header
+    - name: Compile Rubytron
+      run: ninja -C build
+    - name: Make Linux bundle
+      run: |
+        mkdir bundle
+        cp build/src/Editor/rubytron bundle/.
+        cp -r programs bundle/.
+    - name: Upload Linux bundle
+      uses: actions/upload-artifact@v3
+      with:
+        name: rubytron-linux
+        path: bundle
+        retention-days: 5
+
+  macos:
+    needs: [
+      linux-runtime
+      macos-runtime
+    ]
+    runs-on: macos-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+      with:
+        submodules: recursive
+    - name: Install dependencies
+      run: |
+        brew install meson sfml openal-soft
+    - name: Copy mruby config file
+      run: cp rubytron.rb mruby/build_config/.
+    - name: Compile mruby
+      run: |
+        cd mruby
+        MRUBY_CONFIG=rubytron rake
+    - name: Setup Rubytron
+      run: |
+        PKG_CONFIG_PATH="${PKG_CONFIG_PATH}:/usr/local/opt/openal-soft/lib/pkgconfig" meson setup build -Dcpp_args=-DMULTI_EXPORT
+    - uses: actions/download-artifact@v2
+      with:
+        name: linux-runtime-header
     - name: Compile Rubytron
       run: ninja -C build
     - name: Create macOS app

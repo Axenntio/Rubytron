@@ -146,38 +146,46 @@ bool Desktop::isFocused(const Window* window) const
 	return this->_focusedWindow.get() == window;
 }
 
-#include <runtimes.h>
+#if defined(__APPLE__) || defined(MULTI_EXPORT)
+	#include <runtime-darwin.h>
+#endif
+#if defined(__linux__) || defined(MULTI_EXPORT)
+	#include <runtime-linux.h>
+#endif
+struct arch_t {
+	std::string name;
+	unsigned char* file;
+	unsigned int length;
+};
+
 bool Desktop::programExport(const std::string& path) const
 {
-	std::vector<std::string> archs = {
-#ifdef __APPLE__
-		"macos"
+	std::vector<arch_t> archs = {
+#if defined(__APPLE__) || defined(MULTI_EXPORT)
+		{"darwin", src_Runtime_runtime_darwin, src_Runtime_runtime_darwin_len},
 #endif
-#ifdef __linux__
-		"linux"
-#endif
-#ifdef _WIN32
-		"windows"
+#if defined(__linux__) || defined(MULTI_EXPORT)
+		{"linux", src_Runtime_runtime_linux, src_Runtime_runtime_linux_len},
 #endif
 	};
 	std::filesystem::create_directory(path + ".bin");
-	for (const std::string& arch : archs) {
+	for (const arch_t& arch : archs) {
 		// Expose runtime
-		std::filesystem::create_directory(path + ".bin/" + arch);
-		std::ofstream runtimeFile(path + ".bin/" + arch + "/runtime", std::ios::binary);
+		std::filesystem::create_directory(path + ".bin/" + arch.name);
+		std::ofstream runtimeFile(path + ".bin/" + arch.name + "/runtime", std::ios::binary);
 		if (!runtimeFile.is_open()) {
 			return false;
 		}
-		runtimeFile.write((char *)src_Runtime_runtime, src_Runtime_runtime_len);
+		runtimeFile.write((char *)arch.file, arch.length);
 		runtimeFile.close();
-		std::filesystem::permissions(path + ".bin/" + arch + "/runtime",
+		std::filesystem::permissions(path + ".bin/" + arch.name + "/runtime",
 			std::filesystem::perms::owner_exec,
 			std::filesystem::perm_options::add
 		);
 
 		// Output file
 		std::ifstream programFileContent(path, std::ios::binary);
-		std::ofstream programFile(path + ".bin/" + arch + "/program.rb");
+		std::ofstream programFile(path + ".bin/" + arch.name + "/program.rb");
 		if (!programFile.is_open()) {
 			return false;
 		}

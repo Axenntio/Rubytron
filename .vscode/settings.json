@@ -1,10 +1,12 @@
 {
 	"files.associations": {
-		"*.ui": "xml",
 		"*.z80": "z80-macroasm",
 		"*.inc65": "ca65",
-		"**/.config/sway/config": "i3",
 		"*.s65": "ca65",
+		"**/.config/sway/config": "i3",
+		"*.html.erb": "erb",
+		"*.js.erb": "js",
+		"*.ui": "xml",
 		"__hash_table": "cpp",
 		"__split_buffer": "cpp",
 		"__tree": "cpp",
@@ -97,6 +99,7 @@
 		"__functional_base": "cpp",
 		"ranges": "cpp",
 		"span": "cpp",
-		"filesystem": "cpp"
+		"filesystem": "cpp",
+		"__verbose_abort": "cpp"
 	}
 }
