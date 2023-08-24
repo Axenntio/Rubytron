@@ -60,7 +60,7 @@ jobs:
 
   linux:
     needs: [
-      linux-runtime
+      linux-runtime,
       macos-runtime
     ]
     runs-on: ubuntu-latest
@@ -100,7 +100,7 @@ jobs:
 
   macos:
     needs: [
-      linux-runtime
+      linux-runtime,
       macos-runtime
     ]
     runs-on: macos-latest
