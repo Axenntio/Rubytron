@@ -150,6 +150,8 @@ class Terminal
       Window.close
     when 'eval'
       result = eval(command.drop(1).join(' '))
+    else
+      @display_history << "`#{command[0]}` command not found"
     end
     @display_history << result.inspect if @return_value
     @current_line = ''
