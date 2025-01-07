@@ -25,15 +25,15 @@ public:
 	bool killWindow(unsigned int processId);
 
 private:
-	void closeEvent(sf::Event event);
-	void resizeEvent(sf::Event event);
-	void mouseButtonPressEvent(sf::Event event);
-	void mouseButtonReleaseEvent(sf::Event event);
-	void mouseMoveEvent(sf::Event event);
-	void keyPressEvent(sf::Event event);
-	void keyReleaseEvent(sf::Event event);
-	void textEvent(sf::Event event);
-	void mouseWheelEvent(sf::Event event);
+	void closeEvent(const sf::Event::Closed *event);
+	void resizeEvent(const sf::Event::Resized *event);
+	void mouseButtonPressEvent(const sf::Event::MouseButtonPressed *event);
+	void mouseButtonReleaseEvent(const sf::Event::MouseButtonReleased *event);
+	void mouseMoveEvent(const sf::Event::MouseMoved *event);
+	void keyPressEvent(const sf::Event::KeyPressed *event);
+	void keyReleaseEvent(const sf::Event::KeyReleased *event);
+	void textEvent(const sf::Event::TextEntered *event);
+	void mouseWheelEvent(const sf::Event::MouseWheelScrolled *event);
 
 	sf::RenderWindow _window;
 	sf::RenderTexture _background_texture;

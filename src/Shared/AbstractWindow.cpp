@@ -13,7 +13,7 @@ AbstractWindow::AbstractWindow(sf::Vector2i position, sf::Vector2u size, const s
 	this->setPosition(sf::Vector2f(position));
 	this->_minSize = sf::Vector2i(8, 4);
 	this->_palette = palette;
-	this->_texture.create(this->_size.x, this->_size.y);
+	this->_texture.resize(static_cast<sf::Vector2u>(this->_size));
 	this->_texture.clear(this->_palette[0]);
 	this->_mrb = mrb_open();
 
@@ -113,7 +113,7 @@ void AbstractWindow::draw(sf::RenderTarget& target, sf::RenderStates states) con
 	states.texture = NULL;
 
 	sf::Sprite canvas(this->_texture.getTexture());
-	canvas.setTextureRect(sf::IntRect(0, this->_size.y, this->_size.x, -this->_size.y));
+	canvas.setTextureRect(sf::IntRect({0, this->_size.y}, {this->_size.x, -this->_size.y}));
 	target.draw(canvas, states);
 }
 
@@ -194,10 +194,10 @@ void AbstractWindow::resizeV(int height)
 void AbstractWindow::resizeTrigger()
 {
 	sf::Texture tmp(this->_texture.getTexture());
-	this->_texture.create(this->_size.x, this->_size.y);
+	this->_texture.resize(static_cast<sf::Vector2u>(this->_size));
 	this->_texture.clear(this->_palette[0]);
 	sf::Sprite tmpSprite(tmp);
-	tmpSprite.setTextureRect(sf::IntRect(0, tmp.getSize().y, tmp.getSize().x, -tmp.getSize().y));
+	tmpSprite.setTextureRect(sf::IntRect(sf::Vector2i(0, tmp.getSize().y), sf::Vector2i(tmp.getSize().x, -tmp.getSize().y)));
 	this->_texture.draw(tmpSprite);
 }
 
@@ -217,7 +217,7 @@ void AbstractWindow::addKeyPressed(sf::Keyboard::Key key)
 	}
 	mrb_value obj = mrb_const_get(this->_mrb, mrb_obj_value(this->_mrb->object_class), mrb_intern_cstr(this->_mrb, "Window"));
 	if (mrb_respond_to(this->_mrb, obj, mrb_intern_cstr(this->_mrb, "key_press_event"))) {
-		mrb_funcall(this->_mrb, obj, "key_press_event", 1, mrb_int_value(this->_mrb, key));
+		mrb_funcall(this->_mrb, obj, "key_press_event", 1, mrb_int_value(this->_mrb, static_cast<int>(key)));
 	}
 }
 
@@ -230,7 +230,7 @@ void AbstractWindow::removeKeyPressed(sf::Keyboard::Key key)
 	}
 	mrb_value obj = mrb_const_get(this->_mrb, mrb_obj_value(this->_mrb->object_class), mrb_intern_cstr(this->_mrb, "Window"));
 	if (mrb_respond_to(this->_mrb, obj, mrb_intern_cstr(this->_mrb, "key_release_event"))) {
-		mrb_funcall(this->_mrb, obj, "key_release_event", 1, mrb_int_value(this->_mrb, key));
+		mrb_funcall(this->_mrb, obj, "key_release_event", 1, mrb_int_value(this->_mrb, static_cast<int>(key)));
 	}
 }
 
@@ -241,7 +241,7 @@ void AbstractWindow::addButtonPressed(sf::Mouse::Button button)
 	}
 	mrb_value obj = mrb_const_get(this->_mrb, mrb_obj_value(this->_mrb->object_class), mrb_intern_cstr(this->_mrb, "Window"));
 	if (mrb_respond_to(this->_mrb, obj, mrb_intern_cstr(this->_mrb, "button_press_event"))) {
-		mrb_funcall(this->_mrb, obj, "button_press_event", 1, mrb_int_value(this->_mrb, button));
+		mrb_funcall(this->_mrb, obj, "button_press_event", 1, mrb_int_value(this->_mrb, static_cast<int>(button)));
 	}
 }
 
@@ -254,11 +254,11 @@ void AbstractWindow::removeButtonPressed(sf::Mouse::Button button)
 	}
 	mrb_value obj = mrb_const_get(this->_mrb, mrb_obj_value(this->_mrb->object_class), mrb_intern_cstr(this->_mrb, "Window"));
 	if (mrb_respond_to(this->_mrb, obj, mrb_intern_cstr(this->_mrb, "button_release_event"))) {
-		mrb_funcall(this->_mrb, obj, "button_release_event", 1, mrb_int_value(this->_mrb, button));
+		mrb_funcall(this->_mrb, obj, "button_release_event", 1, mrb_int_value(this->_mrb, static_cast<int>(button)));
 	}
 }
 
-void AbstractWindow::textEnteredEvent(sf::Uint32 unicode)
+void AbstractWindow::textEnteredEvent(std::uint32_t unicode)
 {
 	mrb_value obj = mrb_const_get(this->_mrb, mrb_obj_value(this->_mrb->object_class), mrb_intern_cstr(this->_mrb, "Window"));
 	if (mrb_respond_to(this->_mrb, obj, mrb_intern_cstr(this->_mrb, "text_event"))) {
@@ -266,12 +266,12 @@ void AbstractWindow::textEnteredEvent(sf::Uint32 unicode)
 	}
 }
 
-void AbstractWindow::mouseWheelEvent(sf::Event::MouseWheelScrollEvent wheel)
+void AbstractWindow::mouseWheelEvent(const sf::Event::MouseWheelScrolled *wheel)
 {
 	mrb_value obj = mrb_const_get(this->_mrb, mrb_obj_value(this->_mrb->object_class), mrb_intern_cstr(this->_mrb, "Window"));
 	if (mrb_respond_to(this->_mrb, obj, mrb_intern_cstr(this->_mrb, "mouse_wheel_event"))) {
-		mrb_value horizontal = mrb_float_value(this->_mrb, wheel.wheel == sf::Mouse::HorizontalWheel ? wheel.delta : 0);
-		mrb_value vertical = mrb_float_value(this->_mrb, wheel.wheel == sf::Mouse::VerticalWheel ? wheel.delta : 0);
+		mrb_value horizontal = mrb_float_value(this->_mrb, wheel->wheel == sf::Mouse::Wheel::Horizontal ? wheel->delta : 0);
+		mrb_value vertical = mrb_float_value(this->_mrb, wheel->wheel == sf::Mouse::Wheel::Vertical ? wheel->delta : 0);
 		mrb_funcall(this->_mrb, obj, "mouse_wheel_event", 2, horizontal, vertical);
 	}
 }
@@ -532,11 +532,11 @@ mrb_value AbstractWindow::mrubyLine(mrb_state* mrb, [[maybe_unused]] mrb_value s
 	mrb_get_args(mrb, "iiii|i", &x1, &y1, &x2, &y2, &colorPalette);
 
 	sf::Vertex line[] = {
-		sf::Vertex(sf::Vector2f(x1, y1), window->_palette[colorPalette]),
-		sf::Vertex(sf::Vector2f(x2, y2), window->_palette[colorPalette])
+		{sf::Vector2f(x1, y1), window->_palette[colorPalette]},
+		{sf::Vector2f(x2, y2), window->_palette[colorPalette]}
 	};
 
-	window->_texture.draw(line, 2, sf::Lines);
+	window->_texture.draw(line, 2, sf::PrimitiveType::Lines);
 
 	return mrb_nil_value();
 }
@@ -598,7 +598,7 @@ mrb_value AbstractWindow::mrubyKey(mrb_state* mrb, [[maybe_unused]] mrb_value se
 
 	mrb_value array = mrb_ary_new_capa(mrb, window->_keyPressed.size());
 	for (const sf::Keyboard::Key& key : window->_keyPressed) {
-		mrb_ary_push(mrb, array, mrb_int_value(mrb, key));
+		mrb_ary_push(mrb, array, mrb_int_value(mrb, static_cast<int>(key)));
 	}
 
 	return array;
@@ -616,7 +616,7 @@ mrb_value AbstractWindow::mrubyButton(mrb_state* mrb, [[maybe_unused]] mrb_value
 
 	mrb_value array = mrb_ary_new_capa(mrb, window->_buttonPressed.size());
 	for (const sf::Mouse::Button& button : window->_buttonPressed) {
-		mrb_ary_push(mrb, array, mrb_int_value(mrb, button));
+		mrb_ary_push(mrb, array, mrb_int_value(mrb, static_cast<int>(button)));
 	}
 
 	return array;
@@ -626,16 +626,16 @@ mrb_value AbstractWindow::mrubySound(mrb_state* mrb, [[maybe_unused]] mrb_value 
 {
 	AbstractWindow* window = mrubyGetWindowObject(mrb);
 	mrb_int frequency = 440;
-	std::vector<sf::Int16> samples;
+	std::vector<std::int16_t> samples;
 
 	mrb_get_args(mrb, "|i", &frequency);
 
 	for (unsigned int i = 0; i < 44100 / 10; i++) {
 		samples.push_back(window->generateSineWave(i, frequency, 0.9));
 	}
-	window->_soundBuffer.loadFromSamples(&samples[0], samples.size(), 1, 44100);
-	window->_sound.setBuffer(window->_soundBuffer);
-	window->_sound.play();
+	window->_soundBuffer.loadFromSamples(&samples[0], samples.size(), 1, 44100, {sf::SoundChannel::Mono});
+	window->_sound = new sf::Sound(window->_soundBuffer);
+	window->_sound->play();
 	return mrb_nil_value();
 }
 

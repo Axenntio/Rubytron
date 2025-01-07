@@ -25,20 +25,20 @@ Desktop::Desktop(unsigned int width, unsigned int height, unsigned char scale, T
 		sf::Color(255, 204, 170)  // #FFCCAA
 	};
 
-	this->_window.create(sf::VideoMode(this->_size.x * scale, this->_size.y * scale), "Rubytron");
+	this->_window.create(sf::VideoMode(sf::Vector2u(this->_size.x * scale, this->_size.y * scale)), "Rubytron");
 	this->_window.setMouseCursorVisible(false);
-	this->_background_texture.create(this->_size.x, this->_size.y);
+	this->_background_texture.resize(this->_size);
 	this->_background_texture.clear(this->_palette[1]);
-	this->_foreground_texture.create(this->_size.x, this->_size.y);
+	this->_foreground_texture.resize(this->_size);
 	this->_foreground_texture.clear(sf::Color::Transparent);
-	this->_cursor_texture.create(4, 6);
+	this->_cursor_texture.resize({4, 6});
 	this->_cursor_texture.clear(sf::Color::Transparent);
 
 	drawOnTexture(this->_cursor_texture, 0, 0, spr_cursor, SPR_CURSOR_HEIGHT, this->_palette[7]);
 
 
-	this->_canvas_view.setCenter(this->_size.x / 2, this->_size.y / 2);
-	this->_canvas_view.setViewport(sf::FloatRect(0, 0, 1, 1));
+	this->_canvas_view.setCenter(sf::Vector2f(this->_size.x / 2, this->_size.y / 2));
+	this->_canvas_view.setViewport(sf::FloatRect({0, 0}, {1, 1}));
 	this->_canvas_view.setSize(sf::Vector2f(this->_size.x, this->_size.y));
 	this->_window.setView(this->_canvas_view);
 
@@ -66,35 +66,34 @@ void Desktop::run()
 {
 	while (this->_window.isOpen())
 	{
-		sf::Event event;
-		while (this->_window.pollEvent(event))
+		while (const std::optional event = this->_window.pollEvent())
 		{
-			if (event.type == sf::Event::Closed) {
-				this->closeEvent(event);
+			if (const auto* eventData = event->getIf<sf::Event::Closed>()) {
+				this->closeEvent(eventData);
 			}
-			if (event.type == sf::Event::Resized) {
-				this->resizeEvent(event);
+			if (const auto* eventData = event->getIf<sf::Event::Resized>()) {
+				this->resizeEvent(eventData);
 			}
-			if (event.type == sf::Event::MouseButtonPressed) {
-				this->mouseButtonPressEvent(event);
+			if (const auto* eventData = event->getIf<sf::Event::MouseButtonPressed>()) {
+				this->mouseButtonPressEvent(eventData);
 			}
-			if (event.type == sf::Event::MouseButtonReleased) {
-				this->mouseButtonReleaseEvent(event);
+			if (const auto* eventData = event->getIf<sf::Event::MouseButtonReleased>()) {
+				this->mouseButtonReleaseEvent(eventData);
 			}
-			if (event.type == sf::Event::MouseMoved) {
-				this->mouseMoveEvent(event);
+			if (const auto* eventData = event->getIf<sf::Event::MouseMoved>()) {
+				this->mouseMoveEvent(eventData);
 			}
-			if (event.type == sf::Event::KeyPressed) {
-				this->keyPressEvent(event);
+			if (const auto* eventData = event->getIf<sf::Event::KeyPressed>()) {
+				this->keyPressEvent(eventData);
 			}
-			if (event.type == sf::Event::KeyReleased) {
-				this->keyReleaseEvent(event);
+			if (const auto* eventData = event->getIf<sf::Event::KeyReleased>()) {
+				this->keyReleaseEvent(eventData);
 			}
-			if (event.type == sf::Event::TextEntered) {
-				this->textEvent(event);
+			if (const auto* eventData = event->getIf<sf::Event::TextEntered>()) {
+				this->textEvent(eventData);
 			}
-			if (event.type == sf::Event::MouseWheelScrolled) {
-				this->mouseWheelEvent(event);
+			if (const auto* eventData = event->getIf<sf::Event::MouseWheelScrolled>()) {
+				this->mouseWheelEvent(eventData);
 			}
 		}
 
@@ -112,8 +111,8 @@ void Desktop::run()
 		sf::Sprite background(this->_background_texture.getTexture());
 		sf::Sprite foreground(this->_foreground_texture.getTexture());
 		sf::Sprite cursor(this->_cursor_texture.getTexture());
-		cursor.setTextureRect(sf::IntRect(0, 6, 4, -6));
-		cursor.setPosition(this->_mouse_coordinated.x, this->_mouse_coordinated.y);
+		cursor.setTextureRect(sf::IntRect({0, 6}, {4, -6}));
+		cursor.setPosition(sf::Vector2f(this->_mouse_coordinated));
 		this->_window.draw(background);
 		for (std::shared_ptr<Window> window : this->_windows) {
 			window->exceptionHandler();
@@ -247,26 +246,26 @@ bool Desktop::killWindow(unsigned int processId)
 	return true;
 }
 
-void Desktop::closeEvent([[maybe_unused]] sf::Event event)
+void Desktop::closeEvent([[maybe_unused]] const sf::Event::Closed *event)
 {
 	this->_focusedWindow = nullptr;
 	this->_windows.clear();
 	this->_window.close();
 }
 
-void Desktop::resizeEvent(sf::Event event)
+void Desktop::resizeEvent(const sf::Event::Resized *event)
 {
 	sf::Vector2f factors = sf::Vector2f(
-		static_cast<float>(this->_size.x) / event.size.width,
-		static_cast<float>(this->_size.y) / event.size.height
+		static_cast<float>(this->_size.x) / event->size.x,
+		static_cast<float>(this->_size.y) / event->size.y
 	);
 	float maxFactor = std::max(factors.x, factors.y);
 	factors /= maxFactor;
-	this->_canvas_view.setViewport(sf::FloatRect((1.f - factors.x) * 0.5 , (1.f - factors.y) * 0.5, factors.x, factors.y));
+	this->_canvas_view.setViewport(sf::FloatRect(sf::Vector2f((1.f - factors.x) * 0.5, (1.f - factors.y) * 0.5), factors));
 	this->_window.setView(this->_canvas_view);
 }
 
-void Desktop::mouseButtonPressEvent([[maybe_unused]] sf::Event event)
+void Desktop::mouseButtonPressEvent([[maybe_unused]] const sf::Event::MouseButtonPressed *event)
 {
 	std::shared_ptr<Window> previous = this->_focusedWindow;
 	this->_focusedWindow = nullptr;
@@ -286,7 +285,7 @@ void Desktop::mouseButtonPressEvent([[maybe_unused]] sf::Event event)
 		this->_focusedWindow->focusEvent(true);
 	}
 	if (this->_focusedWindow == previous && this->_focusedWindow->isIn(WindowZone::Canvas, static_cast<sf::Vector2i>(this->_mouse_coordinated))) {
-		this->_focusedWindow->addButtonPressed(event.mouseButton.button);
+		this->_focusedWindow->addButtonPressed(event->button);
 	}
 	this->_windows.erase(
 		std::remove_if(this->_windows.begin(), this->_windows.end(), [this](std::shared_ptr<Window> window) { return window == this->_focusedWindow; } ),
@@ -312,17 +311,17 @@ void Desktop::mouseButtonPressEvent([[maybe_unused]] sf::Event event)
 	}
 }
 
-void Desktop::mouseButtonReleaseEvent([[maybe_unused]] sf::Event event)
+void Desktop::mouseButtonReleaseEvent([[maybe_unused]] const sf::Event::MouseButtonReleased *event)
 {
 	this->_focusAction = FocusAction::None;
 	if (this->_focusedWindow != nullptr && this->_focusedWindow->isIn(WindowZone::Canvas, static_cast<sf::Vector2i>(this->_mouse_coordinated))) {
-		this->_focusedWindow->removeButtonPressed(event.mouseButton.button);
+		this->_focusedWindow->removeButtonPressed(event->button);
 	}
 }
 
-void Desktop::mouseMoveEvent(sf::Event event)
+void Desktop::mouseMoveEvent(const sf::Event::MouseMoved *event)
 {
-	sf::Vector2f mappedPoint = this->_window.mapPixelToCoords(sf::Vector2i(event.mouseMove.x, event.mouseMove.y));
+	sf::Vector2f mappedPoint = this->_window.mapPixelToCoords(event->position);
 	this->_mouse_coordinated = static_cast<sf::Vector2i>(mappedPoint);
 	this->_mouse_coordinated.x = std::max(0, std::min(this->_mouse_coordinated.x, static_cast<int>(this->_size.x - 1)));
 	this->_mouse_coordinated.y = std::max(0, std::min(this->_mouse_coordinated.y, static_cast<int>(this->_size.y - 1)));
@@ -347,13 +346,13 @@ void Desktop::mouseMoveEvent(sf::Event event)
 	}
 }
 
-void Desktop::keyPressEvent(sf::Event event)
+void Desktop::keyPressEvent(const sf::Event::KeyPressed *event)
 {
 	if (this->_focusedWindow == nullptr) {
 		return;
 	}
-	if (event.key.control) {
-		switch (event.key.code) {
+	if (event->control) {
+		switch (event->code) {
 			case sf::Keyboard::Key::F:
 				this->_focusedWindow->toggleFullscreen();
 				return;
@@ -364,29 +363,29 @@ void Desktop::keyPressEvent(sf::Event event)
 				break;
 		}
 	}
-	this->_focusedWindow->addKeyPressed(event.key.code);
+	this->_focusedWindow->addKeyPressed(event->code);
 }
 
-void Desktop::keyReleaseEvent(sf::Event event)
+void Desktop::keyReleaseEvent(const sf::Event::KeyReleased *event)
 {
 	if (this->_focusedWindow == nullptr) {
 		return;
 	}
-	this->_focusedWindow->removeKeyPressed(event.key.code);
+	this->_focusedWindow->removeKeyPressed(event->code);
 }
 
-void Desktop::textEvent(sf::Event event)
+void Desktop::textEvent(const sf::Event::TextEntered *event)
 {
 	if (this->_focusedWindow == nullptr) {
 		return;
 	}
-	this->_focusedWindow->textEnteredEvent(event.text.unicode);
+	this->_focusedWindow->textEnteredEvent(event->unicode);
 }
 
-void Desktop::mouseWheelEvent(sf::Event event)
+void Desktop::mouseWheelEvent(const sf::Event::MouseWheelScrolled *event)
 {
 	if (this->_focusedWindow == nullptr) {
 		return;
 	}
-	this->_focusedWindow->mouseWheelEvent(event.mouseWheelScroll);
+	this->_focusedWindow->mouseWheelEvent(event);
 }

@@ -20,11 +20,11 @@ void drawOnTexture(sf::RenderTexture& texture, int x, int y, const unsigned char
 void drawOnTexture(sf::RenderTarget& target, sf::RenderStates states, int x, int y, const unsigned char* sprBytes, unsigned char height, sf::Color color)
 {
 	sf::RenderTexture texture;
-	texture.create(8, height);
+	texture.resize({8, height});
 	texture.clear(sf::Color::Transparent);
 	drawOnTexture(texture, 0, 0, sprBytes, height, color);
 	sf::Sprite sprite(texture.getTexture());
-	sprite.setTextureRect(sf::IntRect(0, height, 8, -height));
+	sprite.setTextureRect(sf::IntRect({0, height}, {8, -height}));
 	sprite.setPosition(sf::Vector2f(x, y));
 	target.draw(sprite, states);
 }

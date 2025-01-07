@@ -36,9 +36,9 @@ public:
 	void removeKeyPressed(sf::Keyboard::Key key);
 	void addButtonPressed(sf::Mouse::Button button);
 	void removeButtonPressed(sf::Mouse::Button button);
-	void textEnteredEvent(sf::Uint32 unicode);
+	void textEnteredEvent(std::uint32_t unicode);
 	virtual void focusEvent(bool isFocused);
-	void mouseWheelEvent(sf::Event::MouseWheelScrollEvent wheel);
+	void mouseWheelEvent(const sf::Event::MouseWheelScrolled *wheel);
 
 protected:
 	virtual void resizeTrigger();
@@ -114,5 +114,5 @@ private:
 	short generateNoise(double amplitude);
 
 	sf::SoundBuffer _soundBuffer;
-	sf::Sound _sound;
+	sf::Sound *_sound;
 };

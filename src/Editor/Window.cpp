@@ -57,13 +57,13 @@ void Window::draw(sf::RenderTarget& target, sf::RenderStates states) const
 
 	if (this->_titleBarMode != TitleBarMode::None) {
 		sf::Sprite titleBar(this->_barTexture.getTexture());
-		titleBar.setTextureRect(sf::IntRect(0, (height - 2), this->_size.x, -(height - 2)));
+		titleBar.setTextureRect(sf::IntRect({0, (height - 2)}, {this->_size.x, -(height - 2)}));
 		titleBar.setPosition(sf::Vector2f(0, -(height - 1)));
 		target.draw(titleBar, states);
 	}
 
 	sf::Sprite canvas(this->_texture.getTexture());
-	canvas.setTextureRect(sf::IntRect(0, this->_size.y, this->_size.x, -this->_size.y));
+	canvas.setTextureRect(sf::IntRect({0, this->_size.y}, {this->_size.x, -this->_size.y}));
 	target.draw(canvas, states);
 }
 
@@ -190,22 +190,22 @@ void Window::titleBarRefresh()
 		palette = 0;
 	}
 	if (this->_titleBarMode == TitleBarMode::Full) {
-		this->_barTexture.create(std::max(1, this->_size.x - 12), height);
+		this->_barTexture.resize(sf::Vector2u(std::max(1, this->_size.x - 12), height));
 		this->_barTexture.clear(sf::Color::Transparent);
 		if (this->_size.x - 12 > 0) {
 			drawText(this->_barTexture, 0, 0, this->_title, this->_palette[palette], false);
 		}
 		sf::Texture tmp(this->_barTexture.getTexture());
-		this->_barTexture.create(this->_size.x, height);
+		this->_barTexture.resize(sf::Vector2u(this->_size.x, height));
 		this->_barTexture.clear(sf::Color::Transparent);
 		sf::Sprite tmpSprite(tmp);
-		tmpSprite.setTextureRect(sf::IntRect(0, tmp.getSize().y, tmp.getSize().x, -tmp.getSize().y));
+		tmpSprite.setTextureRect(sf::IntRect(sf::Vector2i(0, tmp.getSize().y), sf::Vector2i(tmp.getSize().x, -tmp.getSize().y)));
 		this->_barTexture.draw(tmpSprite);
 		drawOnTexture(this->_barTexture, this->_size.x - 11, 0, spr_maximise_full, SPR_MAXIMISE_FULL_HEIGHT, this->_palette[palette]);
 		drawOnTexture(this->_barTexture, this->_size.x - 5, 0, spr_close_full, SPR_CLOSE_FULL_HEIGHT, this->_palette[palette]);
 	}
 	if (this->_titleBarMode == TitleBarMode::Minimal) {
-		this->_barTexture.create(this->_size.x, height);
+		this->_barTexture.resize(sf::Vector2u(this->_size.x, height));
 		this->_barTexture.clear(sf::Color::Transparent);
 		drawOnTexture(this->_barTexture, this->_size.x - 3, 0, spr_close_minimal, SPR_CLOSE_MINIMAL_HEIGHT, this->_palette[palette]);
 		drawOnTexture(this->_barTexture, this->_size.x - 7, 0, spr_maximise_minimal, SPR_MAXIMISE_MINIMAL_HEIGHT, this->_palette[palette]);
