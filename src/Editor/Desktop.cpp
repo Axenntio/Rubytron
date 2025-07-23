@@ -55,9 +55,10 @@ Desktop::Desktop(unsigned int width, unsigned int height, unsigned char scale, T
 	}
 	this->_focusedWindow = nullptr;
 	this->_focusAction = FocusAction::None;
-	for (std::shared_ptr<Window> window : this->_windows) {
-		window->init();
-	}
+	// Unnecessary since init is called inside spawn. but by does it crash things ?
+	// for (std::shared_ptr<Window> window : this->_windows) {
+	// 	window->init();
+	// }
 }
 
 void Desktop::run()
@@ -209,11 +210,10 @@ bool Desktop::spawn(sf::Vector2i position, sf::Vector2u size, sf::Vector2i prevP
 		std::shared_ptr<Window> window = std::make_unique<Window>(this->_windowsPid, position, size, prevPosition, prevSize, fullscreened, this->_palette, this->_titleBarMode, path, parameters);
 		this->_windows.push_back(window);
 		window->init();
-		std::shared_ptr<Window> previous = this->_focusedWindow;
-		this->_focusedWindow = window;
-		if (previous != nullptr) {
-			previous->focusEvent(false);
+		if (this->_focusedWindow != nullptr) {
+			this->_focusedWindow->focusEvent(false);
 		}
+		this->_focusedWindow = window;
 		this->_focusedWindow->focusEvent(true);
 		this->_windowsPid++;
 
