@@ -26,7 +26,7 @@ jobs:
     - name: Compile Rubytron
       run: ninja -C build
     - name: Upload Linux Runtime Header
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: linux-runtime-header
         path: build/src/Editor/runtime-linux.h
@@ -53,7 +53,7 @@ jobs:
     - name: Compile Rubytron
       run: ninja -C build
     - name: Upload macOS Runtime Header
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: macos-runtime-header
         path: build/src/Editor/runtime-darwin.h
@@ -93,7 +93,7 @@ jobs:
         cp build/src/Editor/rubytron bundle/.
         cp -r programs bundle/.
     - name: Upload Linux bundle
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: rubytron-linux
         path: bundle
@@ -172,7 +172,7 @@ jobs:
         hdiutil create /tmp/tmp.dmg -ov -volname "Rubytron" -fs HFS+ -srcfolder bundle
         hdiutil convert /tmp/tmp.dmg -format UDZO -o Rubytron.dmg
     - name: Upload macOS app
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: rubytron-macos
         path: Rubytron.dmg
