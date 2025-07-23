@@ -55,8 +55,10 @@ class Terminal
     @blink_time = @blink_speed
     @monospace = false
     @return_value = false
+    @auto_eval = false
     @display_history = []
     @command_history = []
+    @command_history_index = 0
     @current_line = ''
     @current_path = 'programs'
     @should_blink = Window.focused
@@ -102,11 +104,23 @@ class Terminal
       @current_line.slice!(-1)
     when 60 # Tab
       # Pre-parse to auto-complete
+    when 73 # Up
+      @backup_current_line = @current_line if @command_history_index == @command_history.size
+      @command_history_index = (@command_history_index - 1).clamp(0, @command_history.size - 1)
+      @current_line = @command_history[@command_history_index]
+    when 74 # Down
+      @command_history_index = (@command_history_index + 1).clamp(0, @command_history.size)
+      if @command_history_index == @command_history.size
+        @current_line = @backup_current_line
+      else
+        @current_line = @command_history[@command_history_index]
+      end
     end
   end
 
   def execute
     @command_history << @current_line
+    @command_history_index = @command_history.size
     @display_history << ">#{@current_line}"
     # Parse command here
     command = @current_line.split(' ')
@@ -114,19 +128,26 @@ class Terminal
     case command[0]
     when 'mnsp'
       value = command[1]
-      @monospace = param_to_bool(value) if param_is_bool(value) unless value.nil?
+      @monospace = param_to_bool(value) if param_is_bool(value)
+      @monospace = !@monospace if value.nil?
       result = @monospace
-    when 'ret_val'
+    when 'retval'
       value = command[1]
-      @return_value = param_to_bool(value) if param_is_bool(value) unless value.nil?
+      @return_value = param_to_bool(value) if param_is_bool(value)
+      @return_value = !@return_value if value.nil?
       result = @return_value
+    when 'autoeval'
+      value = command[1]
+      @auto_eval = param_to_bool(value) if param_is_bool(value)
+      @auto_eval = !@auto_eval if value.nil?
+      result = @auto_eval
     when 'sp'
       result = Desktop.spawn "#{@current_path}/#{command[1]}", command.drop(2)
     when 'export'
       result = Desktop.export "#{@current_path}/#{command[1]}"
     when 'history'
       history = @command_history
-      history = @command_history[(@command_history.count - command[1].to_i)..@command_history.count] if command[1].to_i.is_a?(Integer) # TODO: Check working
+      history = @command_history[(@command_history.count - command[1].to_i)..@command_history.count] unless command[1].to_i.zero?
       history.each_with_index { |command, line| @display_history << "#{line + 1} #{command}" }
     when 'cd'
       if command[1].nil?
@@ -151,7 +172,11 @@ class Terminal
     when 'eval'
       result = eval(command.drop(1).join(' '))
     else
-      @display_history << "`#{command[0]}` command not found"
+      if @auto_eval
+        result = eval(command.join(' '))
+      else
+        @display_history << "`#{command[0]}` command not found"
+      end
     end
     @display_history << result.inspect if @return_value
     @current_line = ''
@@ -159,6 +184,7 @@ class Terminal
   end
 
   def param_is_bool(param)
+    return false if param.nil?
     param = param.downcase
     if ['0', 'false', '1', 'true'].include?(param)
       return true
