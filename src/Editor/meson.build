@@ -17,5 +17,6 @@ executable(
 	'rubytron',
 	[sources, runtime_code],
 	include_directories: inc,
-	dependencies: [dep_sfml_graphics, dep_sfml_audio, mruby]
+	dependencies: [dep_sfml, mruby],
+	link_args: ['-L' + sfml_libdir_fix]
 )

@@ -18,6 +18,7 @@ def init
   Window.min_width = 2 + 16 * scale
   Window.min_height = 2 + scale
   Window.width = Window.min_width
+  Window.title = "Palette"
   redraw(Window.width)
 end
 

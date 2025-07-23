@@ -30,7 +30,9 @@ Player::Player(sf::Vector2u size, unsigned char scale, const std::vector<std::st
 
 	this->_window.create(sf::VideoMode(sf::Vector2u(this->_size.x * this->_scale, this->_size.y * this->_scale)), this->_title);
 	this->_window.setMouseCursorVisible(false);
-	this->_cursor_texture.resize({4, 6});
+	if (!this->_cursor_texture.resize({4, 6})) {
+		throw std::runtime_error("Can't resize texture");
+	}
 	this->_cursor_texture.clear(sf::Color::Transparent);
 
 	drawOnTexture(this->_cursor_texture, 0, 0, spr_cursor, SPR_CURSOR_HEIGHT, this->_palette[7]);
@@ -71,10 +73,10 @@ void Player::run()
 			if (const auto* eventData = event->getIf<sf::Event::TextEntered>()) {
 				this->textEvent(eventData);
 			}
-			if (const auto* eventData = event->getIf<sf::Event::FocusGained>()) {
+			if (event->getIf<sf::Event::FocusGained>()) {
 				this->focusEvent(true);
 			}
-			if (const auto* eventData = event->getIf<sf::Event::FocusLost>()) {
+			if (event->getIf<sf::Event::FocusLost>()) {
 				this->focusEvent(false);
 			}
 			if (const auto* eventData = event->getIf<sf::Event::MouseWheelScrolled>()) {

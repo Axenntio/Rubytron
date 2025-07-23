@@ -1,5 +1,6 @@
 #pragma once
 
+#include <mruby.h>
 #include <mruby/compile.h>
 #include <Shared/AbstractWindow.hpp>
 

@@ -9,6 +9,7 @@ class Window
 end
 
 def init
+  Window.title = 'Fractree'
   draw_fractal(Window.width, Window.height)
 end
 

@@ -23,7 +23,7 @@ Window::Window(unsigned int pid, sf::Vector2i position, sf::Vector2u size, const
 
 	mrb_define_class_method(this->_mrb, this->_mrbDesktopClass, "processes", &Window::mrubyProcesses, MRB_ARGS_NONE());
 	mrb_define_class_method(this->_mrb, this->_mrbDesktopClass, "kill_process", &Window::mrubyKillProcess, MRB_ARGS_REQ(1) | MRB_ARGS_OPT(1));
-	mrb_define_class_method(this->_mrb, this->_mrbDesktopClass, "spawn", &Window::mrubySpawn, MRB_ARGS_REQ(1) | MRB_ARGS_OPT(1));
+	mrb_define_class_method(this->_mrb, this->_mrbDesktopClass, "spawn", &Window::mrubySpawn, MRB_ARGS_REQ(1) | MRB_ARGS_OPT(1) | MRB_ARGS_KEY(2, 0));
 	mrb_define_class_method(this->_mrb, this->_mrbDesktopClass, "export", &Window::mrubyExport, MRB_ARGS_REQ(1));
 }
 
@@ -190,13 +190,17 @@ void Window::titleBarRefresh()
 		palette = 0;
 	}
 	if (this->_titleBarMode == TitleBarMode::Full) {
-		this->_barTexture.resize(sf::Vector2u(std::max(1, this->_size.x - 12), height));
+		if (!this->_barTexture.resize(sf::Vector2u(std::max(1, this->_size.x - 12), height))) {
+			throw std::runtime_error("Can't resize texture");
+		}
 		this->_barTexture.clear(sf::Color::Transparent);
 		if (this->_size.x - 12 > 0) {
 			drawText(this->_barTexture, 0, 0, this->_title, this->_palette[palette], false);
 		}
 		sf::Texture tmp(this->_barTexture.getTexture());
-		this->_barTexture.resize(sf::Vector2u(this->_size.x, height));
+		if (!this->_barTexture.resize(sf::Vector2u(this->_size.x, height))) {
+			throw std::runtime_error("Can't resize texture");
+		}
 		this->_barTexture.clear(sf::Color::Transparent);
 		sf::Sprite tmpSprite(tmp);
 		tmpSprite.setTextureRect(sf::IntRect(sf::Vector2i(0, tmp.getSize().y), sf::Vector2i(tmp.getSize().x, -tmp.getSize().y)));
@@ -205,7 +209,9 @@ void Window::titleBarRefresh()
 		drawOnTexture(this->_barTexture, this->_size.x - 5, 0, spr_close_full, SPR_CLOSE_FULL_HEIGHT, this->_palette[palette]);
 	}
 	if (this->_titleBarMode == TitleBarMode::Minimal) {
-		this->_barTexture.resize(sf::Vector2u(this->_size.x, height));
+		if (!this->_barTexture.resize(sf::Vector2u(this->_size.x, height))) {
+			throw std::runtime_error("Can't resize texture");
+		}
 		this->_barTexture.clear(sf::Color::Transparent);
 		drawOnTexture(this->_barTexture, this->_size.x - 3, 0, spr_close_minimal, SPR_CLOSE_MINIMAL_HEIGHT, this->_palette[palette]);
 		drawOnTexture(this->_barTexture, this->_size.x - 7, 0, spr_maximise_minimal, SPR_MAXIMISE_MINIMAL_HEIGHT, this->_palette[palette]);
@@ -216,7 +222,11 @@ mrb_value Window::mrubySpawn(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 {
 	const char* path;
 	mrb_value mrbParameters = mrb_nil_value();
-	mrb_get_args(mrb, "z|A", &path, &mrbParameters);
+	mrb_value kw_rest = mrb_nil_value();
+	mrb_sym kw_names[] = { mrb_intern_lit(mrb, "position"), mrb_intern_lit(mrb, "size") };
+	mrb_value kw_values[2];
+	mrb_kwargs kwargs = { 2, 0, kw_names, kw_values, &kw_rest };
+	mrb_get_args(mrb, "z|A:", &path, &mrbParameters, &kwargs);
 	std::vector<std::string> parameters;
 
 	if (mrb_array_p(mrbParameters)) {
@@ -227,8 +237,25 @@ mrb_value Window::mrubySpawn(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 		}
 	}
 
-	if (desktop.spawn(std::string(path), parameters)) {
-		return mrb_true_value();
+	sf::Vector2i position(0, 0);
+	sf::Vector2u size(0, 0);
+
+	if (mrb_array_p(kw_values[0]) && mrb_array_p(kw_values[1])) {
+		mrb_value *mrbPosition = RARRAY_PTR(kw_values[0]);
+		position = sf::Vector2i(mrb_int(mrb, mrbPosition[0]), mrb_int(mrb, mrbPosition[1]));
+		mrb_value *mrbSize = RARRAY_PTR(kw_values[1]);
+		size = sf::Vector2u(mrb_int(mrb, mrbSize[0]), mrb_int(mrb, mrbSize[1]));
+	}
+
+	if (position == sf::Vector2i(0, 0) || size == sf::Vector2u(0, 0)) {
+		if (desktop.spawn(std::string(path), parameters)) {
+			return mrb_true_value();
+		}
+	}
+	else {
+		if (desktop.spawn(position, size, std::string(path), parameters)) {
+			return mrb_true_value();
+		}
 	}
 
 	return mrb_false_value();

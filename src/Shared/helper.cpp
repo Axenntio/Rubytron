@@ -20,7 +20,9 @@ void drawOnTexture(sf::RenderTexture& texture, int x, int y, const unsigned char
 void drawOnTexture(sf::RenderTarget& target, sf::RenderStates states, int x, int y, const unsigned char* sprBytes, unsigned char height, sf::Color color)
 {
 	sf::RenderTexture texture;
-	texture.resize({8, height});
+	if (!texture.resize({8, height})) {
+		throw std::runtime_error("Can't resize texture");
+	}
 	texture.clear(sf::Color::Transparent);
 	drawOnTexture(texture, 0, 0, sprBytes, height, color);
 	sf::Sprite sprite(texture.getTexture());

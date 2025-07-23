@@ -8,5 +8,6 @@ runtime_exe = executable(
 	'runtime-' + host_machine.system(),
 	sources,
 	include_directories: inc,
-	dependencies: [dep_sfml_graphics, dep_sfml_audio, mruby]
+	dependencies: [dep_sfml, mruby],
+	link_args: ['-L' + sfml_libdir_fix]
 )

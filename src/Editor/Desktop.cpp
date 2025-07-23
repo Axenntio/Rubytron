@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <filesystem>
 #include <fstream>
 #include <Editor/Desktop.hpp>
@@ -27,11 +28,17 @@ Desktop::Desktop(unsigned int width, unsigned int height, unsigned char scale, T
 
 	this->_window.create(sf::VideoMode(sf::Vector2u(this->_size.x * scale, this->_size.y * scale)), "Rubytron");
 	this->_window.setMouseCursorVisible(false);
-	this->_background_texture.resize(this->_size);
+	if (!this->_background_texture.resize(this->_size)) {
+		throw std::runtime_error("Can't resize texture");
+	}
 	this->_background_texture.clear(this->_palette[1]);
-	this->_foreground_texture.resize(this->_size);
+	if (!this->_foreground_texture.resize(this->_size)) {
+		throw std::runtime_error("Can't resize texture");
+	}
 	this->_foreground_texture.clear(sf::Color::Transparent);
-	this->_cursor_texture.resize({4, 6});
+	if (!this->_cursor_texture.resize({4, 6})) {
+		throw std::runtime_error("Can't resize texture");
+	}
 	this->_cursor_texture.clear(sf::Color::Transparent);
 
 	drawOnTexture(this->_cursor_texture, 0, 0, spr_cursor, SPR_CURSOR_HEIGHT, this->_palette[7]);
@@ -42,16 +49,7 @@ Desktop::Desktop(unsigned int width, unsigned int height, unsigned char scale, T
 	this->_canvas_view.setSize(sf::Vector2f(this->_size.x, this->_size.y));
 	this->_window.setView(this->_canvas_view);
 
-	this->spawn(sf::Vector2i(10, 10), sf::Vector2u(60, 30), "programs/test.rb", {});
-	this->spawn(sf::Vector2i(60, 60), sf::Vector2u(10, 10), "programs/resize.rb", {});
-	this->spawn(sf::Vector2i(30, 8), sf::Vector2u(20, 20), "programs/palette.rb", {});
-	this->spawn(sf::Vector2i(85, 30), sf::Vector2u(40, 40), "programs/key.rb", {});
-	this->spawn(sf::Vector2i(100, 15), sf::Vector2u(40, 20), "programs/xeyes.rb", {});
-	this->spawn(sf::Vector2i(120, 50), sf::Vector2u(40, 40), "programs/snake.rb", {});
-	this->spawn(sf::Vector2i(5, 54), sf::Vector2u(48, 68), "programs/editor.rb", {"programs/editor.rb"});
-	this->spawn(sf::Vector2i(57, 80), sf::Vector2u(60, 42), "programs/terminal.rb", {});
-	//this->spawn(sf::Vector2i(1, 8), sf::Vector2u(128, 128), "programs/sprite.rb", {});
-	//this->spawn(sf::Vector2i(1, 8), sf::Vector2u(128, 128), "programs/fractal_tree.rb", {});
+	this->spawn(sf::Vector2i(10, 10), sf::Vector2u(60, 30), "programs/autorun.rb", {});
 	if (this->_focusedWindow != nullptr) {
 		this->_focusedWindow->focusEvent(false);
 	}

@@ -3,6 +3,7 @@
 #include <memory>
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
+#include <mruby.h>
 #include <mruby/compile.h>
 #include <Editor/WindowZone.hh>
 #include <Editor/TitleBarMode.hh>

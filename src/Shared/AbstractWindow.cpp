@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <filesystem>
 #include <Shared/AbstractWindow.hpp>
 #include <Shared/helper.hh>
@@ -13,7 +14,9 @@ AbstractWindow::AbstractWindow(sf::Vector2i position, sf::Vector2u size, const s
 	this->setPosition(sf::Vector2f(position));
 	this->_minSize = sf::Vector2i(8, 4);
 	this->_palette = palette;
-	this->_texture.resize(static_cast<sf::Vector2u>(this->_size));
+	if (!this->_texture.resize(static_cast<sf::Vector2u>(this->_size))) {
+		throw std::runtime_error("Can't resize texture");
+	}
 	this->_texture.clear(this->_palette[0]);
 	this->_mrb = mrb_open();
 
@@ -194,7 +197,9 @@ void AbstractWindow::resizeV(int height)
 void AbstractWindow::resizeTrigger()
 {
 	sf::Texture tmp(this->_texture.getTexture());
-	this->_texture.resize(static_cast<sf::Vector2u>(this->_size));
+	if (!this->_texture.resize(static_cast<sf::Vector2u>(this->_size))) {
+		throw std::runtime_error("Can't resize texture");
+	}
 	this->_texture.clear(this->_palette[0]);
 	sf::Sprite tmpSprite(tmp);
 	tmpSprite.setTextureRect(sf::IntRect(sf::Vector2i(0, tmp.getSize().y), sf::Vector2i(tmp.getSize().x, -tmp.getSize().y)));
@@ -633,7 +638,9 @@ mrb_value AbstractWindow::mrubySound(mrb_state* mrb, [[maybe_unused]] mrb_value 
 	for (unsigned int i = 0; i < 44100 / 10; i++) {
 		samples.push_back(window->generateSineWave(i, frequency, 0.9));
 	}
-	window->_soundBuffer.loadFromSamples(&samples[0], samples.size(), 1, 44100, {sf::SoundChannel::Mono});
+	if (!window->_soundBuffer.loadFromSamples(&samples[0], samples.size(), 1, 44100, {sf::SoundChannel::Mono})) {
+		throw std::runtime_error("Can't load sound into buffer");
+	}
 	window->_sound = new sf::Sound(window->_soundBuffer);
 	window->_sound->play();
 	return mrb_nil_value();
