@@ -1,40 +1,40 @@
 class Window
   def self.resize_event(new_width, new_height)
-    #puts "Received resize event (#{new_width}, #{new_height})"
+    # puts "Received resize event (#{new_width}, #{new_height})"
     $should_update = true
   end
 
   def self.close_event
-    #puts 'Received close event'
+    # puts 'Received close event'
   end
 
   def self.text_event(char)
-    #puts "Received text event (#{char})"
+    # puts "Received text event (#{char})"
   end
 
   def self.key_press_event(key)
-    #puts "Key pressed (#{key})"
+    # puts "Key pressed (#{key})"
   end
 
   def self.key_release_event(key)
-    #puts "Key released (#{key})"
+    # puts "Key released (#{key})"
   end
 
   def self.button_press_event(button)
-    #puts "Button pressed (#{button})"
+    # puts "Button pressed (#{button})"
   end
 
   def self.button_release_event(button)
-    #puts "Button released (#{button})"
+    # puts "Button released (#{button})"
   end
 
   def self.focus_event(has_focus)
-    #puts "Focus changed (#{has_focus})"
+    # puts "Focus changed (#{has_focus})"
     $has_focus = has_focus
   end
 
   def self.mouse_wheel_event(horizontal, vertical)
-    #puts "Mouse wheel scroll [#{horizontal}, #{vertical}]"
+    # puts "Mouse wheel scroll [#{horizontal}, #{vertical}]"
   end
 end
 

@@ -18,9 +18,9 @@ public:
 	bool isFocused(const Window* window) const;
 
 	bool programExport(const std::string& path) const;
-	bool spawn(const std::string& path, const std::vector<std::string>& parameters);
-	bool spawn(sf::Vector2i position, sf::Vector2u size, const std::string& path, const std::vector<std::string>& parameters);
-	bool spawn(sf::Vector2i position, sf::Vector2u size, sf::Vector2i prevPosition, sf::Vector2u prevSize, bool fullscreened, const std::string& path, const std::vector<std::string>& parameters);
+	bool spawn(const std::string& path, const std::vector<std::string>& parameters = {});
+	bool spawn(sf::Vector2i position, sf::Vector2u size, const std::string& path, const std::vector<std::string>& parameters = {});
+	bool spawn(sf::Vector2i position, sf::Vector2u size, sf::Vector2i prevPosition, sf::Vector2u prevSize, bool fullscreened, const std::string& path, const std::vector<std::string>& parameters = {});
 	const std::vector<std::shared_ptr<Window>>& getWindows() const;
 	bool killWindow(unsigned int processId);
 

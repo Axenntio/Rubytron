@@ -9,4 +9,5 @@ def init
   Desktop.spawn('programs/snake.rb', position: [120, 50], size: [40, 40])
   Desktop.spawn('programs/editor.rb', ['programs/editor.rb'], position: [5, 54], size: [48, 68])
   Desktop.spawn('programs/terminal.rb', position: [57, 80], size: [60, 42])
+  Window.close
 end

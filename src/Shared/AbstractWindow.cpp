@@ -178,6 +178,10 @@ void AbstractWindow::resize(sf::Vector2i size)
 
 	this->resizeTrigger();
 
+	if (this->_mrb->exc) {
+		return;
+	}
+
 	mrb_value obj = mrb_const_get(this->_mrb, mrb_obj_value(this->_mrb->object_class), mrb_intern_cstr(this->_mrb, "Window"));
 	if (mrb_respond_to(this->_mrb, obj, mrb_intern_cstr(this->_mrb, "resize_event"))) {
 		mrb_funcall(this->_mrb, obj, "resize_event", 2, mrb_int_value(this->_mrb, this->_size.x), mrb_int_value(this->_mrb, this->_size.y));
@@ -217,6 +221,9 @@ void AbstractWindow::setMousePosition(sf::Vector2i position)
 
 void AbstractWindow::addKeyPressed(sf::Keyboard::Key key)
 {
+	if (this->_mrb->exc) {
+		return;
+	}
 	if (std::find(this->_keyPressed.begin(), this->_keyPressed.end(), static_cast<sf::Keyboard::Key>(key)) == this->_keyPressed.end()) {
 		this->_keyPressed.push_back(key);
 	}
@@ -228,6 +235,9 @@ void AbstractWindow::addKeyPressed(sf::Keyboard::Key key)
 
 void AbstractWindow::removeKeyPressed(sf::Keyboard::Key key)
 {
+	if (this->_mrb->exc) {
+		return;
+	}
 	if (std::find(this->_keyPressed.begin(), this->_keyPressed.end(), static_cast<sf::Keyboard::Key>(key)) != this->_keyPressed.end()) {
 		this->_keyPressed.erase(
 			std::remove_if(this->_keyPressed.begin(), this->_keyPressed.end(), [key](sf::Keyboard::Key testKey) { return testKey == key; } )
@@ -241,6 +251,9 @@ void AbstractWindow::removeKeyPressed(sf::Keyboard::Key key)
 
 void AbstractWindow::addButtonPressed(sf::Mouse::Button button)
 {
+	if (this->_mrb->exc) {
+		return;
+	}
 	if (std::find(this->_buttonPressed.begin(), this->_buttonPressed.end(), static_cast<sf::Mouse::Button>(button)) == this->_buttonPressed.end()) {
 		this->_buttonPressed.push_back(button);
 	}
@@ -252,6 +265,9 @@ void AbstractWindow::addButtonPressed(sf::Mouse::Button button)
 
 void AbstractWindow::removeButtonPressed(sf::Mouse::Button button)
 {
+	if (this->_mrb->exc) {
+		return;
+	}
 	if (std::find(this->_buttonPressed.begin(), this->_buttonPressed.end(), static_cast<sf::Mouse::Button>(button)) != this->_buttonPressed.end()) {
 		this->_buttonPressed.erase(
 			std::remove_if(this->_buttonPressed.begin(), this->_buttonPressed.end(), [button](sf::Mouse::Button testButton) { return testButton == button; } )
@@ -265,6 +281,9 @@ void AbstractWindow::removeButtonPressed(sf::Mouse::Button button)
 
 void AbstractWindow::textEnteredEvent(std::uint32_t unicode)
 {
+	if (this->_mrb->exc) {
+		return;
+	}
 	mrb_value obj = mrb_const_get(this->_mrb, mrb_obj_value(this->_mrb->object_class), mrb_intern_cstr(this->_mrb, "Window"));
 	if (mrb_respond_to(this->_mrb, obj, mrb_intern_cstr(this->_mrb, "text_event"))) {
 		mrb_funcall(this->_mrb, obj, "text_event", 1, mrb_int_value(this->_mrb, unicode));
@@ -273,6 +292,9 @@ void AbstractWindow::textEnteredEvent(std::uint32_t unicode)
 
 void AbstractWindow::mouseWheelEvent(const sf::Event::MouseWheelScrolled *wheel)
 {
+	if (this->_mrb->exc) {
+		return;
+	}
 	mrb_value obj = mrb_const_get(this->_mrb, mrb_obj_value(this->_mrb->object_class), mrb_intern_cstr(this->_mrb, "Window"));
 	if (mrb_respond_to(this->_mrb, obj, mrb_intern_cstr(this->_mrb, "mouse_wheel_event"))) {
 		mrb_value horizontal = mrb_float_value(this->_mrb, wheel->wheel == sf::Mouse::Wheel::Horizontal ? wheel->delta : 0);
@@ -283,6 +305,9 @@ void AbstractWindow::mouseWheelEvent(const sf::Event::MouseWheelScrolled *wheel)
 
 void AbstractWindow::focusEvent(bool focused)
 {
+	if (this->_mrb->exc) {
+		return;
+	}
 	this->_focused = focused;
 	mrb_value obj = mrb_const_get(this->_mrb, mrb_obj_value(this->_mrb->object_class), mrb_intern_cstr(this->_mrb, "Window"));
 	if (mrb_respond_to(this->_mrb, obj, mrb_intern_cstr(this->_mrb, "focus_event"))) {

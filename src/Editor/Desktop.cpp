@@ -5,6 +5,7 @@
 #include <Shared/helper.hh>
 #include <Shared/sprites.hh>
 
+#include<iostream>
 Desktop::Desktop(unsigned int width, unsigned int height, unsigned char scale, TitleBarMode titleBarMode) : _size(sf::Vector2u(width, height)), _titleBarMode(titleBarMode), _windowsPid(0)
 {
 	this->_palette = std::vector<sf::Color> {
@@ -43,22 +44,17 @@ Desktop::Desktop(unsigned int width, unsigned int height, unsigned char scale, T
 
 	drawOnTexture(this->_cursor_texture, 0, 0, spr_cursor, SPR_CURSOR_HEIGHT, this->_palette[7]);
 
-
 	this->_canvas_view.setCenter(sf::Vector2f(this->_size.x / 2, this->_size.y / 2));
 	this->_canvas_view.setViewport(sf::FloatRect({0, 0}, {1, 1}));
 	this->_canvas_view.setSize(sf::Vector2f(this->_size.x, this->_size.y));
 	this->_window.setView(this->_canvas_view);
 
-	this->spawn(sf::Vector2i(10, 10), sf::Vector2u(60, 30), "programs/autorun.rb", {});
+	this->spawn("programs/autorun.rb");
 	if (this->_focusedWindow != nullptr) {
 		this->_focusedWindow->focusEvent(false);
 	}
 	this->_focusedWindow = nullptr;
 	this->_focusAction = FocusAction::None;
-	// Unnecessary since init is called inside spawn. but by does it crash things ?
-	// for (std::shared_ptr<Window> window : this->_windows) {
-	// 	window->init();
-	// }
 }
 
 void Desktop::run()
@@ -96,7 +92,7 @@ void Desktop::run()
 			}
 		}
 
-		for (std::shared_ptr<Window> window : this->_windows) {
+		for (const std::shared_ptr<Window>& window : this->_windows) {
 			if (window->isClosed() && this->_focusedWindow == window) {
 				this->_focusedWindow = nullptr;
 			}
@@ -113,7 +109,7 @@ void Desktop::run()
 		cursor.setTextureRect(sf::IntRect({0, 6}, {4, -6}));
 		cursor.setPosition(sf::Vector2f(this->_mouse_coordinated));
 		this->_window.draw(background);
-		for (std::shared_ptr<Window> window : this->_windows) {
+		for (const std::shared_ptr<Window>& window : this->_windows) {
 			window->exceptionHandler();
 			this->_window.draw(*window);
 			window->resetClock();
@@ -126,7 +122,7 @@ void Desktop::run()
 
 std::shared_ptr<Window> Desktop::getWindow(mrb_state* mrb) const
 {
-	for (std::shared_ptr<Window> window : this->_windows) {
+	for (const std::shared_ptr<Window>& window : this->_windows) {
 		if (window->isContext(mrb)) {
 			return window;
 		}
@@ -323,7 +319,7 @@ void Desktop::mouseMoveEvent(const sf::Event::MouseMoved *event)
 	this->_mouse_coordinated = static_cast<sf::Vector2i>(mappedPoint);
 	this->_mouse_coordinated.x = std::max(0, std::min(this->_mouse_coordinated.x, static_cast<int>(this->_size.x - 1)));
 	this->_mouse_coordinated.y = std::max(0, std::min(this->_mouse_coordinated.y, static_cast<int>(this->_size.y - 1)));
-	for (std::shared_ptr<Window> window : this->_windows) {
+	for (const std::shared_ptr<Window>& window : this->_windows) {
 		window->setMousePosition(this->_mouse_coordinated);
 	}
 	switch (this->_focusAction) {
