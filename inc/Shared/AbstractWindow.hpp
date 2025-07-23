@@ -75,6 +75,8 @@ protected:
 	static mrb_value mrubySpawn(mrb_state *mrb, mrb_value self);
 	static mrb_value mrubyExport(mrb_state *mrb, mrb_value self);
 
+	static mrb_value mrubyExecuteFile(mrb_state *mrb, mrb_value self);
+
 	static mrb_value mrubyClear(mrb_state *mrb, mrb_value self);
 	static mrb_value mrubyPixel(mrb_state *mrb, mrb_value self);
 	static mrb_value mrubyLine(mrb_state *mrb, mrb_value self);

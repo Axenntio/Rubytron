@@ -1,5 +1,7 @@
 #include <algorithm>
 #include <filesystem>
+#include <fstream>
+#include <sstream>
 #include <Shared/AbstractWindow.hpp>
 #include <Shared/helper.hh>
 #include <Shared/sprites.hh>
@@ -51,6 +53,8 @@ AbstractWindow::AbstractWindow(sf::Vector2i position, sf::Vector2u size, const s
 	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "button", &AbstractWindow::mrubyButton, MRB_ARGS_OPT(1));
 	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "focused", &AbstractWindow::mrubyFocused, MRB_ARGS_OPT(1));
 
+	mrb_define_method(this->_mrb, this->_mrb->object_class, "execute_file", &AbstractWindow::mrubyExecuteFile, MRB_ARGS_REQ(1) | MRB_ARGS_REST());
+
 	mrb_define_method(this->_mrb, this->_mrb->object_class, "clear", &AbstractWindow::mrubyClear, MRB_ARGS_REQ(1));
 	mrb_define_method(this->_mrb, this->_mrb->object_class, "pixel", &AbstractWindow::mrubyPixel, MRB_ARGS_REQ(2) | MRB_ARGS_OPT(1));
 	mrb_define_method(this->_mrb, this->_mrb->object_class, "line", &AbstractWindow::mrubyLine, MRB_ARGS_REQ(4) | MRB_ARGS_OPT(1));
@@ -74,7 +78,7 @@ AbstractWindow::~AbstractWindow()
 
 void AbstractWindow::loadFile()
 {
-	FILE *file = fopen((std::filesystem::current_path() / this->_programFile).c_str(), "r");
+	FILE* file = fopen((std::filesystem::current_path() / this->_programFile).c_str(), "r");
 	if (file == nullptr) {
 		throw std::runtime_error("The file '" + std::string(std::filesystem::current_path() / this->_programFile) + "' can't be opened");
 	}
@@ -523,6 +527,29 @@ mrb_value AbstractWindow::mrubyProcesses([[maybe_unused]] mrb_state *mrb, [[mayb
 mrb_value AbstractWindow::mrubyKillProcess([[maybe_unused]] mrb_state *mrb, [[maybe_unused]] mrb_value self)
 {
 	return mrb_nil_value();
+}
+
+mrb_value AbstractWindow::mrubyExecuteFile(mrb_state* mrb, [[maybe_unused]] mrb_value self)
+{
+	AbstractWindow* window = mrubyGetWindowObject(mrb);
+	const char* programPath;
+	const mrb_value* argv;
+	mrb_int argc;
+	mrb_get_args(mrb, "z*", &programPath, &argv, &argc);
+	mrb_value parameters = mrb_ary_new_from_values(mrb, argc, argv);
+
+	mrb_define_const(mrb, mrb->object_class, "ARGC", mrb_fixnum_value(argc));
+	mrb_define_const(mrb, mrb->object_class, "ARGV", parameters);
+
+	std::ifstream file(programPath);
+    std::stringstream buffer;
+    buffer << file.rdbuf();
+	mrb_value result = mrb_load_string(mrb, buffer.str().c_str());
+
+	mrb_define_const(mrb, mrb->object_class, "ARGC", mrb_nil_value());
+	mrb_define_const(mrb, mrb->object_class, "ARGV", mrb_nil_value());
+
+	return result;
 }
 
 // Drawing

@@ -5,7 +5,6 @@
 #include <Shared/helper.hh>
 #include <Shared/sprites.hh>
 
-#include<iostream>
 Desktop::Desktop(unsigned int width, unsigned int height, unsigned char scale, TitleBarMode titleBarMode) : _size(sf::Vector2u(width, height)), _titleBarMode(titleBarMode), _windowsPid(0)
 {
 	this->_palette = std::vector<sf::Color> {
