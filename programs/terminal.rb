@@ -55,18 +55,21 @@ class Terminal
     @blink_time = @blink_speed
     @monospace = false
     @return_value = true
-    @auto_eval = true
     @display_history = []
     @command_history = []
     @command_history_index = 0
     @current_line = ''
     @current_path = 'programs'
     @should_blink = Window.focused
-    @bin_programs = {
-      'sp': "programs/bin/sp.rb",
-      'export': "programs/bin/export.rb",
-      'kill': "programs/bin/kill.rb",
-    } # TODO : Fetch from the `bin` folder
+    bin_programs = Dir.entries('programs/bin').to_h do |file|
+      next [nil, nil] unless file.end_with?(".rb")
+      [file.chomp('.rb'), "programs/bin/#{file}"]
+    end.compact
+    bin_programs.each do |method, file|
+      Object.define_method(method) do |*args|
+        execute_file file, { parameters: args, current_path: @current_path }
+      end
+    end
     update_showable(Window.width, Window.height)
   end
 
@@ -110,10 +113,13 @@ class Terminal
     when 60 # Tab
       # Pre-parse to auto-complete
     when 73 # Up
+      return if @command_history_index <= 0
+
       @backup_current_line = @current_line if @command_history_index == @command_history.size
       @command_history_index = (@command_history_index - 1).clamp(0, @command_history.size - 1)
-      @current_line = @command_history[@command_history_index]
+      @current_line = @command_history[@command_history_index] || ''
     when 74 # Down
+      return if @command_history_index >= @command_history.size
       @command_history_index = (@command_history_index + 1).clamp(0, @command_history.size)
       if @command_history_index == @command_history.size
         @current_line = @backup_current_line
@@ -124,67 +130,65 @@ class Terminal
   end
 
   def execute
+    _ = @_
     @command_history << @current_line
     @command_history_index = @command_history.size
     @display_history << ">#{@current_line}"
     # Parse command here
     command = @current_line.split(' ')
     result =
-      if @bin_programs.key?(command[0].to_sym)
-        execute_file @bin_programs[command[0].to_sym], { parameters: command, current_path: @current_path }
-      else
-        case command[0]
-        when 'mnsp'
-          value = command[1]
-          @monospace = param_to_bool(value) if param_is_bool(value)
-          @monospace = !@monospace if value.nil?
-          @monospace
-        when 'retval'
-          value = command[1]
-          @return_value = param_to_bool(value) if param_is_bool(value)
-          @return_value = !@return_value if value.nil?
-          @return_value
-        when 'autoeval'
-          value = command[1]
-          @auto_eval = param_to_bool(value) if param_is_bool(value)
-          @auto_eval = !@auto_eval if value.nil?
-          @auto_eval
-        when 'history'
-          history = @command_history
-          history = @command_history[(@command_history.count - command[1].to_i)..@command_history.count] unless command[1].to_i.zero?
-          history.each_with_index { |command, line| @display_history << "#{line + 1} #{command}" }
-          nil
-        when 'cd'
-          if command[1].nil?
-            @current_path = 'programs'
-          else
-            @current_path += "/#{command[1]}"
-            paths = @current_path.split('/')
-            # Do magic with '..' and '.'
-            result = @current_path
-          end
-          true
-        when 'pwd'
-          result = @current_path
-          @display_history << result
-          result
-        when 'ps'
-          result = Desktop.processes
-          pid_max_digits = result.max_by { |k, v| k.to_s.length }[0].to_s.length
-          result.each { |pid, process| @display_history << "#{sprintf("%#{pid_max_digits}d", pid.to_i)} #{process}" }
-          result
-        when 'exit'
-          Window.close
-        when 'eval'
-          eval(command.drop(1).join(' '))
+      case command[0]
+      when 'mnsp'
+        value = command[1]
+        @monospace = param_to_bool(value) if param_is_bool(value)
+        @monospace = !@monospace if value.nil?
+        @monospace
+      when 'retval'
+        value = command[1]
+        @return_value = param_to_bool(value) if param_is_bool(value)
+        @return_value = !@return_value if value.nil?
+        @return_value
+      when 'autoeval'
+        value = command[1]
+        @auto_eval = param_to_bool(value) if param_is_bool(value)
+        @auto_eval = !@auto_eval if value.nil?
+        @auto_eval
+      when 'history'
+        history = @command_history
+        history = @command_history[(@command_history.count - command[1].to_i)..@command_history.count] unless command[1].to_i.zero?
+        history.each_with_index { |command, line| @display_history << "#{line + 1} #{command}" }
+        nil
+      when 'cd'
+        if command[1].nil?
+          @current_path = 'programs'
         else
-          if @auto_eval
-            eval(command.join(' '))
-          else
-            @display_history << "`#{command[0]}` command not found"
-          end
+          @current_path += "/#{command[1]}"
+          paths = @current_path.split('/')
+          # Do magic with '..' and '.'
+          result = @current_path
+        end
+        true
+      when 'pwd'
+        result = @current_path
+        @display_history << result
+        result
+      when 'ps'
+        result = Desktop.processes
+        pid_max_digits = result.max_by { |k, v| k.to_s.length }[0].to_s.length
+        result.each { |pid, process| @display_history << "#{sprintf("%#{pid_max_digits}d", pid.to_i)} #{process}" }
+        result
+      when 'exit'
+        Window.close
+      when 'eval'
+        eval(command.drop(1).join(' '))
+      else
+        begin
+          eval(command.join(' '))
+        rescue StandardError => e
+          e
         end
       end
+    @_ = result
     @display_history << result.inspect if @return_value
     @current_line = ''
     @cursor.y += 1
