@@ -136,10 +136,13 @@ void AbstractWindow::exceptionHandler()
 		this->_texture.clear(this->_palette[0]);
 		this->_resizable = true;
 		this->_minSize = sf::Vector2i(8, 4);
-		mrb_value exception = mrb_obj_as_string(this->_mrb, mrb_obj_value(this->_mrb->exc));
+		mrb_value exceptionValue = mrb_obj_value(this->_mrb->exc);
+		RObject* savedException = this->_mrb->exc;
+		this->_mrb->exc = NULL;
+		mrb_value exception = mrb_obj_as_string(this->_mrb, exceptionValue);
 		drawText(this->_texture, 1, 1, mrb_str_to_cstr(this->_mrb, exception), this->_palette[8], false);
 
-		mrb_value backtraceObj = mrb_funcall(this->_mrb, mrb_obj_value(this->_mrb->exc), "backtrace", 0);
+		mrb_value backtraceObj = mrb_funcall(this->_mrb, exceptionValue, "backtrace", 0);
 		if (mrb_array_p(backtraceObj)) {
 			mrb_int backtraceLength = RARRAY_LEN(backtraceObj);
 			mrb_value *backtrace = RARRAY_PTR(backtraceObj);
@@ -147,6 +150,7 @@ void AbstractWindow::exceptionHandler()
 				drawText(this->_texture, 1, (i + 1) * (FONT_HEIGHT + 1) + 1, mrb_str_to_cstr(this->_mrb, backtrace[i]) , this->_palette[5], false); // Palette 9 also render nice
 			}
 		}
+		this->_mrb->exc = savedException;
 	}
 }
 
