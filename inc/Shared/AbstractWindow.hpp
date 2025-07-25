@@ -108,8 +108,9 @@ protected:
 	std::vector<std::string> _programParameters;
 	mrb_state* _mrb;
 	mrbc_context* _mrbContext;
-	RClass *_mrbWindowClass;
-	RClass *_mrbDesktopClass;
+	RClass* _mrbProgramClass;
+	RClass* _mrbWindowClass;
+	RClass* _mrbDesktopClass;
 
 private:
 	short generateSineWave(double time, double frequency, double amplitude);

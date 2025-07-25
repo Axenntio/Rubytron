@@ -26,6 +26,7 @@ AbstractWindow::AbstractWindow(sf::Vector2i position, sf::Vector2u size, const s
 		throw new std::runtime_error("Unable to start mruby for window");
 	}
 
+	this->_mrbProgramClass = mrb_define_class(this->_mrb, "Program", this->_mrb->object_class);
 	this->_mrbWindowClass = mrb_define_class(this->_mrb, "Window", this->_mrb->object_class);
 	this->_mrbDesktopClass = mrb_define_class(this->_mrb, "Desktop", this->_mrb->object_class);
 
@@ -48,10 +49,10 @@ AbstractWindow::AbstractWindow(sf::Vector2i position, sf::Vector2u size, const s
 	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "resizable=", &AbstractWindow::mrubySetResizable, MRB_ARGS_REQ(1));
 	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "reload", &AbstractWindow::mrubyReload, MRB_ARGS_NONE());
 	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "close", &AbstractWindow::mrubyClose, MRB_ARGS_NONE());
-	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "parameters", &AbstractWindow::mrubyParameters, MRB_ARGS_NONE());
 	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "key", &AbstractWindow::mrubyKey, MRB_ARGS_OPT(1));
 	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "button", &AbstractWindow::mrubyButton, MRB_ARGS_OPT(1));
 	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "focused", &AbstractWindow::mrubyFocused, MRB_ARGS_OPT(1));
+	mrb_define_class_method(this->_mrb, this->_mrbProgramClass, "parameters", &AbstractWindow::mrubyParameters, MRB_ARGS_NONE());
 
 	mrb_define_method(this->_mrb, this->_mrb->object_class, "execute_file", &AbstractWindow::mrubyExecuteFile, MRB_ARGS_REQ(1) | MRB_ARGS_REST());
 
@@ -61,7 +62,7 @@ AbstractWindow::AbstractWindow(sf::Vector2i position, sf::Vector2u size, const s
 	mrb_define_method(this->_mrb, this->_mrb->object_class, "rect", &AbstractWindow::mrubyRectangle, MRB_ARGS_REQ(4) | MRB_ARGS_OPT(1));
 	mrb_define_method(this->_mrb, this->_mrb->object_class, "circle", &AbstractWindow::mrubyCircle, MRB_ARGS_REQ(3) | MRB_ARGS_OPT(1));
 	mrb_define_method(this->_mrb, this->_mrb->object_class, "text", &AbstractWindow::mrubyText, MRB_ARGS_REQ(3) | MRB_ARGS_OPT(2));
-	mrb_define_method(this->_mrb, this->_mrb->object_class, "sound", &AbstractWindow::mrubySound, MRB_ARGS_REQ(3) | MRB_ARGS_OPT(2));
+	mrb_define_method(this->_mrb, this->_mrb->object_class, "sound", &AbstractWindow::mrubySound, MRB_ARGS_OPT(2));
 
 	this->loadFile();
 }
@@ -682,11 +683,12 @@ mrb_value AbstractWindow::mrubySound(mrb_state* mrb, [[maybe_unused]] mrb_value 
 {
 	AbstractWindow* window = mrubyGetWindowObject(mrb);
 	mrb_int frequency = 440;
+	mrb_float duration = 1;
 	std::vector<std::int16_t> samples;
 
-	mrb_get_args(mrb, "|i", &frequency);
+	mrb_get_args(mrb, "|if", &frequency, &duration);
 
-	for (unsigned int i = 0; i < 44100 / 10; i++) {
+	for (unsigned int i = 0; i < 44100 * duration; i++) {
 		samples.push_back(window->generateSineWave(i, frequency, 0.9));
 	}
 	if (!window->_soundBuffer.loadFromSamples(&samples[0], samples.size(), 1, 44100, {sf::SoundChannel::Mono})) {

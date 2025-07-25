@@ -10,13 +10,6 @@
 
 extern Desktop desktop;
 
-Window::Window(unsigned int pid, sf::Vector2i position, sf::Vector2u size, sf::Vector2i prevPosition, sf::Vector2u prevSize, bool fullscreened, const std::vector<sf::Color>& palette, TitleBarMode titleBarMode, const std::string& programPath, const std::vector<std::string>& parameters) : Window(pid, position, size, palette, titleBarMode, programPath, parameters)
-{
-	this->_prevPosition = prevPosition;
-	this->_prevSize = prevSize;
-	this->_fullscreened = fullscreened;
-}
-
 Window::Window(unsigned int pid, sf::Vector2i position, sf::Vector2u size, const std::vector<sf::Color>& palette, TitleBarMode titleBarMode, const std::string& programPath, const std::vector<std::string>& parameters) : AbstractWindow(position, size, palette, programPath, parameters), _pid(pid), _titleBarMode(titleBarMode)
 {
 	this->titleBarRefresh();
@@ -153,8 +146,8 @@ unsigned int Window::getPid() const
 void Window::addKeyPressed(sf::Keyboard::Key key)
 {
 	if (this->_mrb->exc) {
-		this->_closed = true;
-		desktop.spawn(static_cast<sf::Vector2i>(this->getPosition()), static_cast<sf::Vector2u>(this->_size), this->_prevPosition, this->_prevSize, this->_fullscreened, this->_programFile, this->_programParameters);
+		this->_mrb->exc = NULL;
+		this->reloadFile();
 		return;
 	}
 	AbstractWindow::addKeyPressed(key);

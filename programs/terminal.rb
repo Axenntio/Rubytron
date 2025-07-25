@@ -47,12 +47,14 @@ class Terminal
   attr_reader :monospace
 
   def initialize
+    @random = Random.new
     Window.min_height = 7
     Window.min_width = 9
     @cursor = Vector.new(0, 0)
     @blink = true
     @blink_speed = 20
     @blink_time = @blink_speed
+    @sound = false
     @monospace = false
     @return_value = true
     @display_history = []
@@ -99,6 +101,9 @@ class Terminal
     if char.between?(32, 126)
       @current_line.insert(@current_line_index, char.chr)
       @current_line_index += 1
+      sound @random.rand(220) + 440, 0.1 if @sound
+    else
+      sound @random.rand(110) + 220, 0.1 if @sound
     end
   end
 
@@ -150,21 +155,14 @@ class Terminal
     command = @current_line.split(' ')
     result =
       case command[0]
+      when 'sound'
+        @sound = toggle_option(@sound, command[1])
       when 'mnsp'
-        value = command[1]
-        @monospace = param_to_bool(value) if param_is_bool(value)
-        @monospace = !@monospace if value.nil?
-        @monospace
+        @monospace = toggle_option(@monospace, command[1])
       when 'retval'
-        value = command[1]
-        @return_value = param_to_bool(value) if param_is_bool(value)
-        @return_value = !@return_value if value.nil?
-        @return_value
+        @return_value = toggle_option(@return_value, command[1])
       when 'autoeval'
-        value = command[1]
-        @auto_eval = param_to_bool(value) if param_is_bool(value)
-        @auto_eval = !@auto_eval if value.nil?
-        @auto_eval
+        @auto_eval = toggle_option(@auto_eval, command[1])
       when 'history'
         history = @command_history
         history = @command_history[(@command_history.count - command[1].to_i)..@command_history.count] unless command[1].to_i.zero?
@@ -224,6 +222,12 @@ class Terminal
       return false
     end
     nil
+  end
+
+  def toggle_option(option, value=nil)
+    option = param_to_bool(value) if param_is_bool(value)
+    option = !option if value.nil?
+    option
   end
 end
 

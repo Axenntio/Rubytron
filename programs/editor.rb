@@ -343,8 +343,8 @@ class Editor
 end
 
 def init
-  raise StandardError.new("Looks like you didn't pass any file as parameter") if Window.parameters[0].nil?
-  $editor = Editor.new(Window.parameters[0])
+  raise StandardError.new("Looks like you didn't pass any file as parameter") if Program.parameters[0].nil?
+  $editor = Editor.new(Program.parameters[0])
 end
 
 def update(elapsed)

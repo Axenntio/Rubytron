@@ -196,13 +196,8 @@ bool Desktop::spawn(const std::string& path, const std::vector<std::string>& par
 
 bool Desktop::spawn(sf::Vector2i position, sf::Vector2u size, const std::string& path, const std::vector<std::string>& parameters)
 {
-	return this->spawn(position, size, position, size, false, path, parameters);
-}
-
-bool Desktop::spawn(sf::Vector2i position, sf::Vector2u size, sf::Vector2i prevPosition, sf::Vector2u prevSize, bool fullscreened, const std::string& path, const std::vector<std::string>& parameters)
-{
 	try {
-		std::shared_ptr<Window> window = std::make_unique<Window>(this->_windowsPid, position, size, prevPosition, prevSize, fullscreened, this->_palette, this->_titleBarMode, path, parameters);
+		std::shared_ptr<Window> window = std::make_unique<Window>(this->_windowsPid, position, size, this->_palette, this->_titleBarMode, path, parameters);
 		this->_windows.push_back(window);
 		window->init();
 		if (this->_focusedWindow != nullptr) {
