@@ -59,6 +59,7 @@ class Terminal
     @command_history = []
     @command_history_index = 0
     @current_line = ''
+    @current_line_index = 0
     @current_path = 'programs'
     @should_blink = Window.focused
     bin_programs = Dir.entries('programs/bin').to_h do |file|
@@ -84,19 +85,20 @@ class Terminal
   end
 
   def showable_display(elapsed)
-    cursor = ''
     @blink_time -= 1 * elapsed if @should_blink
     if @blink_time.zero? || @blink_time.negative?
       @blink_time += @blink_speed
       @blink = !@blink
     end
-    cursor = '_' if @blink
-    (@display_history + [">#{@current_line}#{cursor}"])[[0, @display_history.count - @showable.y + 2].max, @showable.y]
+    line_with_index = @current_line.dup
+    line_with_index[@current_line_index] = '_' if @blink
+    (@display_history + [">#{line_with_index}"])[[0, @display_history.count - @showable.y + 2].max, @showable.y]
   end
 
   def input_char(char)
     if char.between?(32, 126)
-      @current_line += char.chr
+      @current_line.insert(@current_line_index, char.chr)
+      @current_line_index += 1
     end
   end
 
@@ -109,23 +111,33 @@ class Terminal
     when 58 # Enter
       execute
     when 59 # Backspace
-      @current_line.slice!(-1)
+      return if @current_line_index <= 0
+      @current_line.slice!(@current_line_index - 1)
+      @current_line_index -= 1
     when 60 # Tab
       # Pre-parse to auto-complete
+    when 71 # Left
+      return if @current_line_index <= 0
+      @current_line_index = (@current_line_index - 1).clamp(0, @current_line.length - 1);
+    when 72 # Right
+      return if @current_line_index >= (@current_line.size)
+      @current_line_index = (@current_line_index + 1).clamp(0, @current_line.length);
     when 73 # Up
       return if @command_history_index <= 0
-
       @backup_current_line = @current_line if @command_history_index == @command_history.size
       @command_history_index = (@command_history_index - 1).clamp(0, @command_history.size - 1)
       @current_line = @command_history[@command_history_index] || ''
+      @current_line_index = @current_line.length
     when 74 # Down
       return if @command_history_index >= @command_history.size
       @command_history_index = (@command_history_index + 1).clamp(0, @command_history.size)
-      if @command_history_index == @command_history.size
-        @current_line = @backup_current_line
-      else
-        @current_line = @command_history[@command_history_index]
-      end
+      @current_line =
+        if @command_history_index == @command_history.size
+          @backup_current_line
+        else
+          @command_history[@command_history_index]
+        end
+      @current_line_index = @current_line.length
     end
   end
 
@@ -191,6 +203,7 @@ class Terminal
     @_ = result
     @display_history << result.inspect if @return_value
     @current_line = ''
+    @current_line_index = 0
     @cursor.y += 1
   end
 

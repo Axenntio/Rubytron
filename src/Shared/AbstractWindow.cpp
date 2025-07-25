@@ -531,7 +531,6 @@ mrb_value AbstractWindow::mrubyKillProcess([[maybe_unused]] mrb_state *mrb, [[ma
 
 mrb_value AbstractWindow::mrubyExecuteFile(mrb_state* mrb, [[maybe_unused]] mrb_value self)
 {
-	AbstractWindow* window = mrubyGetWindowObject(mrb);
 	const char* programPath;
 	const mrb_value* argv;
 	mrb_int argc;

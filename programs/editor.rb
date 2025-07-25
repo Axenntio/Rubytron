@@ -239,6 +239,7 @@ class Editor
       end
     when 89 # F5
       Desktop.spawn @path
+      @notification = Notification.new('Project launched', 1000)
     when 91 # F7
       Desktop.export @path
       @notification = Notification.new('Project exported', 3000)

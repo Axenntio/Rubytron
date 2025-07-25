@@ -6,7 +6,7 @@ project(
 	default_options: ['warning_level=3', 'cpp_std=c++17']
 )
 
-add_global_arguments('-g3', language: 'cpp')
+add_global_arguments('-g3', '-D_LIBCPP_HARDENING_MODE=_LIBCPP_HARDENING_MODE_DEBUG', '-U_LIBCPP_ENABLE_ASSERTIONS', language: 'cpp')
 
 inc = include_directories('inc')
 
