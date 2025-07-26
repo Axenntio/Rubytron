@@ -9,13 +9,13 @@ jobs:
     container:
       image: archlinux:latest
     steps:
+    - name: Install dependencies
+      run: |
+        pacman -Syu --noconfirm git g++ sfml meson ruby xxd
     - name: Checkout repository
       uses: actions/checkout@v4
       with:
         submodules: recursive
-    - name: Install dependencies
-      run: |
-        pacman -Syu --noconfirm git g++ sfml meson ruby xxd
     - name: Copy mruby config file
       run: cp rubytron.rb mruby/build_config/.
     - name: Compile mruby
