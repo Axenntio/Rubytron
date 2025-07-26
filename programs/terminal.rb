@@ -172,9 +172,22 @@ class Terminal
         if command[1].nil?
           @current_path = ''
         else
-          @current_path += "/#{command[1]}"
+          @current_path = [@current_path, command[1]].reject(&:empty?).join('/')
           paths = @current_path.split('/')
           # Do magic with '..' and '.'
+          cleaned_path = []
+
+          paths.each do |item|
+            if item == '.'
+            elsif item == '..'
+              cleaned_path.pop unless cleaned_path.last == '..' || cleaned_path.empty?
+            else
+              cleaned_path << item
+            end
+          end
+
+          @current_path = cleaned_path.join('/')
+
           result = @current_path
         end
         true
