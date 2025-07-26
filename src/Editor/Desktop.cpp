@@ -47,17 +47,17 @@ Desktop::Desktop(unsigned int width, unsigned int height, unsigned char scale, T
 	this->_canvas_view.setViewport(sf::FloatRect({0, 0}, {1, 1}));
 	this->_canvas_view.setSize(sf::Vector2f(this->_size.x, this->_size.y));
 	this->_window.setView(this->_canvas_view);
+}
 
-	this->spawn("programs/autorun.rb");
+void Desktop::run()
+{
+	this->spawn("autorun.rb");
 	if (this->_focusedWindow != nullptr) {
 		this->_focusedWindow->focusEvent(false);
 	}
 	this->_focusedWindow = nullptr;
 	this->_focusAction = FocusAction::None;
-}
 
-void Desktop::run()
-{
 	while (this->_window.isOpen())
 	{
 		while (const std::optional event = this->_window.pollEvent())

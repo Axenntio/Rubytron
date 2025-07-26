@@ -6,23 +6,32 @@
 
 ## Inspiration
 
-Rubytron is based on the desktop experience of (unreleased) [Picotron](https://www.lexaloffle.com/picotron.php) (Screenshots can be found on the [zep's Twitter](https://twitter.com/lexaloffle)).  
+Rubytron is based on the desktop experience of (now released) [Picotron](https://www.lexaloffle.com/picotron.php) (Screenshots can be found on the [zep's Twitter](https://twitter.com/lexaloffle), and now on the official website).  
 Unlike Picotron, Rubytron use Ruby as scripting language for games/programs.
 
 ## Capabilities
 
-Display: 192x128 / 4bits (16 colors)  
-Code: mruby 3.1 (2.x ruby)
+Display: 384x240 / 4bits (16 colors)  
+Code: mruby 3.4 (2.x ruby)
 
 ## Build
 
 ```console
 $ cp rubytron.rb mruby/build_config/. && cd mruby && MRUBY_CONFIG=rubytron rake && cd ..
 [...]
-$ meson setup build
+$ meson setup build --prefix="$PWD/dist"
 [...]
 $ ninja -C build
 ```
+
+## Export for your plateform
+
+```console
+$ meson install -C build
+[...]
+```
+
+You can then check the `dist` directory
 
 ## Run
 

@@ -62,11 +62,11 @@ class Terminal
     @command_history_index = 0
     @current_line = ''
     @current_line_index = 0
-    @current_path = 'programs'
+    @current_path = ''
     @should_blink = Window.focused
-    bin_programs = Dir.entries('programs/bin').to_h do |file|
+    bin_programs = Dir.entries('bin').to_h do |file|
       next [nil, nil] unless file.end_with?(".rb")
-      [file.chomp('.rb'), "programs/bin/#{file}"]
+      [file.chomp('.rb'), "bin/#{file}"]
     end.compact
     bin_programs.each do |method, file|
       Object.define_method(method) do |*args|
@@ -170,7 +170,7 @@ class Terminal
         nil
       when 'cd'
         if command[1].nil?
-          @current_path = 'programs'
+          @current_path = ''
         else
           @current_path += "/#{command[1]}"
           paths = @current_path.split('/')

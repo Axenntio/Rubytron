@@ -9,6 +9,7 @@ public:
 	Player(sf::Vector2u size, unsigned char scale, const std::vector<std::string>& parameters);
 
 	void run();
+
 private:
 	void closeEvent(const sf::Event::Closed *event);
 	void resizeEvent(const sf::Event::Resized *event);

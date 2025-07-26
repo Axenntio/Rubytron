@@ -80,7 +80,7 @@ AbstractWindow::~AbstractWindow()
 void AbstractWindow::loadFile()
 {
 	FILE* file = fopen((std::filesystem::current_path() / this->_programFile).c_str(), "r");
-	if (file == nullptr) {
+	if (file == NULL) {
 		throw std::runtime_error("The file '" + std::string(std::filesystem::current_path() / this->_programFile) + "' can't be opened");
 	}
 	this->_mrbContext = mrbc_context_new(this->_mrb);

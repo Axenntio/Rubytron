@@ -321,6 +321,7 @@ void drawText(sf::RenderTexture& texture, int x, int y, const std::string& text,
 		++xoffset;
 	}
 }
+
 void drawText(sf::RenderTarget& target, sf::RenderStates states, int x, int y, const std::string& text, sf::Color color, bool monospace)
 {
 	unsigned int xoffset = 0;
