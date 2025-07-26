@@ -41,7 +41,7 @@ jobs:
         submodules: recursive
     - name: Install dependencies
       run: |
-        brew install meson sfml openal-soft
+        brew install meson sfml
     - name: Copy mruby config file
       run: cp rubytron.rb mruby/build_config/.
     - name: Compile mruby
@@ -109,7 +109,7 @@ jobs:
         submodules: recursive
     - name: Install dependencies
       run: |
-        brew install meson sfml openal-soft
+        brew install meson sfml dylibbundler
     - name: Copy mruby config file
       run: cp rubytron.rb mruby/build_config/.
     - name: Compile mruby
