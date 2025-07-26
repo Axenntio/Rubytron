@@ -131,7 +131,7 @@ class Terminal
       return if @command_history_index <= 0
       @backup_current_line = @current_line if @command_history_index == @command_history.size
       @command_history_index = (@command_history_index - 1).clamp(0, @command_history.size - 1)
-      @current_line = @command_history[@command_history_index] || ''
+      @current_line = @command_history[@command_history_index].dup || ''
       @current_line_index = @current_line.length
     when 74 # Down
       return if @command_history_index >= @command_history.size
@@ -140,7 +140,7 @@ class Terminal
         if @command_history_index == @command_history.size
           @backup_current_line
         else
-          @command_history[@command_history_index]
+          @command_history[@command_history_index].dup
         end
       @current_line_index = @current_line.length
     end
