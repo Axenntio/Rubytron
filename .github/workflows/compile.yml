@@ -125,6 +125,8 @@ jobs:
         path: build/src/Editor
     - name: Compile Rubytron
       run: meson install -C build
+    - name: Fix macOS app
+      run: dylibbundler -od -b -x dist/Rubytron.app/Contents/MacOS/rubytron -d dist/Rubytron.app/Contents/libs
     - name: Create macOS DMG
       run: |
         hdiutil create /tmp/tmp.dmg -ov -volname "Rubytron" -fs HFS+ -srcfolder dist/Rubytron.app
@@ -133,5 +135,5 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: rubytron-macos
-        path: dist/Rubytron.app
+        path: dist/Rubytron.dmg
         retention-days: 5
