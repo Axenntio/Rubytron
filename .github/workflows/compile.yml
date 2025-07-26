@@ -135,5 +135,5 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: rubytron-macos
-        path: dist/Rubytron.dmg
+        path: Rubytron.dmg
         retention-days: 5
