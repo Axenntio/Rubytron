@@ -125,13 +125,9 @@ jobs:
         path: build/src/Editor
     - name: Compile Rubytron
       run: meson install -C build
-    - name: Create macOS DMG
-      run: |
-        hdiutil create /tmp/tmp.dmg -ov -volname "Rubytron" -fs HFS+ -srcfolder dist/Rubytron.dmg
-        hdiutil convert /tmp/tmp.dmg -format UDZO -o Rubytron.dmg
     - name: Upload macOS app
       uses: actions/upload-artifact@v4
       with:
         name: rubytron-macos
-        path: dist/Rubytron.dmg
+        path: dist/Rubytron.app
         retention-days: 5

@@ -18,6 +18,7 @@ mruby = declare_dependency(link_args: files('mruby/build/host/lib/libmruby.a')[0
 
 shared_src = [
 	'../Shared/AbstractWindow.cpp',
+	'../Shared/ProgramPod.cpp',
 	'../Shared/helper.cpp',
 	'../Shared/sprites.cpp'
 ]
