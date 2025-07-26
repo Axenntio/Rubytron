@@ -127,13 +127,9 @@ jobs:
       run: meson install -C build
     - name: Fix macOS app
       run: dylibbundler -od -b -x dist/Rubytron.app/Contents/MacOS/rubytron -d dist/Rubytron.app/Contents/libs
-    - name: Create macOS DMG
-      run: |
-        hdiutil create /tmp/tmp.dmg -ov -volname "Rubytron" -fs HFS+ -srcfolder dist/Rubytron.app
-        hdiutil convert /tmp/tmp.dmg -format UDZO -o Rubytron.dmg
     - name: Upload macOS app
       uses: actions/upload-artifact@v4
       with:
         name: rubytron-macos
-        path: Rubytron.dmg
+        path: dist
         retention-days: 5
