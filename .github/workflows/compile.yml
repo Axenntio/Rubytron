@@ -11,7 +11,7 @@ jobs:
     steps:
     - name: Install dependencies
       run: |
-        pacman -Syu --noconfirm git gcc sfml meson ruby ruby-rake vim
+        pacman -Syu --noconfirm git gcc sfml meson ruby ruby-rake ruby-erb vim pkgconfig
     - name: Checkout repository
       uses: actions/checkout@v4
       with:
@@ -65,15 +65,16 @@ jobs:
       macos-runtime
     ]
     runs-on: ubuntu-latest
+    container:
+      image: archlinux:latest
     steps:
+    - name: Install dependencies
+      run: |
+        pacman -Syu --noconfirm git gcc sfml meson ruby ruby-rake ruby-erb vim pkgconfig
     - name: Checkout repository
       uses: actions/checkout@v4
       with:
         submodules: recursive
-    - name: Install dependencies
-      run: |
-        sudo apt update
-        sudo apt install -y git g++ libsfml-dev meson ruby xxd
     - name: Copy mruby config file
       run: cp rubytron.rb mruby/build_config/.
     - name: Compile mruby
