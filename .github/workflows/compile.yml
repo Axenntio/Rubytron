@@ -11,7 +11,7 @@ jobs:
     steps:
     - name: Install dependencies
       run: |
-        pacman -Syu --noconfirm git g++ sfml meson ruby xxd-standalone
+        pacman -Syu --noconfirm git gcc sfml meson ruby vim
     - name: Checkout repository
       uses: actions/checkout@v4
       with:
