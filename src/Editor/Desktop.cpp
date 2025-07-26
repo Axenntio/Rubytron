@@ -169,7 +169,7 @@ bool Desktop::programExport(const std::string& path) const
 		if (!runtimeFile.is_open()) {
 			return false;
 		}
-		runtimeFile.write((char *)arch.file, arch.length);
+		runtimeFile.write(reinterpret_cast<char*>(arch.file), arch.length);
 		runtimeFile.close();
 		std::filesystem::permissions(path + ".bin/" + arch.name + "/runtime",
 			std::filesystem::perms::owner_exec,

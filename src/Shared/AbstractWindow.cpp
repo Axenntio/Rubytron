@@ -658,8 +658,8 @@ mrb_value AbstractWindow::mrubyKey(mrb_state* mrb, [[maybe_unused]] mrb_value se
 	}
 
 	mrb_value array = mrb_ary_new_capa(mrb, window->_keyPressed.size());
-	for (const sf::Keyboard::Key& key : window->_keyPressed) {
-		mrb_ary_push(mrb, array, mrb_int_value(mrb, static_cast<int>(key)));
+	for (const sf::Keyboard::Key& sf_key : window->_keyPressed) {
+		mrb_ary_push(mrb, array, mrb_int_value(mrb, static_cast<int>(sf_key)));
 	}
 
 	return array;
@@ -713,7 +713,8 @@ short AbstractWindow::generateSineWave(double time, double frequency, double amp
 	return amp * sin(rad);
 }
 
-short AbstractWindow::generateSquareWave(double time, double frequency, double amplitude) {
+short AbstractWindow::generateSquareWave(double time, double frequency, double amplitude)
+{
 	int tickPerCycle = 44100 / frequency;
 	int cyclepart = static_cast<int>(time) % tickPerCycle;
 	int halfcycle = tickPerCycle / 2;
@@ -721,7 +722,8 @@ short AbstractWindow::generateSquareWave(double time, double frequency, double a
 	return (cyclepart < halfcycle) ? amp : 0;
 }
 
-short AbstractWindow::generateNoise(double amplitude) {
+short AbstractWindow::generateNoise(double amplitude)
+{
 	short amp = 32767 * amplitude;
 	return rand() % amp;
 }

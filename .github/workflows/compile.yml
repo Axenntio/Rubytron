@@ -6,15 +6,16 @@ on:
 jobs:
   linux-runtime:
     runs-on: ubuntu-latest
+    container:
+      image: archlinux:latest
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         submodules: recursive
     - name: Install dependencies
       run: |
-        sudo apt update
-        sudo apt install -y git g++ libsfml-dev meson ruby xxd
+        pacman -Syu --noconfirm git g++ sfml meson ruby xxd
     - name: Copy mruby config file
       run: cp rubytron.rb mruby/build_config/.
     - name: Compile mruby
@@ -35,7 +36,7 @@ jobs:
     runs-on: macos-latest
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         submodules: recursive
     - name: Install dependencies
@@ -66,7 +67,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         submodules: recursive
     - name: Install dependencies
@@ -107,7 +108,7 @@ jobs:
     runs-on: macos-latest
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         submodules: recursive
     - name: Install dependencies
