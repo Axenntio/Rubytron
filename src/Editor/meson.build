@@ -26,22 +26,22 @@ if host_machine.system() == 'darwin'
 	# 	install_dir: 'Rubytron.app/Contents/Resources'
 	# )
 
-	sfml_frameworks = [
-		'sfml-system.framework',
-		'sfml-window.framework',
-		'sfml-graphics.framework',
-		'sfml-audio.framework'
-	]
+	# sfml_libs = [
+	# 	'libsfml-system.dylib',
+	# 	'libsfml-window.dylib',
+	# 	'libsfml-graphics.dylib',
+	# 	'libsfml-audio.dylib'
+	# ]
 
-	homebrew_sfml_framework_dir = '/opt/homebrew/opt/sfml/Frameworks'
+	# homebrew_sfml_lib_dir = '/opt/homebrew/opt/sfml/lib'
 
-	install_emptydir('Rubytron.app/Contents/Frameworks')
-	foreach f : sfml_frameworks
-		install_subdir(
-			homebrew_sfml_framework_dir + '/' + f,
-			install_dir: 'Rubytron.app/Contents/Frameworks'
-		)
-	endforeach
+	# foreach f : sfml_libs
+	# 	install_data(
+	# 		homebrew_sfml_lib_dir + '/' + f,
+	# 		install_dir: 'Rubytron.app/Contents/Frameworks',
+	# 		follow_symlinks: true
+	# 	)
+	# endforeach
 else
 	app_dir = 'linux'
 	app_rpath = '$ORIGIN'
