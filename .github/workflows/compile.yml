@@ -83,7 +83,7 @@ jobs:
         MRUBY_CONFIG=rubytron rake
     - name: Setup Rubytron
       run: meson setup build -Dcpp_args=-DMULTI_EXPORT
-    - uses: actions/download-artifact@v2
+    - uses: actions/download-artifact@v4
       with:
         name: macos-runtime-header
         path: build/src/Editor
@@ -124,7 +124,7 @@ jobs:
     - name: Setup Rubytron
       run: |
         PKG_CONFIG_PATH="${PKG_CONFIG_PATH}:$(brew --prefix openal-soft)/lib/pkgconfig" meson setup build -Dcpp_args=-DMULTI_EXPORT
-    - uses: actions/download-artifact@v2
+    - uses: actions/download-artifact@v4
       with:
         name: linux-runtime-header
         path: build/src/Editor
@@ -137,10 +137,10 @@ jobs:
         mkdir -p Rubytron.app/Contents/Resources
         echo -e '<?xml version="1.0" encoding="UTF-8"?>\n<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">\n<plist version="1.0">\n<dict>\n  <key>CFBundleGetInfoString</key>\n  <string>Rubytron</string>\n  <key>CFBundleExecutable</key>\n  <string>launch.sh</string>\n  <key>CFBundleIdentifier</key>\n  <string>com.axenntio.rubytron</string>\n  <key>CFBundleName</key>\n  <string>rubytron</string>\n  <key>CFBundleIconFile</key>\n  <string>rubytron.icns</string>\n  <key>CFBundleShortVersionString</key>\n  <string>0.01</string>\n  <key>CFBundleInfoDictionaryVersion</key>\n  <string>6.0</string>\n  <key>CFBundlePackageType</key>\n  <string>APPL</string>\n  <key>IFMajorVersion</key>\n  <integer>0</integer>\n  <key>IFMinorVersion</key>\n  <integer>1</integer>\n</dict>\n</plist>' > Rubytron.app/Contents/Info.plist
         cp ../build/src/Editor/rubytron Rubytron.app/Contents/MacOS/.
-        cp $(brew --prefix sfml)/lib/libsfml-graphics.2.5.dylib Rubytron.app/Contents/MacOS/.
-        cp $(brew --prefix sfml)/lib/libsfml-window.2.5.dylib Rubytron.app/Contents/MacOS/.
-        cp $(brew --prefix sfml)/lib/libsfml-system.2.5.dylib Rubytron.app/Contents/MacOS/.
-        cp $(brew --prefix sfml)/lib/libsfml-audio.2.5.dylib Rubytron.app/Contents/MacOS/.
+        cp $(brew --prefix sfml)/lib/libsfml-graphics.3.0.1.dylib Rubytron.app/Contents/MacOS/.
+        cp $(brew --prefix sfml)/lib/libsfml-window.3.0.1.dylib Rubytron.app/Contents/MacOS/.
+        cp $(brew --prefix sfml)/lib/libsfml-system.3.0.1.dylib Rubytron.app/Contents/MacOS/.
+        cp $(brew --prefix sfml)/lib/libsfml-audio.3.0.1.dylib Rubytron.app/Contents/MacOS/.
         cp $(brew --prefix libvorbis)/lib/libvorbis.0.dylib Rubytron.app/Contents/MacOS/.
         cp $(brew --prefix libvorbis)/lib/libvorbisenc.2.dylib Rubytron.app/Contents/MacOS/.
         cp $(brew --prefix libvorbis)/lib/libvorbisfile.3.dylib Rubytron.app/Contents/MacOS/.
@@ -148,16 +148,16 @@ jobs:
         cp $(brew --prefix flac)/lib/libFLAC.12.dylib Rubytron.app/Contents/MacOS/.
         cp $(brew --prefix freetype)/lib/libfreetype.6.dylib Rubytron.app/Contents/MacOS/.
         cp $(brew --prefix libpng)/lib/libpng16.16.dylib Rubytron.app/Contents/MacOS/.
-        install_name_tool -change $(brew --prefix sfml)/lib/libsfml-graphics.2.5.dylib @executable_path/libsfml-graphics.2.5.dylib Rubytron.app/Contents/MacOS/rubytron
-        install_name_tool -change $(brew --prefix sfml)/lib/libsfml-window.2.5.dylib @executable_path/libsfml-window.2.5.dylib Rubytron.app/Contents/MacOS/rubytron
-        install_name_tool -change $(brew --prefix sfml)/lib/libsfml-system.2.5.dylib @executable_path/libsfml-system.2.5.dylib Rubytron.app/Contents/MacOS/rubytron
-        install_name_tool -change $(brew --prefix sfml)/lib/libsfml-audio.2.5.dylib @executable_path/libsfml-audio.2.5.dylib Rubytron.app/Contents/MacOS/rubytron
-        install_name_tool -change $(brew --prefix libvorbis)/lib/libvorbis.0.dylib @executable_path/libvorbis.0.dylib Rubytron.app/Contents/MacOS/libsfml-audio.2.5.dylib
-        install_name_tool -change $(brew --prefix libvorbis)/lib/libvorbisenc.2.dylib @executable_path/libvorbisenc.2.dylib Rubytron.app/Contents/MacOS/libsfml-audio.2.5.dylib
-        install_name_tool -change $(brew --prefix libvorbis)/lib/libvorbisfile.3.dylib @executable_path/libvorbisfile.3.dylib Rubytron.app/Contents/MacOS/libsfml-audio.2.5.dylib
-        install_name_tool -change $(brew --prefix libogg)/lib/libogg.0.dylib @executable_path/libogg.0.dylib Rubytron.app/Contents/MacOS/libsfml-audio.2.5.dylib
-        install_name_tool -change $(brew --prefix flac)/lib/libFLAC.12.dylib @executable_path/libFLAC.12.dylib Rubytron.app/Contents/MacOS/libsfml-audio.2.5.dylib
-        install_name_tool -change $(brew --prefix freetype)/lib/libfreetype.6.dylib @executable_path/libfreetype.6.dylib Rubytron.app/Contents/MacOS/libsfml-graphics.2.5.dylib
+        install_name_tool -change $(brew --prefix sfml)/lib/libsfml-graphics.3.0.dylib @executable_path/libsfml-graphics.3.0.1.dylib Rubytron.app/Contents/MacOS/rubytron
+        install_name_tool -change $(brew --prefix sfml)/lib/libsfml-window.3.0.dylib @executable_path/libsfml-window.3.0.1.dylib Rubytron.app/Contents/MacOS/rubytron
+        install_name_tool -change $(brew --prefix sfml)/lib/libsfml-system.3.0.dylib @executable_path/libsfml-system.3.0.1.dylib Rubytron.app/Contents/MacOS/rubytron
+        install_name_tool -change $(brew --prefix sfml)/lib/libsfml-audio.3.0.dylib @executable_path/libsfml-audio.3.0.1.dylib Rubytron.app/Contents/MacOS/rubytron
+        install_name_tool -change $(brew --prefix libvorbis)/lib/libvorbis.0.dylib @executable_path/libvorbis.0.dylib Rubytron.app/Contents/MacOS/libsfml-audio.3.0.1.dylib
+        install_name_tool -change $(brew --prefix libvorbis)/lib/libvorbisenc.2.dylib @executable_path/libvorbisenc.2.dylib Rubytron.app/Contents/MacOS/libsfml-audio.3.0.1.dylib
+        install_name_tool -change $(brew --prefix libvorbis)/lib/libvorbisfile.3.dylib @executable_path/libvorbisfile.3.dylib Rubytron.app/Contents/MacOS/libsfml-audio.3.0.1.dylib
+        install_name_tool -change $(brew --prefix libogg)/lib/libogg.0.dylib @executable_path/libogg.0.dylib Rubytron.app/Contents/MacOS/libsfml-audio.3.0.1.dylib
+        install_name_tool -change $(brew --prefix flac)/lib/libFLAC.12.dylib @executable_path/libFLAC.12.dylib Rubytron.app/Contents/MacOS/libsfml-audio.3.0.1.dylib
+        install_name_tool -change $(brew --prefix freetype)/lib/libfreetype.6.dylib @executable_path/libfreetype.6.dylib Rubytron.app/Contents/MacOS/libsfml-graphics.3.0.1.dylib
         install_name_tool -change $(brew --prefix libpng)/lib/libpng16.16.dylib @executable_path/libpng16.16.dylib Rubytron.app/Contents/MacOS/libfreetype.6.dylib
         install_name_tool -change $(brew --prefix libogg)/lib/libogg.0.dylib @executable_path/libogg.0.dylib Rubytron.app/Contents/MacOS/libFLAC.12.dylib
         install_name_tool -change $(brew --prefix libogg)/lib/libogg.0.dylib @executable_path/libogg.0.dylib Rubytron.app/Contents/MacOS/libvorbis.0.dylib
