@@ -85,15 +85,15 @@ jobs:
         cd mruby
         rake
     - name: LS 1
-      run: ls .
+      run: dir .
     - name: LS 2
-      run: ls ./vcpkg
+      run: dir .\vcpkg
     - name: LS 3
-      run: ls ./vcpkg/installed
+      run: dir .\vcpkg\installed
     - name: LS 4
-      run: ls ./vcpkg/installed/x64-windows
+      run: dir .\vcpkg\installed\x64-windows
     - name: LS 5
-      run: ls ./vcpkg/installed/x64-windows/include
+      run: dir .\vcpkg\installed\x64-windows\include
     - name: Setup Rubytron
       run: meson setup build --prefix="$PWD/dist"
     - name: Compile Rubytron
