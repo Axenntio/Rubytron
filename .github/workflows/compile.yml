@@ -74,15 +74,7 @@ jobs:
         choco install mingw git
         git clone https://github.com/microsoft/vcpkg
         .\vcpkg\bootstrap-vcpkg.bat
-        .\vcpkg\vcpkg install sfml:x64-windows
-    - name: LS 1
-      run: ls vcpkg
-    - name: LS 2
-      run: ls vcpkg/installed
-    - name: LS 3
-      run: ls vcpkg/installed/x64-windows
-    - name: LS 4
-      run: ls vcpkg/installed/x64-windows/lib
+        .\vcpkg\vcpkg install sfml:x64-mingw-static
     - name: Add MinGW to PATH
       run: |
         echo "C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw64\bin" >> $env:GITHUB_PATH

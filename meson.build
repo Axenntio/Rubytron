@@ -13,9 +13,9 @@ inc = include_directories('inc')
 
 
 if host_machine.system() == 'windows'
-	sfml_include = include_directories('vcpkg/installed/x64-windows/include')
+	sfml_include = include_directories('vcpkg/installed/x64-mingw_dynamic/include')
 
-	sfml_libdir_fix = meson.source_root() / 'vcpkg' / 'installed' / 'x64-windows' / 'lib'
+	sfml_libdir_fix = meson.source_root() / 'vcpkg' / 'installed' / 'x64-mingw_dynamic' / 'lib'
 
 	dep_sfml = declare_dependency(
 		include_directories: sfml_include,
