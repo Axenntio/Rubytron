@@ -83,7 +83,7 @@ jobs:
     - name: Compile mruby
       run: |
         cd mruby
-        MRUBY_CONFIG=rubytron rake
+        cmd /C "set MRUBY_CONFIG=rubytron && rake"
     - name: Setup Rubytron
       run: meson setup build --prefix="$PWD/dist"
     - name: Compile Rubytron
