@@ -36,7 +36,6 @@ install_subdir(
 	install_dir: app_dir
 )
 
-# MacOS
 executable(
 	'rubytron',
 	[sources, runtime_code],

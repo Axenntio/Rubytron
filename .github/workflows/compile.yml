@@ -48,6 +48,8 @@ jobs:
       run: |
         cd mruby
         MRUBY_CONFIG=rubytron rake
+    - name: Create macOS icon
+      run: iconutil -c icns data/rubytron.iconset -o data/rubytron.icns
     - name: Setup Rubytron
       run: |
         meson setup build --prefix="$PWD/dist"
@@ -116,6 +118,8 @@ jobs:
       run: |
         cd mruby
         MRUBY_CONFIG=rubytron rake
+    - name: Create macOS icon
+      run: iconutil -c icns data/rubytron.iconset -o data/rubytron.icns
     - name: Setup Rubytron
       run: |
         meson setup build --prefix="$PWD/dist" -Dcpp_args=-DMULTI_EXPORT
@@ -123,8 +127,6 @@ jobs:
       with:
         name: linux-runtime-header
         path: build/src/Editor
-    - name: Create macOS icon
-      run: iconutil -c icns data/rubytron.iconset -o data/rubytron.icns
     - name: Compile Rubytron
       run: meson install -C build
     - name: Fix macOS app
