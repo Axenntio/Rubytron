@@ -64,6 +64,10 @@ jobs:
   windows-runtime:
     runs-on: windows-latest
     steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
     - name: Install dependencies
       run: |
         pip install meson ninja
@@ -74,10 +78,6 @@ jobs:
     - name: Add MinGW to PATH
       run: |
         echo "C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw64\bin" >> $env:GITHUB_PATH
-    - name: Checkout repository
-      uses: actions/checkout@v4
-      with:
-        submodules: recursive
     - name: Copy mruby config file
       run: cp rubytron.rb mruby/build_config.rb
     - name: Compile mruby
@@ -85,15 +85,15 @@ jobs:
         cd mruby
         rake
     - name: LS 1
-      run: dir .
+      run: ls .
     - name: LS 2
-      run: dir .\vcpkg
+      run: ls ./vcpkg
     - name: LS 3
-      run: dir .\vcpkg\installed
+      run: ls ./vcpkg/installed
     - name: LS 4
-      run: dir .\vcpkg\installed\x64-windows
+      run: ls ./vcpkg/installed/x64-windows
     - name: LS 5
-      run: dir .\vcpkg\installed\x64-windows\include
+      run: ls ./vcpkg/installed/x64-windows/include
     - name: Setup Rubytron
       run: meson setup build --prefix="$PWD/dist"
     - name: Compile Rubytron
