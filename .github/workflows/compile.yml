@@ -101,7 +101,8 @@ jobs:
   linux:
     needs: [
       linux-runtime,
-      macos-runtime
+      macos-runtime,
+      windows-runtime
     ]
     runs-on: ubuntu-latest
     container:
@@ -126,6 +127,10 @@ jobs:
       with:
         name: macos-runtime-header
         path: build/src/Editor
+    - uses: actions/download-artifact@v4
+      with:
+        name: windows-runtime-header
+        path: build/src/Editor
     - name: Compile Rubytron
       run: meson install -C build
     - name: Upload Linux bundle
@@ -138,7 +143,8 @@ jobs:
   macos:
     needs: [
       linux-runtime,
-      macos-runtime
+      macos-runtime,
+      windows-runtime
     ]
     runs-on: macos-latest
     steps:
@@ -164,6 +170,10 @@ jobs:
       with:
         name: linux-runtime-header
         path: build/src/Editor
+    - uses: actions/download-artifact@v4
+      with:
+        name: windows-runtime-header
+        path: build/src/Editor
     - name: Compile Rubytron
       run: meson install -C build
     - name: Fix macOS app
@@ -173,4 +183,55 @@ jobs:
       with:
         name: rubytron-macos
         path: dist
+        retention-days: 5
+
+  windows:
+    needs: [
+      linux-runtime,
+      macos-runtime,
+      windows-runtime
+    ]
+    runs-on: windows-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+    - name: Install dependencies
+      run: |
+        pip install meson ninja
+        choco install mingw git
+        git clone https://github.com/microsoft/vcpkg
+        .\vcpkg\bootstrap-vcpkg.bat
+        .\vcpkg\vcpkg install sfml:x64-mingw-dynamic
+    - name: LS
+      run: ls vcpkg/installed/x64-mingw-dynamic/lib
+    - name: Add MinGW to PATH
+      run: |
+        echo "C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw64\bin" >> $env:GITHUB_PATH
+    - name: Copy mruby config file
+      run: cp rubytron.rb mruby/build_config.rb
+    - name: Compile mruby
+      run: |
+        cd mruby
+        rake
+    - name: Setup Rubytron
+      shell: bash
+      run: |
+        meson setup build --prefix="$PWD/dist" -Dcpp_args=-DMULTI_EXPORT
+    - uses: actions/download-artifact@v4
+      with:
+        name: linux-runtime-header
+        path: build/src/Editor
+    - uses: actions/download-artifact@v4
+      with:
+        name: macos-runtime-header
+        path: build/src/Editor
+    - name: Compile Rubytron
+      run: ninja -C build
+    - name: Upload Windows bundle
+      uses: actions/upload-artifact@v4
+      with:
+        name: rubytron-windows
+        path: dist/windows
         retention-days: 5

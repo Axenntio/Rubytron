@@ -146,6 +146,9 @@ bool Desktop::isFocused(const Window* window) const
 #if defined(__linux__) || defined(MULTI_EXPORT)
 	#include <runtime-linux.h>
 #endif
+#if defined(_WIN32) || defined(MULTI_EXPORT)
+	#include <runtime-windows.h>
+#endif
 struct arch_t {
 	std::string name;
 	unsigned char* file;
@@ -160,6 +163,9 @@ bool Desktop::programExport(const std::string& path) const
 #endif
 #if defined(__linux__) || defined(MULTI_EXPORT)
 		{"linux", src_Runtime_runtime_linux, src_Runtime_runtime_linux_len},
+#endif
+#if defined(_WIN32) || defined(MULTI_EXPORT)
+		{"windows", src_Runtime_runtime_windows, src_Runtime_runtime_windows_len},
 #endif
 	};
 	std::filesystem::create_directory(path + ".bin");
