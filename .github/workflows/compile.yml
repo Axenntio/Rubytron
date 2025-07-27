@@ -79,11 +79,11 @@ jobs:
       with:
         submodules: recursive
     - name: Copy mruby config file
-      run: cp rubytron.rb mruby/build_config/.
+      run: cp rubytron.rb mruby/build_config.rb
     - name: Compile mruby
       run: |
         cd mruby
-        cmd /C "set MRUBY_CONFIG=rubytron && rake"
+        rake
     - name: Setup Rubytron
       run: meson setup build --prefix="$PWD/dist"
     - name: Compile Rubytron

@@ -26,7 +26,7 @@ if host_machine.system() == 'darwin'
 		'../../data/rubytron.icns',
 		install_dir: 'Rubytron.app/Contents/Resources'
 	)
-else if host_machine.system() == 'windows'
+elif host_machine.system() == 'windows'
 	app_dir = 'windows'
 else
 	app_dir = 'linux'
