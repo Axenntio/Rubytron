@@ -165,7 +165,7 @@ bool Desktop::programExport(const std::string& path) const
 		{"linux", src_Runtime_runtime_linux, src_Runtime_runtime_linux_len},
 #endif
 #if defined(_WIN32) || defined(MULTI_EXPORT)
-		{"windows", src_Runtime_runtime_windows, src_Runtime_runtime_windows_len},
+		{"windows", src_Runtime_runtime_windows_exe, src_Runtime_runtime_windows_exe_len},
 #endif
 	};
 	std::filesystem::create_directory(path + ".bin");
