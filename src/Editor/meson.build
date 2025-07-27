@@ -28,6 +28,7 @@ if host_machine.system() == 'darwin'
 	)
 elif host_machine.system() == 'windows'
 	app_dir = 'windows'
+	app_rpath = ''
 else
 	app_dir = 'linux'
 	app_rpath = '$ORIGIN'
