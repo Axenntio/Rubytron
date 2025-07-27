@@ -67,7 +67,7 @@ jobs:
     - name: Install dependencies
       run: |
         pip install meson ninja
-        choco install mingw git pkgconfiglite
+        choco install mingw git
         git clone https://github.com/microsoft/vcpkg
         .\vcpkg\bootstrap-vcpkg.bat
         .\vcpkg\vcpkg install sfml:x64-windows
@@ -86,9 +86,7 @@ jobs:
         rake
     - name: Setup Rubytron
       shell: bash
-      run: |
-        export PKG_CONFIG_PATH=$PWD/vcpkg/installed/x64-windows/lib/pkgconfig
-        meson setup build --prefix="$PWD/dist"
+      run: meson setup build --prefix="$PWD/dist"
     - name: Compile Rubytron
       run: ninja -C build
     - name: Upload Windows Runtime Header
