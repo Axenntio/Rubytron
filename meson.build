@@ -13,18 +13,19 @@ inc = include_directories('inc')
 sfml_libdir_fix = '/opt/homebrew/Cellar/sfml/3.0.1/lib'
 
 if host_machine.system() == 'windows'
-	vcpkg_prefix = meson.project_source_root() / 'vcpkg' / 'installed' / 'x64-windows'
+	vcpkg_sfml_include = include_directories('vcpkg/installed/x64-windows/include')
+	vcpkg_sfml_lib_dir = 'vcpkg/installed/x64-windows/lib'
 
 	dep_sfml = declare_dependency(
-		include_directories: include_directories(vcpkg_prefix / 'include'),
+		include_directories: vcpkg_sfml_include,
 		link_args: [
-			'-L' + (vcpkg_prefix / 'lib'),
+			'-L' + vcpkg_sfml_lib_dir,
 			'-lsfml-graphics',
 			'-lsfml-window',
 			'-lsfml-system',
 			'-lsfml-audio'
 		]
-	)
+		)
 else
 	dep_sfml = dependency('sfml-all')
 endif
