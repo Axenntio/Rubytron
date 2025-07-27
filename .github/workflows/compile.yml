@@ -123,6 +123,8 @@ jobs:
       with:
         name: linux-runtime-header
         path: build/src/Editor
+    - name: Create macOS icon
+      run: iconutil -c icns data/rubytron.iconset -o data/rubytron.icns
     - name: Compile Rubytron
       run: meson install -C build
     - name: Fix macOS app

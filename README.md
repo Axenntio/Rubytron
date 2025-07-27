@@ -38,3 +38,10 @@ You can then check the `dist` directory
 ```console
 ./build/src/rubytron
 ```
+
+## Update the macOS icon
+
+```console
+$ iconutil -c icns data/rubytron.iconset -o data/rubytron.icns
+[...]
+```

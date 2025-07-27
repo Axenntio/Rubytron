@@ -27,6 +27,7 @@ Desktop::Desktop(unsigned int width, unsigned int height, unsigned char scale, T
 	};
 
 	this->_window.create(sf::VideoMode(sf::Vector2u(this->_size.x * scale, this->_size.y * scale)), "Rubytron");
+	this->_window.setMinimumSize(sf::Vector2u(this->_size.x, this->_size.y));
 	this->_window.setMouseCursorVisible(false);
 	if (!this->_background_texture.resize(this->_size)) {
 		throw std::runtime_error("Can't resize texture");

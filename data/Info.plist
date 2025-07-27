@@ -16,7 +16,5 @@
   <string>1.0.0</string>
   <key>CFBundlePackageType</key>
   <string>APPL</string>
-  <key>CFBundleIconFile</key>
-  <string>Rubytron.icns</string>
 </dict>
 </plist>

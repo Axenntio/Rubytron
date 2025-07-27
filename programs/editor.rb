@@ -161,7 +161,7 @@ class Editor
   end
 
   def add_char(char)
-    if char.between?(32, 126) || char == 9 # tab
+    if char.between?(32, 126)
       @file_content[@cursor.y].insert(@cursor.x, char.chr)
       @cursor.x += 1
     end
@@ -208,6 +208,9 @@ class Editor
         @file_content.delete_at(@cursor.y)
         @cursor.y -= 1
       end
+    when 60 # Tab
+      @file_content[@cursor.y].insert(@cursor.x, '  ')
+      @cursor.x += 2
     when 61 # Page up
       @cursor.y -= @show_line - 2
     when 62 # Page down
