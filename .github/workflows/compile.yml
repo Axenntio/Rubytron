@@ -87,6 +87,7 @@ jobs:
     - name: Setup Rubytron
       shell: bash
       run: |
+        ls $PWD/vcpkg/installed/x64-windows/lib/pkgconfig
         export PKG_CONFIG_PATH=$PWD/vcpkg/installed/x64-windows/lib/pkgconfig
         meson setup build --prefix="$PWD/dist"
     - name: Compile Rubytron
