@@ -20,10 +20,10 @@ if host_machine.system() == 'windows'
 	dep_sfml = declare_dependency(
 		include_directories: sfml_include,
 		link_args: [
-			'-lsfml-graphics',
-			'-lsfml-window',
-			'-lsfml-system',
-			'-lsfml-audio'
+			'-lsfml-graphics-s',
+			'-lsfml-window-s',
+			'-lsfml-system-s',
+			'-lsfml-audio-s'
 		]
 	)
 else
