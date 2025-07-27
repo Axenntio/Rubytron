@@ -13,8 +13,8 @@ inc = include_directories('inc')
 sfml_libdir_fix = '/opt/homebrew/Cellar/sfml/3.0.1/lib'
 
 if host_machine.system() == 'windows'
-	vcpkg_sfml_include = include_directories('vcpkg/installed/x64-windows/include')
-	vcpkg_sfml_lib_dir = 'vcpkg/installed/x64-windows/lib'
+	vcpkg_sfml_include = include_directories('vcpkg/packages/sfml_x64-windows/include')
+	vcpkg_sfml_lib_dir = 'vcpkg/packages/sfml_x64-windows/lib'
 
 	dep_sfml = declare_dependency(
 		include_directories: vcpkg_sfml_include,
