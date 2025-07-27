@@ -1,6 +1,6 @@
 #include <Shared/ProgramPod.hpp>
 
-ProgramPod::ProgramPod(const std::string& programPath)
+ProgramPod::ProgramPod([[maybe_unused]] const std::string& programPath)
 {
 
 }

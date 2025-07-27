@@ -79,7 +79,11 @@ AbstractWindow::~AbstractWindow()
 
 void AbstractWindow::loadFile()
 {
-	FILE* file = fopen((std::filesystem::current_path() / this->_programFile).c_str(), "r");
+	#ifdef _WIN32
+		FILE* file = _wfopen((std::filesystem::current_path() / this->_programFile).c_str(), L"r");
+	#else
+		FILE* file = fopen((std::filesystem::current_path() / this->_programFile).c_str(), "r");
+	#endif
 	if (file == NULL) {
 		throw std::runtime_error("The file '" + std::string(std::filesystem::current_path() / this->_programFile) + "' can't be opened");
 	}
