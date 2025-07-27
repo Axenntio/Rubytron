@@ -13,17 +13,17 @@ inc = include_directories('inc')
 
 
 if host_machine.system() == 'windows'
-	sfml_include = include_directories('vcpkg/installed/x64-mingw-static/include')
+	sfml_include = include_directories('vcpkg/installed/x64-mingw-dynamic/include')
 
-	sfml_libdir_fix = meson.source_root() / 'vcpkg' / 'installed' / 'x64-mingw-static' / 'lib'
+	sfml_libdir_fix = meson.source_root() / 'vcpkg' / 'installed' / 'x64-mingw-dynamic' / 'lib'
 
 	dep_sfml = declare_dependency(
 		include_directories: sfml_include,
 		link_args: [
-			'-lsfml-graphics-s',
-			'-lsfml-window-s',
-			'-lsfml-system-s',
-			'-lsfml-audio-s'
+			'-lsfml-graphics',
+			'-lsfml-window',
+			'-lsfml-system',
+			'-lsfml-audio'
 		]
 	)
 else
