@@ -10,7 +10,7 @@ add_global_arguments('-g3', '-D_LIBCPP_HARDENING_MODE=_LIBCPP_HARDENING_MODE_DEB
 
 inc = include_directories('inc')
 
-
+mruby_inc = include_directories('./mruby/include/')
 
 if host_machine.system() == 'windows'
 	sfml_include = include_directories('vcpkg/installed/x64-mingw-dynamic/include')
@@ -26,13 +26,14 @@ if host_machine.system() == 'windows'
 			'-lsfml-audio'
 		]
 	)
+	dep_mruby = declare_dependency(link_args: [files('mruby/build/host/lib/libmruby.a')[0].full_path(), '-lws2_32'], include_directories: mruby_inc)
 else
-	dep_sfml = dependency('sfml-all')
 	sfml_libdir_fix = '/opt/homebrew/Cellar/sfml/3.0.1/lib'
+	dep_sfml = dependency('sfml-all')
+	dep_mruby = declare_dependency(link_args: files('mruby/build/host/lib/libmruby.a')[0].full_path(), include_directories: mruby_inc)
 endif
 
-mruby_inc = include_directories('./mruby/include/')
-mruby = declare_dependency(link_args: files('mruby/build/host/lib/libmruby.a')[0].full_path(), include_directories: mruby_inc)
+
 
 shared_src = [
 	'../Shared/AbstractWindow.cpp',
