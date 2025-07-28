@@ -17,7 +17,7 @@ if host_machine.system() == 'windows'
 	sfml_include = include_directories('vcpkg/installed/x64-mingw-static/include')
 
 	link_args_fix = [
-		'-L' + meson.source_root() / 'vcpkg' / 'installed' / 'x64-mingw-static' / 'lib',
+		'-L' + meson.project_source_root()() / 'vcpkg' / 'installed' / 'x64-mingw-static' / 'lib',
 		'-static-libgcc',
 		'-static-libstdc++',
 		'-static'
