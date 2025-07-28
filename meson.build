@@ -24,12 +24,18 @@ if host_machine.system() == 'windows'
 			'-lsfml-graphics-s',
 			'-lsfml-window-s',
 			'-lsfml-system-s',
-			'-lsfml-audio-s'
+			'-lsfml-audio-s',
+			'-lfreetype',
+			'-lwinmm',
+			'-lgdi32',
+			'-lws2_32',
+			'-lopengl32',
+			'-lwsock32'
 		]
 	)
 	dep_mruby = declare_dependency(link_args: [files('mruby/build/host/lib/libmruby.a')[0].full_path(), '-lws2_32'], include_directories: mruby_inc)
 else
-	sfml_libdir_fix = '/opt/homebrew/Cellar/sfml/3.0.1/lib/'
+	sfml_libdir_fix = '/opt/homebrew/Cellar/sfml/3.0.1/lib'
 	dep_sfml = dependency('sfml-all')
 	dep_mruby = declare_dependency(link_args: files('mruby/build/host/lib/libmruby.a')[0].full_path(), include_directories: mruby_inc)
 endif
