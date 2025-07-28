@@ -25,12 +25,22 @@ if host_machine.system() == 'windows'
 			'-lsfml-window-s',
 			'-lsfml-system-s',
 			'-lsfml-audio-s',
+			# Graphics
 			'-lfreetype',
 			'-lwinmm',
 			'-lgdi32',
 			'-lws2_32',
 			'-lopengl32',
-			'-lwsock32'
+			# Network
+			'-lwsock32',
+			# Audio
+			'-lFLAC',
+			'-lvorbis',
+			'-lvorbisenc',
+			'-lvorbisfile',
+			'-logg',
+			'-lsndfile',
+			'-lOpenAL32'
 		]
 	)
 	dep_mruby = declare_dependency(link_args: [files('mruby/build/host/lib/libmruby.a')[0].full_path(), '-lws2_32'], include_directories: mruby_inc)
