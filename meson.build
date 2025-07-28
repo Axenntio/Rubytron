@@ -13,7 +13,15 @@ inc = include_directories('inc')
 mruby_inc = include_directories('./mruby/include/')
 
 if host_machine.system() == 'windows'
-	add_global_arguments('-DSFML_STATIC', language: 'cpp')
+	add_global_arguments(
+		'-DSFML_STATIC',
+		'-static-libgcc',
+		'-static-libstdc++',
+		'-Wl,-Bstatic',
+		'-lpthread',
+		'-Wl,-Bdynamic',
+		language: 'cpp'
+	)
 	sfml_include = include_directories('vcpkg/installed/x64-mingw-static/include')
 
 	sfml_libdir_fix = meson.source_root() / 'vcpkg' / 'installed' / 'x64-mingw-static' / 'lib'
@@ -38,9 +46,7 @@ if host_machine.system() == 'windows'
 			'-lvorbis',
 			'-lvorbisenc',
 			'-lvorbisfile',
-			'-logg',
-			'-lsndfile',
-			'-lOpenAL32'
+			'-logg'
 		]
 	)
 	dep_mruby = declare_dependency(link_args: [files('mruby/build/host/lib/libmruby.a')[0].full_path(), '-lws2_32'], include_directories: mruby_inc)

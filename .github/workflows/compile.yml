@@ -100,8 +100,6 @@ jobs:
         git clone https://github.com/microsoft/vcpkg
         .\vcpkg\bootstrap-vcpkg.bat
         .\vcpkg\vcpkg install sfml:x64-mingw-static
-        ls vcpkg/installed/x64-mingw-static/lib
-        .\vcpkg\vcpkg install openal-soft:x64-mingw-static libsndfile:x64-mingw-static
     - name: LS
       run: ls vcpkg/installed/x64-mingw-static/lib
     - name: Add MinGW to PATH
