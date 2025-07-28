@@ -86,24 +86,6 @@ jobs:
     - name: Install dependencies
       run: |
         pip install meson ninja
-    - name: Cache mingw
-      id: cache-mingw
-      uses: actions/cache@v4
-      with:
-        path: C:\msys64\mingw64
-        key: ${{ runner.os }}-mingw
-    - name: Set up Mingw
-      if: steps.cache-mingw.outputs.cache-hit != 'true'
-      uses: msys2/setup-msys2@v2
-      with:
-        update: true
-        install: >-
-          mingw-w64-x86_64-gcc
-    - name: Set compiler
-      run: |
-        echo "C:\msys64\mingw64\bin" >> $GITHUB_PATH
-        echo "CC=x86_64-w64-mingw32-gcc" >> $GITHUB_ENV
-        echo "CXX=x86_64-w64-mingw32-g++" >> $GITHUB_ENV
     - name: Cache vcpkg
       id: cache-vcpkg
       uses: actions/cache@v4
@@ -258,24 +240,6 @@ jobs:
     - name: Install dependencies
       run: |
         pip install meson ninja
-    - name: Cache mingw
-      id: cache-mingw
-      uses: actions/cache@v4
-      with:
-        path: C:\msys64\mingw64
-        key: ${{ runner.os }}-mingw
-    - name: Set up Mingw
-      if: steps.cache-mingw.outputs.cache-hit != 'true'
-      uses: msys2/setup-msys2@v2
-      with:
-        update: true
-        install: >-
-          mingw-w64-x86_64-gcc
-    - name: Set compiler
-      run: |
-        echo "C:\msys64\mingw64\bin" >> $GITHUB_PATH
-        echo "CC=x86_64-w64-mingw32-gcc" >> $GITHUB_ENV
-        echo "CXX=x86_64-w64-mingw32-g++" >> $GITHUB_ENV
     - name: Cache vcpkg
       id: cache-vcpkg
       uses: actions/cache@v4
