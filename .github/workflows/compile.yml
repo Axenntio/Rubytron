@@ -100,7 +100,7 @@ jobs:
         echo "CC=x86_64-w64-mingw32-gcc" >> $GITHUB_ENV
         echo "CXX=x86_64-w64-mingw32-g++" >> $GITHUB_ENV
     - name: ls
-      run: ls C:\msys64\mingw64\lib\
+      run: dir C:\msys64\mingw64\lib
     - name: Cache vcpkg
       id: cache-vcpkg
       uses: actions/cache@v4
