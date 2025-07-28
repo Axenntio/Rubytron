@@ -118,7 +118,7 @@ jobs:
         cd mruby
         rake
     - name: Setup Rubytron
-      run: meson setup build --prefix="$PWD/dist" --default-library=static
+      run: meson setup build --prefix="$PWD/dist"
     - name: Compile Rubytron
       run: ninja -C build
     - name: Upload Windows Runtime Header
@@ -159,7 +159,7 @@ jobs:
         cd mruby
         MRUBY_CONFIG=rubytron rake
     - name: Setup Rubytron
-      run: meson setup build --prefix="$PWD/dist" --default-library=static -Dcpp_args=-DMULTI_EXPORT
+      run: meson setup build --prefix="$PWD/dist" -Dcpp_args=-DMULTI_EXPORT
     - uses: actions/download-artifact@v4
       with:
         name: macos-runtime-header

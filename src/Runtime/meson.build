@@ -9,5 +9,5 @@ runtime_exe = executable(
 	sources,
 	include_directories: inc,
 	dependencies: [dep_sfml, dep_mruby],
-	link_args: ['-L' + sfml_libdir_fix]
+	link_args: link_args_fix
 )

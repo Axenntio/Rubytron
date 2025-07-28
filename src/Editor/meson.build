@@ -44,7 +44,7 @@ executable(
 	[sources, runtime_code],
 	include_directories: inc,
 	dependencies: [dep_sfml, dep_mruby],
-	link_args: ['-L' + sfml_libdir_fix],
+	link_args: link_args_fix,
 	install: true,
 	install_dir: app_dir,
 	install_rpath: app_rpath
