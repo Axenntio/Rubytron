@@ -16,9 +16,17 @@ jobs:
       uses: actions/checkout@v4
       with:
         submodules: recursive
+    - name: Cache mruby
+      id: cache-linux-mruby
+      uses: actions/cache@v4
+      with:
+        path: mruby
+        key: ${{ runner.os }}-mruby-${{ hashFiles('rubytron.rb') }}
     - name: Copy mruby config file
+      if: steps.cache-linux-mruby.outputs.cache-hit != 'true'
       run: cp rubytron.rb mruby/build_config/.
     - name: Compile mruby
+      if: steps.cache-linux-mruby.outputs.cache-hit != 'true'
       run: |
         cd mruby
         MRUBY_CONFIG=rubytron rake
@@ -42,17 +50,24 @@ jobs:
     - name: Install dependencies
       run: |
         brew install meson sfml
+    - name: Cache mruby
+      id: cache-macos-mruby
+      uses: actions/cache@v4
+      with:
+        path: mruby
+        key: ${{ runner.os }}-mruby-${{ hashFiles('rubytron.rb') }}
     - name: Copy mruby config file
+      if: steps.cache-macos-mruby.outputs.cache-hit != 'true'
       run: cp rubytron.rb mruby/build_config/.
     - name: Compile mruby
+      if: steps.cache-macos-mruby.outputs.cache-hit != 'true'
       run: |
         cd mruby
         MRUBY_CONFIG=rubytron rake
     - name: Create macOS icon
       run: iconutil -c icns data/rubytron.iconset -o data/rubytron.icns
     - name: Setup Rubytron
-      run: |
-        meson setup build --prefix="$PWD/dist"
+      run: meson setup build --prefix="$PWD/dist"
     - name: Compile Rubytron
       run: ninja -C build
     - name: Upload macOS Runtime Header
@@ -77,27 +92,33 @@ jobs:
       uses: actions/cache@v4
       with:
         path: vcpkg
-        key: ${{ runner.os }}-vcpkg
+        key: ${{ runner.os }}-vcpkg-static
     - name: Install vcpkg and SFML
       if: steps.cache-vcpkg.outputs.cache-hit != 'true'
       run: |
         choco install git
         git clone https://github.com/microsoft/vcpkg
         .\vcpkg\bootstrap-vcpkg.bat
-        .\vcpkg\vcpkg install sfml:x64-mingw-dynamic
+        .\vcpkg\vcpkg install sfml:x64-mingw-static
     - name: Add MinGW to PATH
       run: |
         echo "C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw64\bin" >> $env:GITHUB_PATH
+    - name: Cache mruby
+      id: cache-windows-mruby
+      uses: actions/cache@v4
+      with:
+        path: mruby
+        key: ${{ runner.os }}-mruby-${{ hashFiles('rubytron.rb') }}
     - name: Copy mruby config file
-      run: cp rubytron.rb mruby/build_config.rb
+      if: steps.cache-windows-mruby.outputs.cache-hit != 'true'
+      run: cp rubytron.rb mruby/build_config/.
     - name: Compile mruby
+      if: steps.cache-windows-mruby.outputs.cache-hit != 'true'
       run: |
         cd mruby
         rake
     - name: Setup Rubytron
-      shell: bash
-      run: |
-        meson setup build --prefix="$PWD/dist"
+      run: meson setup build --prefix="$PWD/dist"
     - name: Compile Rubytron
       run: ninja -C build
     - name: Upload Windows Runtime Header
@@ -123,9 +144,17 @@ jobs:
       uses: actions/checkout@v4
       with:
         submodules: recursive
+    - name: Cache mruby
+      id: cache-linux-mruby
+      uses: actions/cache@v4
+      with:
+        path: mruby
+        key: ${{ runner.os }}-mruby-${{ hashFiles('rubytron.rb') }}
     - name: Copy mruby config file
+      if: steps.cache-linux-mruby.outputs.cache-hit != 'true'
       run: cp rubytron.rb mruby/build_config/.
     - name: Compile mruby
+      if: steps.cache-linux-mruby.outputs.cache-hit != 'true'
       run: |
         cd mruby
         MRUBY_CONFIG=rubytron rake
@@ -163,17 +192,24 @@ jobs:
     - name: Install dependencies
       run: |
         brew install meson sfml dylibbundler
+    - name: Cache mruby
+      id: cache-macos-mruby
+      uses: actions/cache@v4
+      with:
+        path: mruby
+        key: ${{ runner.os }}-mruby-${{ hashFiles('rubytron.rb') }}
     - name: Copy mruby config file
+      if: steps.cache-macos-mruby.outputs.cache-hit != 'true'
       run: cp rubytron.rb mruby/build_config/.
     - name: Compile mruby
+      if: steps.cache-macos-mruby.outputs.cache-hit != 'true'
       run: |
         cd mruby
         MRUBY_CONFIG=rubytron rake
     - name: Create macOS icon
       run: iconutil -c icns data/rubytron.iconset -o data/rubytron.icns
     - name: Setup Rubytron
-      run: |
-        meson setup build --prefix="$PWD/dist" -Dcpp_args=-DMULTI_EXPORT
+      run: meson setup build --prefix="$PWD/dist" -Dcpp_args=-DMULTI_EXPORT
     - uses: actions/download-artifact@v4
       with:
         name: linux-runtime-header
@@ -214,27 +250,34 @@ jobs:
       uses: actions/cache@v4
       with:
         path: vcpkg
-        key: ${{ runner.os }}-vcpkg
+        key: ${{ runner.os }}-vcpkg-static
     - name: Install vcpkg and SFML
       if: steps.cache-vcpkg.outputs.cache-hit != 'true'
       run: |
         choco install git
         git clone https://github.com/microsoft/vcpkg
         .\vcpkg\bootstrap-vcpkg.bat
-        .\vcpkg\vcpkg install sfml:x64-mingw-dynamic
+        .\vcpkg\vcpkg install sfml:x64-mingw-static
     - name: Add MinGW to PATH
       run: |
         echo "C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw64\bin" >> $env:GITHUB_PATH
+    - name: Cache mruby
+      id: cache-windows-mruby
+      uses: actions/cache@v4
+      with:
+        path: mruby
+        key: ${{ runner.os }}-mruby-${{ hashFiles('rubytron.rb') }}
     - name: Copy mruby config file
-      run: cp rubytron.rb mruby/build_config.rb
+      if: steps.cache-windows-mruby.outputs.cache-hit != 'true'
+      run: cp rubytron.rb mruby/build_config/.
     - name: Compile mruby
+      if: steps.cache-windows-mruby.outputs.cache-hit != 'true'
       run: |
         cd mruby
         rake
     - name: Setup Rubytron
       shell: bash
-      run: |
-        meson setup build --prefix="$PWD/dist" -Dcpp_args=-DMULTI_EXPORT
+      run: meson setup build --prefix="$PWD/dist" -Dcpp_args=-DMULTI_EXPORT
     - uses: actions/download-artifact@v4
       with:
         name: linux-runtime-header
