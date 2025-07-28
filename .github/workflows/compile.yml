@@ -100,8 +100,6 @@ jobs:
         git clone https://github.com/microsoft/vcpkg
         .\vcpkg\bootstrap-vcpkg.bat
         .\vcpkg\vcpkg install sfml:x64-mingw-static
-    - name: LS
-      run: ls vcpkg/installed/x64-mingw-static/lib
     - name: Add MinGW to PATH
       run: |
         echo "C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw64\bin" >> $env:GITHUB_PATH
@@ -120,7 +118,7 @@ jobs:
         cd mruby
         rake
     - name: Setup Rubytron
-      run: meson setup build --prefix="$PWD/dist"
+      run: meson setup build --prefix="$PWD/dist" --default-library=static
     - name: Compile Rubytron
       run: ninja -C build
     - name: Upload Windows Runtime Header
@@ -161,7 +159,7 @@ jobs:
         cd mruby
         MRUBY_CONFIG=rubytron rake
     - name: Setup Rubytron
-      run: meson setup build --prefix="$PWD/dist" -Dcpp_args=-DMULTI_EXPORT
+      run: meson setup build --prefix="$PWD/dist" --default-library=static -Dcpp_args=-DMULTI_EXPORT
     - uses: actions/download-artifact@v4
       with:
         name: macos-runtime-header
@@ -259,7 +257,7 @@ jobs:
         choco install git
         git clone https://github.com/microsoft/vcpkg
         .\vcpkg\bootstrap-vcpkg.bat
-        .\vcpkg\vcpkg install sfml:x64-mingw-static openal-soft:x64-mingw-static libsndfile:x64-mingw-static
+        .\vcpkg\vcpkg install sfml:x64-mingw-static
     - name: Add MinGW to PATH
       run: |
         echo "C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw64\bin" >> $env:GITHUB_PATH
