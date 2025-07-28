@@ -92,6 +92,7 @@ jobs:
         update: true
         install: >-
           mingw-w64-x86_64-gcc
+          mingw-w64-x86_64-winpthreads
           mingw-w64-x86_64-cmake
           mingw-w64-x86_64-pkg-config
     - name: Set compiler
