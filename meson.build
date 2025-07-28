@@ -20,9 +20,7 @@ if host_machine.system() == 'windows'
 		'-L' + meson.source_root() / 'vcpkg' / 'installed' / 'x64-mingw-static' / 'lib',
 		'-static-libgcc',
 		'-static-libstdc++',
-		'-Wl,-Bstatic',
-		'-lwinpthread',
-		'-Wl,-Bdynamic'
+		'-static'
 	]
 
 	dep_sfml = declare_dependency(
