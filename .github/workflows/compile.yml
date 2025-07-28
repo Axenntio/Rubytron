@@ -71,12 +71,20 @@ jobs:
     - name: Install dependencies
       run: |
         pip install meson ninja
-        choco install mingw git
+        choco install mingw
+    - name: Cache vcpkg
+      id: cache-vcpkg
+      uses: actions/cache@v4
+      with:
+        path: vcpkg
+        key: ${{ runner.os }}-vcpkg
+    - name: Install vcpkg and SFML
+      if: steps.cache-vcpkg.outputs.cache-hit != 'true'
+      run: |
+        choco install git
         git clone https://github.com/microsoft/vcpkg
         .\vcpkg\bootstrap-vcpkg.bat
         .\vcpkg\vcpkg install sfml:x64-mingw-dynamic
-    - name: LS
-      run: ls vcpkg/installed/x64-mingw-dynamic/lib
     - name: Add MinGW to PATH
       run: |
         echo "C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw64\bin" >> $env:GITHUB_PATH
@@ -200,12 +208,20 @@ jobs:
     - name: Install dependencies
       run: |
         pip install meson ninja
-        choco install mingw git
+        choco install mingw
+    - name: Cache vcpkg
+      id: cache-vcpkg
+      uses: actions/cache@v4
+      with:
+        path: vcpkg
+        key: ${{ runner.os }}-vcpkg
+    - name: Install vcpkg and SFML
+      if: steps.cache-vcpkg.outputs.cache-hit != 'true'
+      run: |
+        choco install git
         git clone https://github.com/microsoft/vcpkg
         .\vcpkg\bootstrap-vcpkg.bat
         .\vcpkg\vcpkg install sfml:x64-mingw-dynamic
-    - name: LS
-      run: ls vcpkg/installed/x64-mingw-dynamic/lib
     - name: Add MinGW to PATH
       run: |
         echo "C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw64\bin" >> $env:GITHUB_PATH
@@ -228,7 +244,7 @@ jobs:
         name: macos-runtime-header
         path: build/src/Editor
     - name: Compile Rubytron
-      run: ninja -C build
+      run: meson install -C build
     - name: Upload Windows bundle
       uses: actions/upload-artifact@v4
       with:
