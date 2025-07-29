@@ -33,7 +33,7 @@ jobs:
     - name: Setup Rubytron
       run: meson setup build --prefix="$PWD/dist"
     - name: Compile Rubytron
-      run: ninja -C build
+      run: meson install -C build
     - name: Upload Linux Runtime Header
       uses: actions/upload-artifact@v4
       with:
@@ -64,12 +64,14 @@ jobs:
       run: |
         cd mruby
         MRUBY_CONFIG=rubytron rake
-    - name: Create macOS icon
-      run: iconutil -c icns data/rubytron.iconset -o data/rubytron.icns
+    - name: Create macOS icons
+      run: |
+        iconutil -c icns data/Editor/icon.iconset -o data/Editor/icon.icns
+        iconutil -c icns data/Runtime/icon.iconset -o data/Runtime/icon.icns
     - name: Setup Rubytron
       run: meson setup build --prefix="$PWD/dist"
     - name: Compile Rubytron
-      run: ninja -C build
+      run: meson install -C build
     - name: Upload macOS Runtime Header
       uses: actions/upload-artifact@v4
       with:
@@ -116,7 +118,7 @@ jobs:
     - name: Setup Rubytron
       run: meson setup build --prefix="$PWD/dist"
     - name: Compile Rubytron
-      run: ninja -C build
+      run: meson install -C build
     - name: Upload Windows Runtime Header
       uses: actions/upload-artifact@v4
       with:
@@ -202,8 +204,10 @@ jobs:
       run: |
         cd mruby
         MRUBY_CONFIG=rubytron rake
-    - name: Create macOS icon
-      run: iconutil -c icns data/rubytron.iconset -o data/rubytron.icns
+    - name: Create macOS icons
+      run: |
+        iconutil -c icns data/Editor/icon.iconset -o data/Editor/icon.icns
+        iconutil -c icns data/Runtime/icon.iconset -o data/Runtime/icon.icns
     - name: Setup Rubytron
       run: meson setup build --prefix="$PWD/dist" -Dcpp_args=-DMULTI_EXPORT
     - uses: actions/download-artifact@v4
@@ -216,8 +220,6 @@ jobs:
         path: build/src/Editor
     - name: Compile Rubytron
       run: meson install -C build
-    - name: Fix macOS app
-      run: dylibbundler -od -b -x dist/Rubytron.app/Contents/MacOS/rubytron -d dist/Rubytron.app/Contents/libs
     - name: Upload macOS app
       uses: actions/upload-artifact@v4
       with:

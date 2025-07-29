@@ -1,3 +1,4 @@
 .DS_Store
 dist
-data/rubytron.icns
+data/Editor/icon.icns
+data/Runtime/icon.icns

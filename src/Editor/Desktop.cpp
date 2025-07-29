@@ -158,15 +158,15 @@ struct arch_t {
 bool Desktop::programExport(const std::string& path) const
 {
 	std::vector<arch_t> archs = {
-#if defined(__APPLE__) || defined(MULTI_EXPORT)
-		{"darwin", src_Runtime_runtime_darwin, src_Runtime_runtime_darwin_len},
-#endif
-#if defined(__linux__) || defined(MULTI_EXPORT)
-		{"linux", src_Runtime_runtime_linux, src_Runtime_runtime_linux_len},
-#endif
-#if defined(_WIN32) || defined(MULTI_EXPORT)
-		{"windows", src_Runtime_runtime_windows_exe, src_Runtime_runtime_windows_exe_len},
-#endif
+// #if defined(__APPLE__) || defined(MULTI_EXPORT)
+// 		{"darwin", src_Runtime_runtime_darwin, src_Runtime_runtime_darwin_len},
+// #endif
+// #if defined(__linux__) || defined(MULTI_EXPORT)
+// 		{"linux", src_Runtime_runtime_linux, src_Runtime_runtime_linux_len},
+// #endif
+// #if defined(_WIN32) || defined(MULTI_EXPORT)
+// 		{"windows", src_Runtime_runtime_windows_exe, src_Runtime_runtime_windows_exe_len},
+// #endif
 	};
 	std::filesystem::create_directory(path + ".bin");
 	for (const arch_t& arch : archs) {
