@@ -158,30 +158,26 @@ struct arch_t {
 bool Desktop::programExport(const std::string& path) const
 {
 	std::vector<arch_t> archs = {
-// #if defined(__APPLE__) || defined(MULTI_EXPORT)
-// 		{"darwin", src_Runtime_runtime_darwin, src_Runtime_runtime_darwin_len},
-// #endif
-// #if defined(__linux__) || defined(MULTI_EXPORT)
-// 		{"linux", src_Runtime_runtime_linux, src_Runtime_runtime_linux_len},
-// #endif
-// #if defined(_WIN32) || defined(MULTI_EXPORT)
-// 		{"windows", src_Runtime_runtime_windows_exe, src_Runtime_runtime_windows_exe_len},
-// #endif
+#if defined(__APPLE__) || defined(MULTI_EXPORT)
+		{"darwin", src_Runtime_runtime_darwin_zip, src_Runtime_runtime_darwin_zip_len},
+#endif
+#if defined(__linux__) || defined(MULTI_EXPORT)
+		{"linux", src_Runtime_runtime_linux_zip, src_Runtime_runtime_linux_zip_len},
+#endif
+#if defined(_WIN32) || defined(MULTI_EXPORT)
+		{"windows", src_Runtime_runtime_windows_zip, src_Runtime_runtime_windows_zip_len},
+#endif
 	};
 	std::filesystem::create_directory(path + ".bin");
 	for (const arch_t& arch : archs) {
 		// Expose runtime
 		std::filesystem::create_directory(path + ".bin/" + arch.name);
-		std::ofstream runtimeFile(path + ".bin/" + arch.name + "/runtime", std::ios::binary);
+		std::ofstream runtimeFile(path + ".bin/" + arch.name + "/runtime.zip", std::ios::binary);
 		if (!runtimeFile.is_open()) {
 			return false;
 		}
 		runtimeFile.write(reinterpret_cast<char*>(arch.file), arch.length);
 		runtimeFile.close();
-		std::filesystem::permissions(path + ".bin/" + arch.name + "/runtime",
-			std::filesystem::perms::owner_exec,
-			std::filesystem::perm_options::add
-		);
 
 		// Output file
 		std::ifstream programFileContent(path, std::ios::binary);
