@@ -61,7 +61,7 @@ class Terminal
     @command_history = []
     @command_history_index = 0
     @current_line = ''
-    @current_line_index = 0
+    @current_line_index = @current_line.length
     @current_path = ''
     @should_blink = Window.focused
     bin_programs = Dir.entries('bin').to_h do |file|

@@ -150,7 +150,7 @@ bool Desktop::isFocused(const Window* window) const
 	#include <runtime-windows.h>
 #endif
 struct arch_t {
-	std::string name;
+	const std::string& name;
 	unsigned char* file;
 	unsigned int length;
 };

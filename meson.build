@@ -14,7 +14,7 @@ mruby_inc = include_directories('./mruby/include/')
 
 add_global_arguments('-DSFML_STATIC', language: 'cpp')
 if host_machine.system() == 'windows'
-	sfml_include = include_directories('vcpkg/installed/x64-mingw-static/include')
+	vcpkg_include = include_directories('vcpkg/installed/x64-mingw-static/include')
 
 	link_args_fix = [
 		'-L' + meson.project_source_root() / 'vcpkg' / 'installed' / 'x64-mingw-static' / 'lib',
@@ -24,7 +24,7 @@ if host_machine.system() == 'windows'
 	]
 
 	dep_sfml = declare_dependency(
-		include_directories: sfml_include,
+		include_directories: vcpkg_include,
 		link_args: [
 			'-lsfml-graphics-s',
 			'-lsfml-window-s',
@@ -47,10 +47,18 @@ if host_machine.system() == 'windows'
 		]
 	)
 	dep_mruby = declare_dependency(link_args: [files('mruby/build/host/lib/libmruby.a')[0].full_path(), '-lws2_32'], include_directories: mruby_inc)
+	dep_minizip = declare_dependency(
+		include_directories: vcpkg_include,
+		link_args: [
+			'-lminizip-ng',
+			'-lz'
+		]
+	)
 else
 	link_args_fix = ['-L/opt/homebrew/Cellar/sfml/3.0.1/lib']
 	dep_sfml = dependency('sfml-all')
 	dep_mruby = declare_dependency(link_args: files('mruby/build/host/lib/libmruby.a')[0].full_path(), include_directories: mruby_inc)
+	dep_minizip = dependency('minizip-ng')
 endif
 
 

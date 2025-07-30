@@ -43,7 +43,7 @@ executable(
 	'rubytron',
 	[sources, runtime_code],
 	include_directories: inc,
-	dependencies: [dep_sfml, dep_mruby],
+	dependencies: [dep_sfml, dep_mruby, dep_minizip],
 	link_args: link_args_fix,
 	install: true,
 	install_dir: app_dir,

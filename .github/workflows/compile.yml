@@ -11,7 +11,7 @@ jobs:
     steps:
     - name: Install dependencies
       run: |
-        pacman -Syu --noconfirm git gcc sfml meson ruby ruby-rake ruby-erb vim pkgconfig zip
+        pacman -Syu --noconfirm git gcc sfml meson ruby ruby-rake ruby-erb vim pkgconfig zip minizip-ng
     - name: Checkout repository
       uses: actions/checkout@v4
       with:
@@ -37,7 +37,7 @@ jobs:
     - name: Upload Linux Runtime Header
       uses: actions/upload-artifact@v4
       with:
-        name: linux-runtime-header
+        name: runtime-linux-header
         path: build/src/Editor/runtime-linux.h
 
   macos-runtime:
@@ -75,7 +75,7 @@ jobs:
     - name: Upload macOS Runtime Header
       uses: actions/upload-artifact@v4
       with:
-        name: macos-runtime-header
+        name: runtime-macos-header
         path: build/src/Editor/runtime-darwin.h
 
   windows-runtime:
@@ -93,14 +93,14 @@ jobs:
       uses: actions/cache@v4
       with:
         path: vcpkg
-        key: ${{ runner.os }}-vcpkg-static
+        key: ${{ runner.os }}-vcpkg-sfml-minizip-static
     - name: Install vcpkg and SFML
       if: steps.cache-vcpkg.outputs.cache-hit != 'true'
       run: |
         choco install git
         git clone https://github.com/microsoft/vcpkg
         .\vcpkg\bootstrap-vcpkg.bat
-        .\vcpkg\vcpkg install sfml:x64-mingw-static
+        .\vcpkg\vcpkg install sfml:x64-mingw-static minizip-ng:x64-mingw-static
     - name: Cache mruby
       id: cache-windows-mruby
       uses: actions/cache@v4
@@ -122,7 +122,7 @@ jobs:
     - name: Upload Windows Runtime Header
       uses: actions/upload-artifact@v4
       with:
-        name: windows-runtime-header
+        name: runtime-windows-header
         path: build/src/Editor/runtime-windows.h
 
   linux:
@@ -137,7 +137,7 @@ jobs:
     steps:
     - name: Install dependencies
       run: |
-        pacman -Syu --noconfirm git gcc sfml meson ruby ruby-rake ruby-erb vim pkgconfig zip
+        pacman -Syu --noconfirm git gcc sfml meson ruby ruby-rake ruby-erb vim pkgconfig zip minizip-ng
     - name: Checkout repository
       uses: actions/checkout@v4
       with:
@@ -160,11 +160,11 @@ jobs:
       run: meson setup build --prefix="$PWD/dist" -Dcpp_args=-DMULTI_EXPORT
     - uses: actions/download-artifact@v4
       with:
-        name: macos-runtime-header
+        name: runtime-macos-header
         path: build/src/Editor
     - uses: actions/download-artifact@v4
       with:
-        name: windows-runtime-header
+        name: runtime-windows-header
         path: build/src/Editor
     - name: Compile Rubytron
       run: meson install -C build
@@ -212,11 +212,11 @@ jobs:
       run: meson setup build --prefix="$PWD/dist" -Dcpp_args=-DMULTI_EXPORT
     - uses: actions/download-artifact@v4
       with:
-        name: linux-runtime-header
+        name: runtime-linux-header
         path: build/src/Editor
     - uses: actions/download-artifact@v4
       with:
-        name: windows-runtime-header
+        name: runtime-windows-header
         path: build/src/Editor
     - name: Compile Rubytron
       run: meson install -C build
@@ -247,14 +247,14 @@ jobs:
       uses: actions/cache@v4
       with:
         path: vcpkg
-        key: ${{ runner.os }}-vcpkg-static
+        key: ${{ runner.os }}-vcpkg-sfml-minizip-static
     - name: Install vcpkg and SFML
       if: steps.cache-vcpkg.outputs.cache-hit != 'true'
       run: |
         choco install git
         git clone https://github.com/microsoft/vcpkg
         .\vcpkg\bootstrap-vcpkg.bat
-        .\vcpkg\vcpkg install sfml:x64-mingw-static
+        .\vcpkg\vcpkg install sfml:x64-mingw-static minizip-ng:x64-mingw-static
     - name: Cache mruby
       id: cache-windows-mruby
       uses: actions/cache@v4
@@ -274,11 +274,11 @@ jobs:
       run: meson setup build --prefix="$PWD/dist" -Dcpp_args=-DMULTI_EXPORT
     - uses: actions/download-artifact@v4
       with:
-        name: linux-runtime-header
+        name: runtime-linux-header
         path: build/src/Editor
     - uses: actions/download-artifact@v4
       with:
-        name: macos-runtime-header
+        name: runtime-macos-header
         path: build/src/Editor
     - name: Compile Rubytron
       run: meson install -C build
