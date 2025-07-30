@@ -6,6 +6,24 @@
 #include <mz_strm_mem.h>
 #include <mz_zip_rw.h>
 
+#ifdef _WIN32
+    #include <windows.h>
+
+    std::string pathToUtf8(const std::filesystem::path& path) {
+        const std::wstring& wide = path.native();
+        int len = WideCharToMultiByte(CP_UTF8, 0, wide.c_str(), -1, nullptr, 0, nullptr, nullptr);
+        if (len == 0) return "";
+
+        std::string utf8(len - 1, 0);
+        WideCharToMultiByte(CP_UTF8, 0, wide.c_str(), -1, utf8.data(), len, nullptr, nullptr);
+        return utf8;
+    }
+#else
+    std::string pathToUtf8(const std::filesystem::path& path) {
+        return path.string();
+    }
+#endif
+
 bool addProgramToRuntime(unsigned char* zipContent, unsigned int zipLength, const std::string& filePath, const std::string& zipPath, const std::string& outputPath)
 {
     std::vector<uint8_t> modified_zip;
@@ -52,7 +70,7 @@ bool addProgramToRuntime(unsigned char* zipContent, unsigned int zipLength, cons
         } while (mz_zip_reader_goto_next_entry(zip_reader) == MZ_OK);
     }
 
-	if (mz_zip_writer_add_file(zip_writer, (std::filesystem::current_path() / filePath).c_str(), zipPath.c_str()) != MZ_OK) {
+	if (mz_zip_writer_add_file(zip_writer, pathToUtf8(std::filesystem::current_path() / filePath).c_str(), zipPath.c_str()) != MZ_OK) {
         throw std::runtime_error("Failed to add new file to ZIP.");
 
 		mz_zip_writer_close(zip_writer);

@@ -105,6 +105,7 @@
 		"execution": "cpp",
 		"print": "cpp",
 		"queue": "cpp",
-		"*.def": "cpp"
+		"*.def": "cpp",
+		"codecvt": "cpp"
 	}
 }
