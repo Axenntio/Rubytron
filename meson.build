@@ -51,9 +51,10 @@ if host_machine.system() == 'windows'
 		link_args: [
 			'-lminizip-ng',
 			'-lz',
-			'-lbcrypt',
 			'-lbz2',
-			'-llzma'
+			'-llzma',
+			'-lzstd',
+			'-lbcrypt'
 		]
 	)
 else
