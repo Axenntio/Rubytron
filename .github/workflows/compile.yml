@@ -11,7 +11,7 @@ jobs:
     steps:
     - name: Install dependencies
       run: |
-        pacman -Syu --noconfirm git gcc sfml meson ruby ruby-rake ruby-erb vim pkgconfig
+        pacman -Syu --noconfirm git gcc sfml meson ruby ruby-rake ruby-erb vim pkgconfig zip
     - name: Checkout repository
       uses: actions/checkout@v4
       with:
