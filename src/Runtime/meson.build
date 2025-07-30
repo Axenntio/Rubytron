@@ -12,20 +12,14 @@ runtime_exe = executable(
 	link_args: link_args_fix
 )
 
-if host_machine.system() == 'darwin'
-	post_install_script = 'meson.post_install.sh'
-
-	app_bundle = custom_target('RuntimeAppBundle',
-		input: [runtime_exe],
-		output: 'runtime-darwin.zip',
-		command: [
-			find_program('meson.build.darwin.sh'),
-			'@INPUT0@',
-			'@OUTPUT@'
-		],
-		install: true,
-		install_dir: '.'
-	)
-elif host_machine.system() == 'windows'
-	app_bundle = runtime_exe
-endif
+app_bundle = custom_target('RuntimeAppBundle',
+	input: [runtime_exe],
+	output: 'runtime-' + host_machine.system() + '.zip',
+	command: [
+		find_program('meson.build.' + host_machine.system() + '.sh'),
+		'@INPUT0@',
+		'@OUTPUT@'
+	],
+	install: true,
+	install_dir: '.'
+)
