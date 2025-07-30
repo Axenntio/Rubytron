@@ -12,8 +12,8 @@ inc = include_directories('inc')
 
 mruby_inc = include_directories('./mruby/include/')
 
-add_global_arguments('-DSFML_STATIC', language: 'cpp')
 if host_machine.system() == 'windows'
+	add_global_arguments('-DSFML_STATIC', language: 'cpp')
 	vcpkg_include = include_directories('vcpkg/installed/x64-mingw-static/include')
 
 	link_args_fix = [

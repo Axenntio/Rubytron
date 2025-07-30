@@ -22,7 +22,8 @@
             "name": "Mac",
             "includePath": [
                 "${defaultIncludePath}",
-                "/opt/homebrew/include"
+                "/opt/homebrew/include",
+                "/opt/homebrew/include/minizip-ng"
             ],
             "defines": [],
             "macFrameworkPath": [

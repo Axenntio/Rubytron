@@ -5,6 +5,16 @@
 #include <Shared/helper.hh>
 #include <Shared/sprites.hh>
 
+#include <mz.h>
+#include <mz_zip.h>
+#include <mz_strm.h>
+#include <mz_zip_rw.h>
+
+void addFileToZip(unsigned char* zipContent, unsigned int zipLength, const std::string& filepath)
+{
+
+}
+
 Desktop::Desktop(unsigned int width, unsigned int height, unsigned char scale, TitleBarMode titleBarMode) : _size(sf::Vector2u(width, height)), _titleBarMode(titleBarMode), _windowsPid(0)
 {
 	this->_palette = std::vector<sf::Color> {
