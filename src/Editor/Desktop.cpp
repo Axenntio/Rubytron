@@ -10,9 +10,25 @@
 #include <mz_strm.h>
 #include <mz_zip_rw.h>
 
-void addFileToZip(unsigned char* zipContent, unsigned int zipLength, const std::string& filepath)
+// TODO: not intended, shound done in_memory manipulation
+bool extractZip(unsigned char* zipContent, unsigned int zipLength, const std::string& filepath)
 {
+	void* reader = mz_zip_reader_create();
+	void* writer = mz_zip_writer_create();
+	int32_t err = 0;
 
+    err = mz_zip_reader_open_buffer(reader, zipContent, zipLength, false);
+    if (err != MZ_OK) {
+        return false;
+    }
+
+	err = mz_zip_reader_save_all(reader, filepath.c_str());
+    if (err != MZ_OK) {
+        return false;
+    }
+
+	mz_zip_reader_entry_close(reader);
+	return true;
 }
 
 Desktop::Desktop(unsigned int width, unsigned int height, unsigned char scale, TitleBarMode titleBarMode) : _size(sf::Vector2u(width, height)), _titleBarMode(titleBarMode), _windowsPid(0)
@@ -160,7 +176,8 @@ bool Desktop::isFocused(const Window* window) const
 	#include <runtime-windows.h>
 #endif
 struct arch_t {
-	const std::string& name;
+	const std::string name;
+	const std::string programPath;
 	unsigned char* file;
 	unsigned int length;
 };
@@ -169,17 +186,28 @@ bool Desktop::programExport(const std::string& path) const
 {
 	std::vector<arch_t> archs = {
 #if defined(__APPLE__) || defined(MULTI_EXPORT)
-		{"darwin", src_Runtime_runtime_darwin_zip, src_Runtime_runtime_darwin_zip_len},
+		{"darwin", "Runtime.app/Contents/MacOS/program.rb", src_Runtime_runtime_darwin_zip, src_Runtime_runtime_darwin_zip_len},
 #endif
 #if defined(__linux__) || defined(MULTI_EXPORT)
-		{"linux", src_Runtime_runtime_linux_zip, src_Runtime_runtime_linux_zip_len},
+		{"linux", "program.rb", src_Runtime_runtime_linux_zip, src_Runtime_runtime_linux_zip_len},
 #endif
 #if defined(_WIN32) || defined(MULTI_EXPORT)
-		{"windows", src_Runtime_runtime_windows_zip, src_Runtime_runtime_windows_zip_len},
+		{"windows", "program.rb", src_Runtime_runtime_windows_zip, src_Runtime_runtime_windows_zip_len},
 #endif
 	};
 	std::filesystem::create_directory(path + ".bin");
 	for (const arch_t& arch : archs) {
+		std::filesystem::create_directory(path + ".bin/" + arch.name);
+		extractZip(arch.file, arch.length, path + ".bin/" + arch.name);
+		std::ifstream programFileContent(path, std::ios::binary);
+		std::ofstream programFile(path + ".bin/" + arch.name + "/" + arch.programPath);
+		if (!programFile.is_open()) {
+			return false;
+		}
+		programFile << programFileContent.rdbuf();
+		programFile.close();
+		programFileContent.close();
+
 		// Expose runtime
 		std::ofstream runtimeFile(path + ".bin/runtime-" + arch.name + ".zip", std::ios::binary);
 		if (!runtimeFile.is_open()) {
@@ -187,18 +215,6 @@ bool Desktop::programExport(const std::string& path) const
 		}
 		runtimeFile.write(reinterpret_cast<char*>(arch.file), arch.length);
 		runtimeFile.close();
-
-		// Output file
-		// TODO: Open virually the zip from RAM and add programs inside then create the zip.
-		std::filesystem::create_directory(path + ".bin/" + arch.name);
-		std::ifstream programFileContent(path, std::ios::binary);
-		std::ofstream programFile(path + ".bin/" + arch.name + "/program.rb");
-		if (!programFile.is_open()) {
-			return false;
-		}
-		programFile << programFileContent.rdbuf();
-		programFile.close();
-		programFileContent.close();
 	}
 	return true;
 }

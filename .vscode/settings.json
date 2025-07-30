@@ -104,6 +104,7 @@
 		"charconv": "cpp",
 		"execution": "cpp",
 		"print": "cpp",
-		"queue": "cpp"
+		"queue": "cpp",
+		"*.def": "cpp"
 	}
 }
