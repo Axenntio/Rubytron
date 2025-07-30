@@ -171,13 +171,17 @@ bool Desktop::programExport(const std::string& path) const
 	};
 	std::filesystem::create_directory(path + ".bin");
 	for (const arch_t& arch : archs) {
-		return addProgramToRuntime(
+		bool exportSuccessful = addProgramToRuntime(
 			arch.file,
 			arch.length,
 			path,
 			arch.programPath,
 			path + ".bin/runtime-" + arch.name + ".zip"
 		);
+
+		if (!exportSuccessful) {
+			return false;
+		}
 	}
 	return true;
 }
