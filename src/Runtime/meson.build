@@ -19,7 +19,5 @@ app_bundle = custom_target('RuntimeAppBundle',
 		find_program('meson.build.' + host_machine.system() + '.sh'),
 		'@INPUT0@',
 		'@OUTPUT@'
-	],
-	install: true,
-	install_dir: '.'
+	]
 )

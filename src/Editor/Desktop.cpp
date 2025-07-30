@@ -171,8 +171,7 @@ bool Desktop::programExport(const std::string& path) const
 	std::filesystem::create_directory(path + ".bin");
 	for (const arch_t& arch : archs) {
 		// Expose runtime
-		std::filesystem::create_directory(path + ".bin/" + arch.name);
-		std::ofstream runtimeFile(path + ".bin/" + arch.name + "/runtime.zip", std::ios::binary);
+		std::ofstream runtimeFile(path + ".bin/runtime-" + arch.name + ".zip", std::ios::binary);
 		if (!runtimeFile.is_open()) {
 			return false;
 		}
@@ -180,6 +179,8 @@ bool Desktop::programExport(const std::string& path) const
 		runtimeFile.close();
 
 		// Output file
+		// TODO: Open virually the zip from RAM and add programs inside then create the zip.
+		std::filesystem::create_directory(path + ".bin/" + arch.name);
 		std::ifstream programFileContent(path, std::ios::binary);
 		std::ofstream programFile(path + ".bin/" + arch.name + "/program.rb");
 		if (!programFile.is_open()) {
