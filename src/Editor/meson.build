@@ -2,6 +2,7 @@ sources = [
 	'main.cpp',
 	'Desktop.cpp',
 	'Window.cpp',
+	'helper.cpp',
 	shared_src
 ]
 

@@ -1,35 +1,9 @@
 #include <algorithm>
 #include <filesystem>
-#include <fstream>
 #include <Editor/Desktop.hpp>
+#include <Editor/helper.hh>
 #include <Shared/helper.hh>
 #include <Shared/sprites.hh>
-
-#include <mz.h>
-#include <mz_zip.h>
-#include <mz_strm.h>
-#include <mz_zip_rw.h>
-
-// TODO: not intended, shound done in_memory manipulation
-bool extractZip(unsigned char* zipContent, unsigned int zipLength, const std::string& filepath)
-{
-	void* reader = mz_zip_reader_create();
-	void* writer = mz_zip_writer_create();
-	int32_t err = 0;
-
-    err = mz_zip_reader_open_buffer(reader, zipContent, zipLength, false);
-    if (err != MZ_OK) {
-        return false;
-    }
-
-	err = mz_zip_reader_save_all(reader, filepath.c_str());
-    if (err != MZ_OK) {
-        return false;
-    }
-
-	mz_zip_reader_entry_close(reader);
-	return true;
-}
 
 Desktop::Desktop(unsigned int width, unsigned int height, unsigned char scale, TitleBarMode titleBarMode) : _size(sf::Vector2u(width, height)), _titleBarMode(titleBarMode), _windowsPid(0)
 {
@@ -197,24 +171,13 @@ bool Desktop::programExport(const std::string& path) const
 	};
 	std::filesystem::create_directory(path + ".bin");
 	for (const arch_t& arch : archs) {
-		std::filesystem::create_directory(path + ".bin/" + arch.name);
-		extractZip(arch.file, arch.length, path + ".bin/" + arch.name);
-		std::ifstream programFileContent(path, std::ios::binary);
-		std::ofstream programFile(path + ".bin/" + arch.name + "/" + arch.programPath);
-		if (!programFile.is_open()) {
-			return false;
-		}
-		programFile << programFileContent.rdbuf();
-		programFile.close();
-		programFileContent.close();
-
-		// Expose runtime
-		std::ofstream runtimeFile(path + ".bin/runtime-" + arch.name + ".zip", std::ios::binary);
-		if (!runtimeFile.is_open()) {
-			return false;
-		}
-		runtimeFile.write(reinterpret_cast<char*>(arch.file), arch.length);
-		runtimeFile.close();
+		return addProgramToRuntime(
+			arch.file,
+			arch.length,
+			path,
+			arch.programPath,
+			path + ".bin/runtime-" + arch.name + ".zip"
+		);
 	}
 	return true;
 }
