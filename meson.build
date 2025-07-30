@@ -50,7 +50,8 @@ if host_machine.system() == 'windows'
 		include_directories: include_directories('vcpkg/installed/x64-mingw-static/include/minizip-ng'),
 		link_args: [
 			'-lminizip-ng',
-			'-lz'
+			'-lz',
+			'-lbcrypt'
 		]
 	)
 else
