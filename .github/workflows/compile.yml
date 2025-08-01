@@ -118,8 +118,8 @@ jobs:
         rake
     - name: Create Windows icons
       run: |
-        magick convert data/Editor/icon.iconset/icon_256.png -define icon:auto-resize=256,128,64,48,32,16 data/Editor/icon.icon
-        magick convert data/Runtime/icon.iconset/icon_256.png -define icon:auto-resize=256,128,64,48,32,16 data/Runtime/icon.icon
+        magick data/Editor/icon.iconset/icon_256.png -define icon:auto-resize=256,128,64,48,32,16 data/Editor/icon.icon
+        magick data/Runtime/icon.iconset/icon_256.png -define icon:auto-resize=256,128,64,48,32,16 data/Runtime/icon.icon
     - name: Setup Rubytron
       run: meson setup build --prefix="$PWD/dist"
     - name: Compile Rubytron
@@ -277,8 +277,8 @@ jobs:
         rake
     - name: Create Windows icons
       run: |
-        magick convert data/Editor/icon.iconset/icon_256.png -define icon:auto-resize=256,128,64,48,32,16 data/Editor/icon.ico
-        magick convert data/Runtime/icon.iconset/icon_256.png -define icon:auto-resize=256,128,64,48,32,16 data/Runtime/icon.ico
+        magick data/Editor/icon.iconset/icon_256.png -define icon:auto-resize=256,128,64,48,32,16 data/Editor/icon.ico
+        magick data/Runtime/icon.iconset/icon_256.png -define icon:auto-resize=256,128,64,48,32,16 data/Runtime/icon.ico
     - name: Setup Rubytron
       shell: bash
       run: meson setup build --prefix="$PWD/dist" -Dcpp_args=-DMULTI_EXPORT

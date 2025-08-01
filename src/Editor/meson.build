@@ -30,6 +30,7 @@ if host_machine.system() == 'darwin'
 elif host_machine.system() == 'windows'
 	app_dir = 'windows'
 	app_rpath = ''
+	sources += '../../data/Editor/editor.rc'
 else
 	app_dir = 'linux'
 	app_rpath = '$ORIGIN'
@@ -40,32 +41,16 @@ install_subdir(
 	install_dir: app_dir
 )
 
-
-if host_machine.system() == 'windows'
-	executable(
-		'rubytron',
-		[sources, runtime_code],
-		include_directories: inc,
-		dependencies: [dep_sfml, dep_mruby, dep_minizip],
-		link_args: link_args_fix,
-		install: true,
-		install_dir: app_dir,
-		install_rpath: app_rpath,
-		win_res: '../../data/Editor/editor.rc'
-	)
-else
-	executable(
-		'rubytron',
-		[sources, runtime_code],
-		include_directories: inc,
-		dependencies: [dep_sfml, dep_mruby, dep_minizip],
-		link_args: link_args_fix,
-		install: true,
-		install_dir: app_dir,
-		install_rpath: app_rpath
-	)
-endif
-
+executable(
+	'rubytron',
+	[sources, runtime_code],
+	include_directories: inc,
+	dependencies: [dep_sfml, dep_mruby, dep_minizip],
+	link_args: link_args_fix,
+	install: true,
+	install_dir: app_dir,
+	install_rpath: app_rpath
+)
 
 fs = import('fs')
 filepath = join_paths(meson.current_source_dir(), 'meson.post_install.' + host_machine.system() + '.sh')
