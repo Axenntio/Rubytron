@@ -525,6 +525,11 @@ mrb_value AbstractWindow::mrubySpawn([[maybe_unused]] mrb_state *mrb, [[maybe_un
 	return mrb_false_value();
 }
 
+mrb_value AbstractWindow::mrubyFolder([[maybe_unused]] mrb_state *mrb, [[maybe_unused]] mrb_value self)
+{
+	return mrb_false_value();
+}
+
 mrb_value AbstractWindow::mrubyExport([[maybe_unused]] mrb_state *mrb, [[maybe_unused]] mrb_value self)
 {
 	return mrb_false_value();

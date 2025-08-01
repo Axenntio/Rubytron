@@ -17,6 +17,7 @@ Window::Window(unsigned int pid, sf::Vector2i position, sf::Vector2u size, const
 	mrb_define_class_method(this->_mrb, this->_mrbDesktopClass, "processes", &Window::mrubyProcesses, MRB_ARGS_NONE());
 	mrb_define_class_method(this->_mrb, this->_mrbDesktopClass, "kill_process", &Window::mrubyKillProcess, MRB_ARGS_REQ(1) | MRB_ARGS_OPT(1));
 	mrb_define_class_method(this->_mrb, this->_mrbDesktopClass, "spawn", &Window::mrubySpawn, MRB_ARGS_REQ(1) | MRB_ARGS_OPT(1) | MRB_ARGS_KEY(2, 0));
+	mrb_define_class_method(this->_mrb, this->_mrbDesktopClass, "folder", &Window::mrubyFolder, MRB_ARGS_NONE());
 	mrb_define_class_method(this->_mrb, this->_mrbDesktopClass, "export", &Window::mrubyExport, MRB_ARGS_REQ(1));
 }
 
@@ -252,6 +253,28 @@ mrb_value Window::mrubySpawn(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 	}
 
 	return mrb_false_value();
+}
+
+mrb_value Window::mrubyFolder(mrb_state *mrb, [[maybe_unused]] mrb_value self)
+{
+	const std::string path = std::filesystem::current_path();
+	#ifdef _WIN32
+		const std::string command = "explorer \"" + path + "\"";
+	#elif __APPLE__
+		const std::string command = "open \"" + path + "\"";
+	#elif __linux__
+		const std::string command = "xdg-open \"" + path + "\"";
+	#else
+		throw std::runtime_error("Unsupported OS");
+		return;
+	#endif
+
+	int result = std::system(command.c_str());
+	if (result != 0) {
+		throw std::runtime_error("Failed to open folder. Exit code: " + std::to_string(result));
+	}
+
+	return mrb_true_value();
 }
 
 mrb_value Window::mrubyExport(mrb_state *mrb, [[maybe_unused]] mrb_value self)

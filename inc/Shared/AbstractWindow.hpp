@@ -73,6 +73,7 @@ protected:
 	static mrb_value mrubyProcesses(mrb_state *mrb, mrb_value self);
 	static mrb_value mrubyKillProcess(mrb_state *mrb, mrb_value self);
 	static mrb_value mrubySpawn(mrb_state *mrb, mrb_value self);
+	static mrb_value mrubyFolder(mrb_state *mrb, mrb_value self);
 	static mrb_value mrubyExport(mrb_state *mrb, mrb_value self);
 
 	static mrb_value mrubyExecuteFile(mrb_state *mrb, mrb_value self);
