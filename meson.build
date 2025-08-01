@@ -8,6 +8,8 @@ project(
 
 add_global_arguments('-g3', '-D_LIBCPP_HARDENING_MODE=_LIBCPP_HARDENING_MODE_DEBUG', '-U_LIBCPP_ENABLE_ASSERTIONS', language: 'cpp')
 
+windows = import('windows')
+
 inc = include_directories('inc')
 
 mruby_inc = include_directories('./mruby/include/')

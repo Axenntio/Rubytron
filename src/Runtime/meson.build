@@ -5,7 +5,8 @@ sources = [
 ]
 
 if host_machine.system() == 'windows'
-	sources += '../../data/Runtime/runtime.rc'
+	rc_obj = windows.compile_resources('../../data/Runtime/runtime.rc')
+	sources += rc_obj
 endif
 
 runtime_exe = executable(

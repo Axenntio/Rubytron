@@ -30,7 +30,8 @@ if host_machine.system() == 'darwin'
 elif host_machine.system() == 'windows'
 	app_dir = 'windows'
 	app_rpath = ''
-	sources += '../../data/Editor/editor.rc'
+	rc_obj = windows.compile_resources('../../data/Editor/editor.rc')
+	sources += rc_obj
 else
 	app_dir = 'linux'
 	app_rpath = '$ORIGIN'
