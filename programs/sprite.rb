@@ -1,4 +1,8 @@
 class Window
+  def self.resize_event(_, _)
+    $editor.redraw
+  end
+
   def self.text_event(key)
     Window.reload
   end
@@ -19,10 +23,23 @@ class Interactive
     self.x = x
     self.y = y
     self.scale = scale
+    @need_redraw = true
   end
 
   def in?(x:, y:)
     x > self.x && x < self.x + self.width && y > self.y && y < self.y + self.height
+  end
+
+  def redraw?
+    @need_redraw
+  end
+
+  def redraw
+    @need_redraw = true
+  end
+
+  def draw
+    @need_redraw = false
   end
 end
 
@@ -38,9 +55,11 @@ class PaletteSelector < Interactive
 
   def click_event(x:, y:)
     self.selected = (x - self.x) / scale + (y - self.y) / scale * 4
+    redraw
   end
 
   def draw
+    super
     rect self.x, self.y, self.scale * 4 + 1, self.scale * 4 + 1, 0
     4.times do |dx|
       4.times do |dy|
@@ -73,6 +92,7 @@ class SpritePalette < Interactive
   def click_event(x:, y:)
     self.sprite_x_index = (x - self.x) / scale
     self.sprite_y_index = (y - self.y) / scale
+    redraw
   end
 
   def draw_on(x:, y:, color: )
@@ -84,6 +104,7 @@ class SpritePalette < Interactive
   end
 
   def draw
+    super
     rect self.x - 1, self.y - 1, self.width + 2, self.height + 2, 0
     self.sprite_x.times do |dx|
       self.sprite_y.times do |dy|
@@ -93,12 +114,12 @@ class SpritePalette < Interactive
           end
         end
       end
-    rect self.x + self.sprite_x_index * self.scale - 1, self.y + self.sprite_y_index * self.scale - 1, self.scale + 2, self.scale + 2, 7
-    8.times do |sx|
-      8.times do |sy|
-        rect self.x + self.sprite_x_index * self.scale + sx, self.y + self.sprite_y_index * self.scale + sy, 1, 1, self.canvas[(self.sprite_y_index * self.scale + sy) * (self.sprite_x * self.scale) + self.sprite_x_index * self.scale + sx]
+      rect self.x + self.sprite_x_index * self.scale - 1, self.y + self.sprite_y_index * self.scale - 1, self.scale + 2, self.scale + 2, 7
+      8.times do |sx|
+        8.times do |sy|
+          rect self.x + self.sprite_x_index * self.scale + sx, self.y + self.sprite_y_index * self.scale + sy, 1, 1, self.canvas[(self.sprite_y_index * self.scale + sy) * (self.sprite_x * self.scale) + self.sprite_x_index * self.scale + sx]
+        end
       end
-    end
     end
   end
 end
@@ -117,9 +138,11 @@ class DrawingCanvas < Interactive
 
   def click_event(x:, y:)
     @sprite_palette.draw_on(x: (x - self.x) / scale, y: (y - self.y) / scale, color: self.color_palette.selected)
+    redraw
   end
 
   def draw
+    super
     rect self.x - 1, self.y - 1, self.scale * 8 + 2, self.scale * 8 + 2, 0
     8.times do |dx|
       8.times do |dy|
@@ -146,6 +169,12 @@ class Editor
     @sprite_palette.click_event(x: x, y: y) if @sprite_palette.in?(x: x, y: y)
   end
 
+  def redraw
+    @canvas.redraw
+    @sprite_palette.redraw
+    @color_palette.redraw
+  end
+
   def update
     x = Window.mouse_x
     y = Window.mouse_y
@@ -153,6 +182,9 @@ class Editor
   end
 
   def draw
+    return unless @canvas.redraw? || @sprite_palette.redraw? || @color_palette.redraw?
+
+    clear 1
     @canvas.draw
     @sprite_palette.draw
     @color_palette.draw
@@ -164,7 +196,6 @@ def init
 end
 
 def update(elapsed)
-  clear 1
   $editor.update
   $editor.draw
 end
