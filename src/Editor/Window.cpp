@@ -255,21 +255,21 @@ mrb_value Window::mrubySpawn(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 	return mrb_false_value();
 }
 
-mrb_value Window::mrubyFolder(mrb_state *mrb, [[maybe_unused]] mrb_value self)
+mrb_value Window::mrubyFolder([[maybe_unused]] mrb_state *mrb, [[maybe_unused]] mrb_value self)
 {
 	const std::string path = std::filesystem::current_path();
 	#ifdef _WIN32
-		const std::string command = "explorer \"" + path + "\"";
+		int result = _wsystem(()"explorer \"" + path + "\"").c_str());
 	#elif __APPLE__
-		const std::string command = "open \"" + path + "\"";
+		int result = std::system(("open \"" + path + "\"").c_str());
 	#elif __linux__
-		const std::string command = "xdg-open \"" + path + "\"";
+		int result = std::system(("xdg-open \"" + path + "\"").c_str());
 	#else
 		throw std::runtime_error("Unsupported OS");
 		return;
 	#endif
 
-	int result = std::system(command.c_str());
+
 	if (result != 0) {
 		throw std::runtime_error("Failed to open folder. Exit code: " + std::to_string(result));
 	}
