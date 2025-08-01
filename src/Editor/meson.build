@@ -40,16 +40,31 @@ install_subdir(
 	install_dir: app_dir
 )
 
-executable(
-	'rubytron',
-	[sources, runtime_code],
-	include_directories: inc,
-	dependencies: [dep_sfml, dep_mruby, dep_minizip],
-	link_args: link_args_fix,
-	install: true,
-	install_dir: app_dir,
-	install_rpath: app_rpath
-)
+
+if host_machine.system() == 'windows'
+	executable(
+		'rubytron',
+		[sources, runtime_code],
+		include_directories: inc,
+		dependencies: [dep_sfml, dep_mruby, dep_minizip],
+		link_args: link_args_fix,
+		install: true,
+		install_dir: app_dir,
+		install_rpath: app_rpath,
+		win_res: '../../data/Editor/editor.rc'
+	)
+else
+	executable(
+		'rubytron',
+		[sources, runtime_code],
+		include_directories: inc,
+		dependencies: [dep_sfml, dep_mruby, dep_minizip],
+		link_args: link_args_fix,
+		install: true,
+		install_dir: app_dir,
+		install_rpath: app_rpath
+	)
+endif
 
 
 fs = import('fs')

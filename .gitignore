@@ -1,4 +1,6 @@
 .DS_Store
 dist
-data/Editor/icon.icns
 data/Runtime/icon.icns
+data/Editor/icon.icns
+data/Runtime/icon.ico
+data/Editor/icon.ico

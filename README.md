@@ -47,3 +47,12 @@ $ iconutil -c icns data/Editor/icon.iconset -o data/Editor/icon.icns
 $ iconutil -c icns data/Runtime/icon.iconset -o data/Runtime/icon.icns
 [...]
 ```
+
+## Update the Windows icons
+
+```console
+$ magick convert data/Editor/icon.iconset/icon_256.png -define icon:auto-resize=256,128,64,48,32,16 data/Editor/icon.ico
+[...]
+$ magick convert data/Runtime/icon.iconset/icon_256.png -define icon:auto-resize=256,128,64,48,32,16 data/Runtime/icon.ico
+[...]
+```

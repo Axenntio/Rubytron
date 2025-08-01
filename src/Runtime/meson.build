@@ -4,13 +4,24 @@ sources = [
 	shared_src
 ]
 
-runtime_exe = executable(
-	'runtime',
-	sources,
-	include_directories: inc,
-	dependencies: [dep_sfml, dep_mruby],
-	link_args: link_args_fix
-)
+if host_machine.system() == 'windows'
+	runtime_exe = executable(
+		'runtime',
+		sources,
+		include_directories: inc,
+		dependencies: [dep_sfml, dep_mruby],
+		link_args: link_args_fix,
+		win_res: '../../data/Runtime/runtime.rc'
+	)
+else
+	runtime_exe = executable(
+		'runtime',
+		sources,
+		include_directories: inc,
+		dependencies: [dep_sfml, dep_mruby],
+		link_args: link_args_fix
+	)
+endif
 
 app_bundle = custom_target('RuntimeAppBundle',
 	input: [runtime_exe],
