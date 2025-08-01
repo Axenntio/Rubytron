@@ -87,8 +87,12 @@ jobs:
         submodules: recursive
     - name: Install dependencies
       run: |
-        choco install imagemagick -y
+        choco install mingw imagemagick -y
         pip install meson ninja
+    - name: Add MinGW to PATH
+      run: echo "C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw64\bin" | Out-File -Append -FilePath $env:GITHUB_PATH
+    - name: Confirm windres is available
+      run: where windres
     - name: Cache vcpkg
       id: cache-vcpkg
       uses: actions/cache@v4
@@ -246,8 +250,10 @@ jobs:
         submodules: recursive
     - name: Install dependencies
       run: |
-        choco install imagemagick -y
+        choco install mingw imagemagick -y
         pip install meson ninja
+    - name: Add MinGW to PATH
+      run: echo "C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw64\bin" | Out-File -Append -FilePath $env:GITHUB_PATH
     - name: Cache vcpkg
       id: cache-vcpkg
       uses: actions/cache@v4
