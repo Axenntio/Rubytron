@@ -263,7 +263,7 @@ mrb_value Window::mrubyFolder([[maybe_unused]] mrb_state *mrb, [[maybe_unused]] 
 		const std::string path = std::filesystem::current_path();
 	#endif
 	#ifdef _WIN32
-		int result = _wsystem(("explorer \"" + path + "\"").c_str());
+		int result = _wsystem(std::wstring("explorer \"") + path + std::wstring("\"")).c_str());
 	#elif __APPLE__
 		int result = std::system(("open \"" + path + "\"").c_str());
 	#elif __linux__
