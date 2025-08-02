@@ -120,6 +120,11 @@ void Desktop::run()
 	}
 }
 
+void Desktop::close()
+{
+	this->_window.close();
+}
+
 std::shared_ptr<Window> Desktop::getWindow(mrb_state* mrb) const
 {
 	for (const std::shared_ptr<Window>& window : this->_windows) {

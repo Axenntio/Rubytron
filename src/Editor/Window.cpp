@@ -19,6 +19,7 @@ Window::Window(unsigned int pid, sf::Vector2i position, sf::Vector2u size, const
 	mrb_define_class_method(this->_mrb, this->_mrbDesktopClass, "spawn", &Window::mrubySpawn, MRB_ARGS_REQ(1) | MRB_ARGS_OPT(1) | MRB_ARGS_KEY(2, 0));
 	mrb_define_class_method(this->_mrb, this->_mrbDesktopClass, "folder", &Window::mrubyFolder, MRB_ARGS_NONE());
 	mrb_define_class_method(this->_mrb, this->_mrbDesktopClass, "export", &Window::mrubyExport, MRB_ARGS_REQ(1));
+	mrb_define_class_method(this->_mrb, this->_mrbDesktopClass, "close", &Window::mrubyDesktopClose, MRB_ARGS_NONE());
 }
 
 void Window::draw(sf::RenderTarget& target, sf::RenderStates states) const
@@ -210,6 +211,13 @@ void Window::titleBarRefresh()
 		drawOnTexture(this->_barTexture, this->_size.x - 3, 0, spr_close_minimal, SPR_CLOSE_MINIMAL_HEIGHT, this->_palette[palette]);
 		drawOnTexture(this->_barTexture, this->_size.x - 7, 0, spr_maximise_minimal, SPR_MAXIMISE_MINIMAL_HEIGHT, this->_palette[palette]);
 	}
+}
+
+mrb_value Window::mrubyDesktopClose([[maybe_unused]] mrb_state *mrb, [[maybe_unused]] mrb_value self)
+{
+	desktop.close();
+
+	return mrb_true_value();
 }
 
 mrb_value Window::mrubySpawn(mrb_state *mrb, [[maybe_unused]] mrb_value self)

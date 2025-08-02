@@ -13,6 +13,7 @@ public:
 	Desktop(unsigned int width, unsigned int height, unsigned char scale = 1, TitleBarMode titleBarMode = TitleBarMode::Full);
 
 	void run();
+	void close();
 	std::shared_ptr<Window> getWindow(mrb_state *mrb) const;
 	sf::Vector2u getSize() const;
 	bool isFocused(const Window* window) const;
