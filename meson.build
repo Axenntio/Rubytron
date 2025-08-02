@@ -6,13 +6,15 @@ project(
 	default_options: ['warning_level=3', 'cpp_std=c++17']
 )
 
-add_global_arguments('-g3', '-D_LIBCPP_HARDENING_MODE=_LIBCPP_HARDENING_MODE_DEBUG', '-U_LIBCPP_ENABLE_ASSERTIONS', language: 'cpp')
+add_global_arguments('-g3', language: 'cpp')
 
 windows = import('windows')
 
 inc = include_directories('inc')
 
 mruby_inc = include_directories('./mruby/include/')
+
+dep_mruby = declare_dependency(link_args: files('mruby/build/host/lib/libmruby.a')[0].full_path(), include_directories: mruby_inc)
 
 if host_machine.system() == 'windows'
 	add_global_arguments('-DSFML_STATIC', language: 'cpp')
@@ -47,7 +49,6 @@ if host_machine.system() == 'windows'
 			'-logg'
 		]
 	)
-	dep_mruby = declare_dependency(link_args: [files('mruby/build/host/lib/libmruby.a')[0].full_path(), '-lws2_32'], include_directories: mruby_inc)
 	dep_minizip = declare_dependency(
 		include_directories: include_directories('vcpkg/installed/x64-mingw-static/include/minizip-ng'),
 		link_args: [
@@ -62,7 +63,6 @@ if host_machine.system() == 'windows'
 else
 	link_args_fix = ['-L/opt/homebrew/Cellar/sfml/3.0.1/lib']
 	dep_sfml = dependency('sfml-all')
-	dep_mruby = declare_dependency(link_args: files('mruby/build/host/lib/libmruby.a')[0].full_path(), include_directories: mruby_inc)
 	dep_minizip = dependency('minizip-ng')
 endif
 
