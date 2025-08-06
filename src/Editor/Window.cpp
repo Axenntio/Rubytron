@@ -124,6 +124,20 @@ bool Window::isIn(WindowZone zone, sf::Vector2i point) const
 	return false;
 }
 
+void Window::maximize()
+{
+	unsigned char height = 8;
+	if (this->_titleBarMode == TitleBarMode::Minimal) {
+		height = 5;
+	}
+	if (this->_titleBarMode == TitleBarMode::None) {
+		height = 1;
+	}
+
+	this->setPosition(sf::Vector2f(1, height));
+	this->resize(static_cast<sf::Vector2i>(desktop.getSize() - sf::Vector2u(2, height + 1)));
+}
+
 void Window::toggleFullscreen()
 {
 	if (this->_fullscreened) {

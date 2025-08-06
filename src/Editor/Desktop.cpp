@@ -346,6 +346,9 @@ void Desktop::keyPressEvent(const sf::Event::KeyPressed *event)
 			case sf::Keyboard::Key::F:
 				this->_focusedWindow->toggleFullscreen();
 				return;
+			case sf::Keyboard::Key::M:
+				this->_focusedWindow->maximize();
+				return;
 			case sf::Keyboard::Key::Q:
 				this->_focusedWindow->close();
 				return;
