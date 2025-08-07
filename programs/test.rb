@@ -14,6 +14,11 @@ class Window
 
   def self.key_press_event(key)
     # puts "Key pressed (#{key})"
+    if key == 16
+      $sleep = true
+    elsif key == 22
+      $sleep = false
+    end
   end
 
   def self.key_release_event(key)
@@ -39,16 +44,29 @@ class Window
 end
 
 def init
-  $has_focus = false
-  $should_update = true
+  $has_focus = Window.focused?
+  $should_update =true
   $color_index = 0
   $value = 0
+  $elapseds = []
+  $sleep = false
+  $last_fps = 0
 end
 
 def update(elapsed)
-  return if $has_focus && !$should_update
+  return if !$has_focus && !$should_update
+  sleep(0.2) if $sleep
+  $should_update = false
+
+  if $elapseds.size >= 25 * 2
+    $elapseds.shift(25)
+    $last_fps = (100.0 / ($elapseds.sum / $elapseds.size)).to_i
+  else
+    $elapseds << elapsed
+  end
 
   clear $color_index
+  text Window.width - ($last_fps.to_s.chars.count * 4 - 1), 1, $last_fps.to_s, 7
   $value += elapsed / 10 if $has_focus
   pixel 0, 0, 1
   pixel 0, Window.height - 1, 2

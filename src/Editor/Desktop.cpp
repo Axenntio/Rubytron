@@ -29,6 +29,7 @@ Desktop::Desktop(unsigned int width, unsigned int height, unsigned char scale, T
 	this->_window.create(sf::VideoMode(sf::Vector2u(this->_size.x * scale, this->_size.y * scale)), "Rubytron");
 	this->_window.setMinimumSize(sf::Vector2u(this->_size.x, this->_size.y));
 	this->_window.setMouseCursorVisible(false);
+	this->_window.setVerticalSyncEnabled(true);
 	if (!this->_background_texture.resize(this->_size)) {
 		throw std::runtime_error("Can't resize texture");
 	}
@@ -101,7 +102,11 @@ void Desktop::run()
 			std::remove_if(this->_windows.begin(), this->_windows.end(), [](const std::shared_ptr<Window> window) { return window->isClosed(); }),
 			this->_windows.end()
 		);
-		this->_window.setVerticalSyncEnabled(true);
+		for (const std::shared_ptr<Window>& window : this->_windows) {
+			window->exceptionHandler();
+			window->update();
+			window->resetClock();
+		}
 		this->_window.clear();
 		sf::Sprite background(this->_background_texture.getTexture());
 		sf::Sprite foreground(this->_foreground_texture.getTexture());
@@ -110,9 +115,7 @@ void Desktop::run()
 		cursor.setPosition(sf::Vector2f(this->_mouse_coordinated));
 		this->_window.draw(background);
 		for (const std::shared_ptr<Window>& window : this->_windows) {
-			window->exceptionHandler();
 			this->_window.draw(*window);
-			window->resetClock();
 		}
 		this->_window.draw(foreground);
 		this->_window.draw(cursor);

@@ -116,12 +116,15 @@ void AbstractWindow::init()
 	this->_windowClock.restart();
 }
 
-void AbstractWindow::draw(sf::RenderTarget& target, sf::RenderStates states) const
+void AbstractWindow::update()
 {
 	if (this->_mrb->exc == nullptr && mrb_obj_respond_to(this->_mrb, this->_mrb->object_class, mrb_intern_cstr(this->_mrb, "update"))) {
 		mrb_funcall(this->_mrb, mrb_obj_value(this->_mrb->object_class), "update", 1, mrb_float_value(this->_mrb, this->_windowElapsedTime.asSeconds() * 100));
 	}
+}
 
+void AbstractWindow::draw(sf::RenderTarget& target, sf::RenderStates states) const
+{
 	states.transform *= getTransform();
 
 	states.texture = NULL;
@@ -167,6 +170,16 @@ void AbstractWindow::resetClock()
 
 void AbstractWindow::toggleFullscreen()
 {
+}
+
+bool AbstractWindow::isFocused() const
+{
+	return this->_focused;
+}
+
+void AbstractWindow::focus()
+{
+	this->_focused = true;
 }
 
 bool AbstractWindow::isClosed() const

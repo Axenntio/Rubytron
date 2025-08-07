@@ -26,6 +26,8 @@ private:
 	void changeTitleTrigger();
 	void titleBarRefresh();
 
+	static mrb_value mrubyIsFocused(mrb_state *mrb, mrb_value self);
+
 	static mrb_value mrubyDesktopClose(mrb_state *mrb, mrb_value self);
 	static mrb_value mrubyProcesses(mrb_state *mrb, mrb_value self);
 	static mrb_value mrubyKillProcess(mrb_state *mrb, mrb_value self);

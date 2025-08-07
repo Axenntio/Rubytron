@@ -18,6 +18,7 @@ public:
 	void execute(const std::string& string);
 
 	void init();
+	void update();
 	virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
 
 	sf::Vector2i getSize() const;
@@ -29,6 +30,8 @@ public:
 	void resizeH(int width);
 	void resizeV(int height);
 	virtual void toggleFullscreen();
+	bool isFocused() const;
+	void focus();
 	bool isClosed() const;
 	void close();
 

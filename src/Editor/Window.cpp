@@ -14,7 +14,8 @@ Window::Window(unsigned int pid, sf::Vector2i position, sf::Vector2u size, const
 {
 	this->titleBarRefresh();
 
-	mrb_define_class_method(this->_mrb, this->_mrbDesktopClass, "processes", &Window::mrubyProcesses, MRB_ARGS_NONE());
+	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "focused?", &Window::mrubyIsFocused, MRB_ARGS_NONE());
+
 	mrb_define_class_method(this->_mrb, this->_mrbDesktopClass, "kill_process", &Window::mrubyKillProcess, MRB_ARGS_REQ(1) | MRB_ARGS_OPT(1));
 	mrb_define_class_method(this->_mrb, this->_mrbDesktopClass, "spawn", &Window::mrubySpawn, MRB_ARGS_REQ(1) | MRB_ARGS_OPT(1) | MRB_ARGS_KEY(2, 0));
 	mrb_define_class_method(this->_mrb, this->_mrbDesktopClass, "folder", &Window::mrubyFolder, MRB_ARGS_NONE());
@@ -24,10 +25,6 @@ Window::Window(unsigned int pid, sf::Vector2i position, sf::Vector2u size, const
 
 void Window::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {
-	if (this->_mrb->exc == nullptr && mrb_obj_respond_to(this->_mrb, this->_mrb->object_class, mrb_intern_cstr(this->_mrb, "update"))) {
-		mrb_funcall(this->_mrb, mrb_obj_value(this->_mrb->object_class), "update", 1, mrb_float_value(this->_mrb, this->_windowElapsedTime.asSeconds() * 100));
-	}
-
 	states.transform *= getTransform();
 
 	states.texture = NULL;
@@ -225,6 +222,12 @@ void Window::titleBarRefresh()
 		drawOnTexture(this->_barTexture, this->_size.x - 3, 0, spr_close_minimal, SPR_CLOSE_MINIMAL_HEIGHT, this->_palette[palette]);
 		drawOnTexture(this->_barTexture, this->_size.x - 7, 0, spr_maximise_minimal, SPR_MAXIMISE_MINIMAL_HEIGHT, this->_palette[palette]);
 	}
+}
+
+mrb_value Window::mrubyIsFocused(mrb_state *mrb, [[maybe_unused]] mrb_value self)
+{
+	AbstractWindow* window = mrubyGetWindowObject(mrb);
+	return mrb_bool_value(window->isFocused());
 }
 
 mrb_value Window::mrubyDesktopClose([[maybe_unused]] mrb_state *mrb, [[maybe_unused]] mrb_value self)
