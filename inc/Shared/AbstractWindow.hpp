@@ -1,6 +1,7 @@
 #pragma once
 
 #include <thread>
+#include <mutex>
 #include <memory>
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
