@@ -63,7 +63,7 @@ class Terminal
     @current_line = ''
     @current_line_index = @current_line.length
     @current_path = ''
-    @should_blink = Window.focused
+    @should_blink = Window.focused?
     bin_programs = Dir.entries('bin').to_h do |file|
       next [nil, nil] unless file.end_with?(".rb")
       [file.chomp('.rb'), "bin/#{file}"]

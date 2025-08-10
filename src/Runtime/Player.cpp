@@ -34,13 +34,14 @@ Player::Player(sf::Vector2u size, unsigned char scale, const std::vector<std::st
 		throw std::runtime_error("Can't resize texture");
 	}
 	this->_cursor_texture.clear(sf::Color::Transparent);
-
 	drawOnTexture(this->_cursor_texture, 0, 0, spr_cursor, SPR_CURSOR_HEIGHT, this->_palette[7]);
+	this->_cursor_texture.display();
 
 	this->_canvas_view.setCenter({static_cast<float>(this->_size.x) / 2, static_cast<float>(this->_size.y) / 2});
 	this->_canvas_view.setViewport(sf::FloatRect({0, 0}, {1, 1}));
 	this->_canvas_view.setSize(sf::Vector2f(this->_size.x, this->_size.y));
 	this->_window.setView(this->_canvas_view);
+	this->_window.setVerticalSyncEnabled(true);
 }
 
 void Player::run()
@@ -83,13 +84,10 @@ void Player::run()
 				this->mouseWheelEvent(eventData);
 			}
 		}
-
-		this->_window.setVerticalSyncEnabled(true);
 		this->_window.clear();
 		sf::Sprite cursor(this->_cursor_texture.getTexture());
-		cursor.setTextureRect(sf::IntRect({0, 6}, {4, -6}));
 		cursor.setPosition(static_cast<sf::Vector2f>(this->_mouse_coordinated));
-		this->exceptionHandler();
+		this->update();
 		this->_window.draw(*this);
 		this->_window.draw(cursor);
 		this->_window.display();

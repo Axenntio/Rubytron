@@ -1,5 +1,6 @@
 #pragma once
 
+#include <thread>
 #include <memory>
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
@@ -18,6 +19,9 @@ public:
 	void execute(const std::string& string);
 
 	void init();
+	void updateThreaded();
+	std::mutex _drawMutex;
+	std::recursive_mutex _mrbMutex;
 	void update();
 	virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
 
@@ -47,6 +51,7 @@ public:
 protected:
 	virtual void resizeTrigger();
 	virtual void changeTitleTrigger();
+	void displayBuffer();
 
 	static AbstractWindow* mrubyGetWindowObject(mrb_state *mrb);
 
@@ -71,7 +76,7 @@ protected:
 	static mrb_value mrubyParameters(mrb_state *mrb, mrb_value self);
 	static mrb_value mrubyKey(mrb_state *mrb, mrb_value self);
 	static mrb_value mrubyButton(mrb_state *mrb, mrb_value self);
-	static mrb_value mrubyFocused(mrb_state *mrb, mrb_value self);
+	static mrb_value mrubyIsFocused(mrb_state *mrb, mrb_value self);
 
 	static mrb_value mrubyProcesses(mrb_state *mrb, mrb_value self);
 	static mrb_value mrubyKillProcess(mrb_state *mrb, mrb_value self);
@@ -89,9 +94,13 @@ protected:
 	static mrb_value mrubyText(mrb_state *mrb, mrb_value self);
 	static mrb_value mrubySound(mrb_state *mrb, mrb_value self);
 
+	std::atomic<bool> _isUpdating;
+	std::thread _updateThread;
+
 	sf::Clock _windowClock;
 	sf::Time _windowElapsedTime;
 	sf::RenderTexture _texture;
+	sf::RenderTexture _textureBuffer;
 	sf::RenderTexture _barTexture;
 	std::vector<sf::Color> _palette;
 	sf::Vector2i _prevPosition;

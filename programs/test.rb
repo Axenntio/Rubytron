@@ -45,7 +45,7 @@ end
 
 def init
   $has_focus = Window.focused?
-  $should_update =true
+  $should_update = true
   $color_index = 0
   $value = 0
   $elapseds = []

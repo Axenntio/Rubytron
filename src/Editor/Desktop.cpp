@@ -42,8 +42,8 @@ Desktop::Desktop(unsigned int width, unsigned int height, unsigned char scale, T
 		throw std::runtime_error("Can't resize texture");
 	}
 	this->_cursor_texture.clear(sf::Color::Transparent);
-
 	drawOnTexture(this->_cursor_texture, 0, 0, spr_cursor, SPR_CURSOR_HEIGHT, this->_palette[7]);
+	this->_cursor_texture.display();
 
 	this->_canvas_view.setCenter(sf::Vector2f(this->_size.x / 2, this->_size.y / 2));
 	this->_canvas_view.setViewport(sf::FloatRect({0, 0}, {1, 1}));
@@ -103,18 +103,16 @@ void Desktop::run()
 			this->_windows.end()
 		);
 		for (const std::shared_ptr<Window>& window : this->_windows) {
-			window->exceptionHandler();
 			window->update();
-			window->resetClock();
 		}
 		this->_window.clear();
 		sf::Sprite background(this->_background_texture.getTexture());
 		sf::Sprite foreground(this->_foreground_texture.getTexture());
 		sf::Sprite cursor(this->_cursor_texture.getTexture());
-		cursor.setTextureRect(sf::IntRect({0, 6}, {4, -6}));
 		cursor.setPosition(sf::Vector2f(this->_mouse_coordinated));
 		this->_window.draw(background);
 		for (const std::shared_ptr<Window>& window : this->_windows) {
+			std::lock_guard<std::mutex> lock(window->_drawMutex);
 			this->_window.draw(*window);
 		}
 		this->_window.draw(foreground);

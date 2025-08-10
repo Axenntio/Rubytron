@@ -11,7 +11,7 @@
 #include <mruby/string.h>
 #include <mruby/error.h>
 
-AbstractWindow::AbstractWindow(sf::Vector2i position, sf::Vector2u size, const std::vector<sf::Color>& palette, const std::string& programPath, const std::vector<std::string>& parameters) : _size(size), _title(programPath), _focused(false), _resizable(true), _closed(false), _fullscreened(false), _programFile(programPath), _programParameters(parameters)
+AbstractWindow::AbstractWindow(sf::Vector2i position, sf::Vector2u size, const std::vector<sf::Color>& palette, const std::string& programPath, const std::vector<std::string>& parameters) : _isUpdating(false), _size(size), _title(programPath), _focused(false), _resizable(true), _closed(false), _fullscreened(false), _programFile(programPath), _programParameters(parameters)
 {
 	this->setPosition(sf::Vector2f(position));
 	this->_minSize = sf::Vector2i(8, 4);
@@ -19,7 +19,11 @@ AbstractWindow::AbstractWindow(sf::Vector2i position, sf::Vector2u size, const s
 	if (!this->_texture.resize(static_cast<sf::Vector2u>(this->_size))) {
 		throw std::runtime_error("Can't resize texture");
 	}
+	if (!this->_textureBuffer.resize(static_cast<sf::Vector2u>(this->_size))) {
+		throw std::runtime_error("Can't resize texture buffer");
+	}
 	this->_texture.clear(this->_palette[0]);
+	this->_textureBuffer.clear(this->_palette[0]);
 	this->_mrb = mrb_open();
 
 	if (!this->_mrb) {
@@ -51,7 +55,7 @@ AbstractWindow::AbstractWindow(sf::Vector2i position, sf::Vector2u size, const s
 	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "close", &AbstractWindow::mrubyClose, MRB_ARGS_NONE());
 	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "key", &AbstractWindow::mrubyKey, MRB_ARGS_OPT(1));
 	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "button", &AbstractWindow::mrubyButton, MRB_ARGS_OPT(1));
-	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "focused", &AbstractWindow::mrubyFocused, MRB_ARGS_OPT(1));
+	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "focused?", &AbstractWindow::mrubyIsFocused, MRB_ARGS_NONE());
 	mrb_define_class_method(this->_mrb, this->_mrbProgramClass, "parameters", &AbstractWindow::mrubyParameters, MRB_ARGS_NONE());
 
 	mrb_define_method(this->_mrb, this->_mrb->object_class, "execute_file", &AbstractWindow::mrubyExecuteFile, MRB_ARGS_REQ(1) | MRB_ARGS_REST());
@@ -69,6 +73,9 @@ AbstractWindow::AbstractWindow(sf::Vector2i position, sf::Vector2u size, const s
 
 AbstractWindow::~AbstractWindow()
 {
+	if (this->_updateThread.joinable()) {
+		this->_updateThread.join();
+	}
 	mrb_value obj = mrb_const_get(this->_mrb, mrb_obj_value(this->_mrb->object_class), mrb_intern_cstr(this->_mrb, "Window"));
 	if (mrb_respond_to(this->_mrb, obj, mrb_intern_cstr(this->_mrb, "close_event"))) {
 		mrb_funcall(this->_mrb, obj, "close_event", 0);
@@ -113,14 +120,41 @@ void AbstractWindow::init()
 	if (mrb_obj_respond_to(this->_mrb, this->_mrb->object_class, mrb_intern_cstr(this->_mrb, "init"))) {
 		mrb_funcall(this->_mrb, mrb_obj_value(this->_mrb->object_class), "init", 0);
 	}
+	this->displayBuffer();
 	this->_windowClock.restart();
+}
+
+void AbstractWindow::updateThreaded()
+{
+	if (!this->_isUpdating.load()) {
+		if (this->_updateThread.joinable()) {
+			this->_updateThread.join();
+		}
+
+		this->_isUpdating.store(true);
+		this->_updateThread = std::thread([this]() {
+			this->update();
+			this->_isUpdating.store(false);
+		});
+	}
+}
+
+void AbstractWindow::displayBuffer()
+{
+	sf::Sprite canvas(this->_texture.getTexture());
+	this->_textureBuffer.draw(canvas);
 }
 
 void AbstractWindow::update()
 {
+	this->exceptionHandler();
+	std::lock_guard<std::recursive_mutex> mrbLock(this->_mrbMutex);
 	if (this->_mrb->exc == nullptr && mrb_obj_respond_to(this->_mrb, this->_mrb->object_class, mrb_intern_cstr(this->_mrb, "update"))) {
 		mrb_funcall(this->_mrb, mrb_obj_value(this->_mrb->object_class), "update", 1, mrb_float_value(this->_mrb, this->_windowElapsedTime.asSeconds() * 100));
 	}
+	std::lock_guard<std::mutex> drawLock(this->_drawMutex);
+	this->displayBuffer();
+	this->resetClock();
 }
 
 void AbstractWindow::draw(sf::RenderTarget& target, sf::RenderStates states) const
@@ -129,8 +163,7 @@ void AbstractWindow::draw(sf::RenderTarget& target, sf::RenderStates states) con
 
 	states.texture = NULL;
 
-	sf::Sprite canvas(this->_texture.getTexture());
-	canvas.setTextureRect(sf::IntRect({0, this->_size.y}, {this->_size.x, -this->_size.y}));
+	sf::Sprite canvas(this->_textureBuffer.getTexture());
 	target.draw(canvas, states);
 }
 
@@ -141,7 +174,9 @@ sf::Vector2i AbstractWindow::getSize() const
 
 void AbstractWindow::exceptionHandler()
 {
+	std::lock_guard<std::recursive_mutex> mrbLock(this->_mrbMutex);
 	if (this->_mrb->exc) {
+		std::lock_guard<std::mutex> drawLock(this->_drawMutex);
 		this->_texture.clear(this->_palette[0]);
 		this->_resizable = true;
 		this->_minSize = sf::Vector2i(8, 4);
@@ -210,6 +245,7 @@ void AbstractWindow::resize(sf::Vector2i size)
 		return;
 	}
 
+	std::lock_guard<std::recursive_mutex> mrbLock(this->_mrbMutex);
 	mrb_value obj = mrb_const_get(this->_mrb, mrb_obj_value(this->_mrb->object_class), mrb_intern_cstr(this->_mrb, "Window"));
 	if (mrb_respond_to(this->_mrb, obj, mrb_intern_cstr(this->_mrb, "resize_event"))) {
 		mrb_funcall(this->_mrb, obj, "resize_event", 2, mrb_int_value(this->_mrb, this->_size.x), mrb_int_value(this->_mrb, this->_size.y));
@@ -228,14 +264,15 @@ void AbstractWindow::resizeV(int height)
 
 void AbstractWindow::resizeTrigger()
 {
-	sf::Texture tmp(this->_texture.getTexture());
+	std::lock_guard<std::mutex> drawLock(this->_drawMutex);
 	if (!this->_texture.resize(static_cast<sf::Vector2u>(this->_size))) {
 		throw std::runtime_error("Can't resize texture");
 	}
 	this->_texture.clear(this->_palette[0]);
-	sf::Sprite tmpSprite(tmp);
-	tmpSprite.setTextureRect(sf::IntRect(sf::Vector2i(0, tmp.getSize().y), sf::Vector2i(tmp.getSize().x, -tmp.getSize().y)));
-	this->_texture.draw(tmpSprite);
+	if (!this->_textureBuffer.resize(static_cast<sf::Vector2u>(this->_size))) {
+		throw std::runtime_error("Can't resize texture buffer");
+	}
+	this->displayBuffer();
 }
 
 void AbstractWindow::changeTitleTrigger()
@@ -255,6 +292,7 @@ void AbstractWindow::addKeyPressed(sf::Keyboard::Key key)
 	if (std::find(this->_keyPressed.begin(), this->_keyPressed.end(), static_cast<sf::Keyboard::Key>(key)) == this->_keyPressed.end()) {
 		this->_keyPressed.push_back(key);
 	}
+	std::lock_guard<std::recursive_mutex> mrbLock(this->_mrbMutex);
 	mrb_value obj = mrb_const_get(this->_mrb, mrb_obj_value(this->_mrb->object_class), mrb_intern_cstr(this->_mrb, "Window"));
 	if (mrb_respond_to(this->_mrb, obj, mrb_intern_cstr(this->_mrb, "key_press_event"))) {
 		mrb_funcall(this->_mrb, obj, "key_press_event", 1, mrb_int_value(this->_mrb, static_cast<int>(key)));
@@ -271,6 +309,7 @@ void AbstractWindow::removeKeyPressed(sf::Keyboard::Key key)
 			std::remove_if(this->_keyPressed.begin(), this->_keyPressed.end(), [key](sf::Keyboard::Key testKey) { return testKey == key; } )
 		);
 	}
+	std::lock_guard<std::recursive_mutex> mrbLock(this->_mrbMutex);
 	mrb_value obj = mrb_const_get(this->_mrb, mrb_obj_value(this->_mrb->object_class), mrb_intern_cstr(this->_mrb, "Window"));
 	if (mrb_respond_to(this->_mrb, obj, mrb_intern_cstr(this->_mrb, "key_release_event"))) {
 		mrb_funcall(this->_mrb, obj, "key_release_event", 1, mrb_int_value(this->_mrb, static_cast<int>(key)));
@@ -285,6 +324,7 @@ void AbstractWindow::addButtonPressed(sf::Mouse::Button button)
 	if (std::find(this->_buttonPressed.begin(), this->_buttonPressed.end(), static_cast<sf::Mouse::Button>(button)) == this->_buttonPressed.end()) {
 		this->_buttonPressed.push_back(button);
 	}
+	std::lock_guard<std::recursive_mutex> mrbLock(this->_mrbMutex);
 	mrb_value obj = mrb_const_get(this->_mrb, mrb_obj_value(this->_mrb->object_class), mrb_intern_cstr(this->_mrb, "Window"));
 	if (mrb_respond_to(this->_mrb, obj, mrb_intern_cstr(this->_mrb, "button_press_event"))) {
 		mrb_funcall(this->_mrb, obj, "button_press_event", 1, mrb_int_value(this->_mrb, static_cast<int>(button)));
@@ -301,6 +341,7 @@ void AbstractWindow::removeButtonPressed(sf::Mouse::Button button)
 			std::remove_if(this->_buttonPressed.begin(), this->_buttonPressed.end(), [button](sf::Mouse::Button testButton) { return testButton == button; } )
 		);
 	}
+	std::lock_guard<std::recursive_mutex> mrbLock(this->_mrbMutex);
 	mrb_value obj = mrb_const_get(this->_mrb, mrb_obj_value(this->_mrb->object_class), mrb_intern_cstr(this->_mrb, "Window"));
 	if (mrb_respond_to(this->_mrb, obj, mrb_intern_cstr(this->_mrb, "button_release_event"))) {
 		mrb_funcall(this->_mrb, obj, "button_release_event", 1, mrb_int_value(this->_mrb, static_cast<int>(button)));
@@ -312,6 +353,7 @@ void AbstractWindow::textEnteredEvent(std::uint32_t unicode)
 	if (this->_mrb->exc) {
 		return;
 	}
+	std::lock_guard<std::recursive_mutex> mrbLock(this->_mrbMutex);
 	mrb_value obj = mrb_const_get(this->_mrb, mrb_obj_value(this->_mrb->object_class), mrb_intern_cstr(this->_mrb, "Window"));
 	if (mrb_respond_to(this->_mrb, obj, mrb_intern_cstr(this->_mrb, "text_event"))) {
 		mrb_funcall(this->_mrb, obj, "text_event", 1, mrb_int_value(this->_mrb, unicode));
@@ -323,6 +365,7 @@ void AbstractWindow::mouseWheelEvent(const sf::Event::MouseWheelScrolled *wheel)
 	if (this->_mrb->exc) {
 		return;
 	}
+	std::lock_guard<std::recursive_mutex> mrbLock(this->_mrbMutex);
 	mrb_value obj = mrb_const_get(this->_mrb, mrb_obj_value(this->_mrb->object_class), mrb_intern_cstr(this->_mrb, "Window"));
 	if (mrb_respond_to(this->_mrb, obj, mrb_intern_cstr(this->_mrb, "mouse_wheel_event"))) {
 		mrb_value horizontal = mrb_float_value(this->_mrb, wheel->wheel == sf::Mouse::Wheel::Horizontal ? wheel->delta : 0);
@@ -337,6 +380,7 @@ void AbstractWindow::focusEvent(bool focused)
 		return;
 	}
 	this->_focused = focused;
+	std::lock_guard<std::recursive_mutex> mrbLock(this->_mrbMutex);
 	mrb_value obj = mrb_const_get(this->_mrb, mrb_obj_value(this->_mrb->object_class), mrb_intern_cstr(this->_mrb, "Window"));
 	if (mrb_respond_to(this->_mrb, obj, mrb_intern_cstr(this->_mrb, "focus_event"))) {
 		mrb_funcall(this->_mrb, obj, "focus_event", 1, mrb_bool_value(this->_focused));
@@ -357,6 +401,7 @@ AbstractWindow* AbstractWindow::mrubyGetWindowObject(mrb_state *mrb)
 mrb_value AbstractWindow::mrubyGetWidth(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 {
 	AbstractWindow* window = mrubyGetWindowObject(mrb);
+	std::lock_guard<std::recursive_mutex> mrbLock(window->_mrbMutex);
 
 	return mrb_int_value(mrb, window->_size.x);
 }
@@ -364,6 +409,7 @@ mrb_value AbstractWindow::mrubyGetWidth(mrb_state *mrb, [[maybe_unused]] mrb_val
 mrb_value AbstractWindow::mrubySetWidth(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 {
 	AbstractWindow* window = mrubyGetWindowObject(mrb);
+	std::lock_guard<std::recursive_mutex> mrbLock(window->_mrbMutex);
 	if (window->_fullscreened) {
 		return mrb_nil_value();
 	}
@@ -378,6 +424,7 @@ mrb_value AbstractWindow::mrubySetWidth(mrb_state *mrb, [[maybe_unused]] mrb_val
 mrb_value AbstractWindow::mrubyGetHeight(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 {
 	AbstractWindow* window = mrubyGetWindowObject(mrb);
+	std::lock_guard<std::recursive_mutex> mrbLock(window->_mrbMutex);
 
 	return mrb_int_value(mrb, window->_size.y);
 }
@@ -385,6 +432,7 @@ mrb_value AbstractWindow::mrubyGetHeight(mrb_state *mrb, [[maybe_unused]] mrb_va
 mrb_value AbstractWindow::mrubySetHeight(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 {
 	AbstractWindow* window = mrubyGetWindowObject(mrb);
+	std::lock_guard<std::recursive_mutex> mrbLock(window->_mrbMutex);
 	if (window->_fullscreened) {
 		return mrb_nil_value();
 	}
@@ -399,6 +447,7 @@ mrb_value AbstractWindow::mrubySetHeight(mrb_state *mrb, [[maybe_unused]] mrb_va
 mrb_value AbstractWindow::mrubyGetMinWidth(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 {
 	AbstractWindow* window = mrubyGetWindowObject(mrb);
+	std::lock_guard<std::recursive_mutex> mrbLock(window->_mrbMutex);
 
 	return mrb_int_value(mrb, window->_minSize.x);
 }
@@ -406,6 +455,7 @@ mrb_value AbstractWindow::mrubyGetMinWidth(mrb_state *mrb, [[maybe_unused]] mrb_
 mrb_value AbstractWindow::mrubySetMinWidth(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 {
 	AbstractWindow* window = mrubyGetWindowObject(mrb);
+	std::lock_guard<std::recursive_mutex> mrbLock(window->_mrbMutex);
 	mrb_int newWidth;
 	mrb_get_args(mrb, "i", &newWidth);
 	window->_minSize.x = std::max(1, static_cast<int>(newWidth));
@@ -416,6 +466,7 @@ mrb_value AbstractWindow::mrubySetMinWidth(mrb_state *mrb, [[maybe_unused]] mrb_
 mrb_value AbstractWindow::mrubyGetMinHeight(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 {
 	AbstractWindow* window = mrubyGetWindowObject(mrb);
+	std::lock_guard<std::recursive_mutex> mrbLock(window->_mrbMutex);
 
 	return mrb_int_value(mrb, window->_minSize.y);
 }
@@ -423,6 +474,7 @@ mrb_value AbstractWindow::mrubyGetMinHeight(mrb_state *mrb, [[maybe_unused]] mrb
 mrb_value AbstractWindow::mrubySetMinHeight(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 {
 	AbstractWindow* window = mrubyGetWindowObject(mrb);
+	std::lock_guard<std::recursive_mutex> mrbLock(window->_mrbMutex);
 	mrb_int newHeight;
 	mrb_get_args(mrb, "i", &newHeight);
 	window->_minSize.y = std::max(1, static_cast<int>(newHeight));
@@ -433,6 +485,7 @@ mrb_value AbstractWindow::mrubySetMinHeight(mrb_state *mrb, [[maybe_unused]] mrb
 mrb_value AbstractWindow::mrubyGetMouseX(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 {
 	AbstractWindow* window = mrubyGetWindowObject(mrb);
+	std::lock_guard<std::recursive_mutex> mrbLock(window->_mrbMutex);
 
 	return mrb_int_value(mrb, window->_mousePosition.x);
 }
@@ -440,6 +493,7 @@ mrb_value AbstractWindow::mrubyGetMouseX(mrb_state *mrb, [[maybe_unused]] mrb_va
 mrb_value AbstractWindow::mrubySetMouseX(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 {
 	AbstractWindow* window = mrubyGetWindowObject(mrb);
+	std::lock_guard<std::recursive_mutex> mrbLock(window->_mrbMutex);
 	mrb_int newX;
 	mrb_get_args(mrb, "i", &newX);
 	window->_mousePosition.x = newX;
@@ -450,6 +504,7 @@ mrb_value AbstractWindow::mrubySetMouseX(mrb_state *mrb, [[maybe_unused]] mrb_va
 mrb_value AbstractWindow::mrubyGetMouseY(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 {
 	AbstractWindow* window = mrubyGetWindowObject(mrb);
+	std::lock_guard<std::recursive_mutex> mrbLock(window->_mrbMutex);
 
 	return mrb_int_value(mrb, window->_mousePosition.y);
 }
@@ -457,6 +512,7 @@ mrb_value AbstractWindow::mrubyGetMouseY(mrb_state *mrb, [[maybe_unused]] mrb_va
 mrb_value AbstractWindow::mrubySetMouseY(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 {
 	AbstractWindow* window = mrubyGetWindowObject(mrb);
+	std::lock_guard<std::recursive_mutex> mrbLock(window->_mrbMutex);
 	mrb_int newY;
 	mrb_get_args(mrb, "i", &newY);
 	window->_mousePosition.y = newY;
@@ -467,12 +523,14 @@ mrb_value AbstractWindow::mrubySetMouseY(mrb_state *mrb, [[maybe_unused]] mrb_va
 mrb_value AbstractWindow::mrubyGetTitle(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 {
 	AbstractWindow* window = mrubyGetWindowObject(mrb);
+	std::lock_guard<std::recursive_mutex> mrbLock(window->_mrbMutex);
 	return mrb_str_new(mrb, window->_title.c_str(), window->_title.length());
 }
 
 mrb_value AbstractWindow::mrubySetTitle(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 {
 	AbstractWindow* window = mrubyGetWindowObject(mrb);
+	std::lock_guard<std::recursive_mutex> mrbLock(window->_mrbMutex);
 	const char* title;
 	mrb_get_args(mrb, "z", &title);
 	window->_title = std::string(title);
@@ -484,6 +542,7 @@ mrb_value AbstractWindow::mrubySetTitle(mrb_state *mrb, [[maybe_unused]] mrb_val
 mrb_value AbstractWindow::mrubyIsResizable(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 {
 	AbstractWindow* window = mrubyGetWindowObject(mrb);
+	std::lock_guard<std::recursive_mutex> mrbLock(window->_mrbMutex);
 
 	return mrb_bool_value(window->_resizable);
 }
@@ -491,6 +550,7 @@ mrb_value AbstractWindow::mrubyIsResizable(mrb_state *mrb, [[maybe_unused]] mrb_
 mrb_value AbstractWindow::mrubySetResizable(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 {
 	AbstractWindow* window = mrubyGetWindowObject(mrb);
+	std::lock_guard<std::recursive_mutex> mrbLock(window->_mrbMutex);
 	mrb_bool resizable;
 	mrb_get_args(mrb, "b", &resizable);
 	window->_resizable = resizable;
@@ -501,6 +561,7 @@ mrb_value AbstractWindow::mrubySetResizable(mrb_state *mrb, [[maybe_unused]] mrb
 mrb_value AbstractWindow::mrubyReload(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 {
 	AbstractWindow* window = mrubyGetWindowObject(mrb);
+	std::lock_guard<std::recursive_mutex> mrbLock(window->_mrbMutex);
 	window->reloadFile();
 	window->_keyPressed = {};
 
@@ -510,6 +571,7 @@ mrb_value AbstractWindow::mrubyReload(mrb_state *mrb, [[maybe_unused]] mrb_value
 mrb_value AbstractWindow::mrubyClose(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 {
 	AbstractWindow* window = mrubyGetWindowObject(mrb);
+	std::lock_guard<std::recursive_mutex> mrbLock(window->_mrbMutex);
 	window->_closed = true;
 
 	return mrb_nil_value();
@@ -518,6 +580,7 @@ mrb_value AbstractWindow::mrubyClose(mrb_state *mrb, [[maybe_unused]] mrb_value 
 mrb_value AbstractWindow::mrubyParameters(mrb_state *mrb, [[maybe_unused]] mrb_value self)
 {
 	AbstractWindow* window = mrubyGetWindowObject(mrb);
+	std::lock_guard<std::recursive_mutex> mrbLock(window->_mrbMutex);
 	mrb_value parameters = mrb_ary_new_capa(mrb, window->_programParameters.size());
 	for (const std::string& parameter : window->_programParameters) {
 		mrb_ary_push(mrb, parameters, mrb_str_new(mrb, parameter.c_str(), parameter.length()));
@@ -526,9 +589,10 @@ mrb_value AbstractWindow::mrubyParameters(mrb_state *mrb, [[maybe_unused]] mrb_v
 	return parameters;
 }
 
-mrb_value AbstractWindow::mrubyFocused([[maybe_unused]] mrb_state *mrb, [[maybe_unused]] mrb_value self)
+mrb_value AbstractWindow::mrubyIsFocused([[maybe_unused]] mrb_state *mrb, [[maybe_unused]] mrb_value self)
 {
 	AbstractWindow* window = mrubyGetWindowObject(mrb);
+	std::lock_guard<std::recursive_mutex> mrbLock(window->_mrbMutex);
 
 	return mrb_bool_value(window->_focused);
 }
@@ -560,6 +624,8 @@ mrb_value AbstractWindow::mrubyKillProcess([[maybe_unused]] mrb_state *mrb, [[ma
 
 mrb_value AbstractWindow::mrubyExecuteFile(mrb_state* mrb, [[maybe_unused]] mrb_value self)
 {
+	AbstractWindow* window = mrubyGetWindowObject(mrb);
+	std::lock_guard<std::recursive_mutex> mrbLock(window->_mrbMutex);
 	const char* programPath;
 	const mrb_value* argv;
 	mrb_int argc;
@@ -570,8 +636,8 @@ mrb_value AbstractWindow::mrubyExecuteFile(mrb_state* mrb, [[maybe_unused]] mrb_
 	mrb_define_const(mrb, mrb->object_class, "ARGV", parameters);
 
 	std::ifstream file(programPath);
-    std::stringstream buffer;
-    buffer << file.rdbuf();
+	std::stringstream buffer;
+	buffer << file.rdbuf();
 	mrb_value result = mrb_load_string(mrb, buffer.str().c_str());
 
 	mrb_define_const(mrb, mrb->object_class, "ARGC", mrb_nil_value());
@@ -585,9 +651,11 @@ mrb_value AbstractWindow::mrubyExecuteFile(mrb_state* mrb, [[maybe_unused]] mrb_
 mrb_value AbstractWindow::mrubyClear(mrb_state* mrb, [[maybe_unused]] mrb_value self)
 {
 	AbstractWindow* window = mrubyGetWindowObject(mrb);
+	std::lock_guard<std::recursive_mutex> mrbLock(window->_mrbMutex);
 	mrb_int paletteIndex;
 	mrb_get_args(mrb, "i", &paletteIndex);
 
+	std::lock_guard<std::mutex> drawLock(window->_drawMutex);
 	window->_texture.clear(window->_palette[paletteIndex]);
 
 	return mrb_nil_value();
@@ -596,6 +664,7 @@ mrb_value AbstractWindow::mrubyClear(mrb_state* mrb, [[maybe_unused]] mrb_value 
 mrb_value AbstractWindow::mrubyPixel(mrb_state* mrb, [[maybe_unused]] mrb_value self)
 {
 	AbstractWindow* window = mrubyGetWindowObject(mrb);
+	std::lock_guard<std::recursive_mutex> mrbLock(window->_mrbMutex);
 	mrb_int x, y;
 	mrb_int colorPalette = 1;
 	mrb_get_args(mrb, "ii|i", &x, &y, &colorPalette);
@@ -604,6 +673,7 @@ mrb_value AbstractWindow::mrubyPixel(mrb_state* mrb, [[maybe_unused]] mrb_value 
 	pixel.setPosition(sf::Vector2f(x, y));
 	pixel.setOutlineColor(window->_palette[colorPalette]);
 	pixel.setFillColor(window->_palette[colorPalette]);
+	std::lock_guard<std::mutex> drawLock(window->_drawMutex);
 	window->_texture.draw(pixel);
 
 	return mrb_nil_value();
@@ -612,6 +682,7 @@ mrb_value AbstractWindow::mrubyPixel(mrb_state* mrb, [[maybe_unused]] mrb_value 
 mrb_value AbstractWindow::mrubyLine(mrb_state* mrb, [[maybe_unused]] mrb_value self)
 {
 	AbstractWindow* window = mrubyGetWindowObject(mrb);
+	std::lock_guard<std::recursive_mutex> mrbLock(window->_mrbMutex);
 	mrb_int x1, x2, y1, y2;
 	mrb_int colorPalette = 1;
 	mrb_get_args(mrb, "iiii|i", &x1, &y1, &x2, &y2, &colorPalette);
@@ -621,6 +692,7 @@ mrb_value AbstractWindow::mrubyLine(mrb_state* mrb, [[maybe_unused]] mrb_value s
 		{sf::Vector2f(x2, y2), window->_palette[colorPalette]}
 	};
 
+	std::lock_guard<std::mutex> drawLock(window->_drawMutex);
 	window->_texture.draw(line, 2, sf::PrimitiveType::Lines);
 
 	return mrb_nil_value();
@@ -629,6 +701,7 @@ mrb_value AbstractWindow::mrubyLine(mrb_state* mrb, [[maybe_unused]] mrb_value s
 mrb_value AbstractWindow::mrubyRectangle(mrb_state* mrb, [[maybe_unused]] mrb_value self)
 {
 	AbstractWindow* window = mrubyGetWindowObject(mrb);
+	std::lock_guard<std::recursive_mutex> mrbLock(window->_mrbMutex);
 	mrb_int x, y, w, h;
 	mrb_int colorPalette = 1;
 	mrb_get_args(mrb, "iiii|i", &x, &y, &w, &h, &colorPalette);
@@ -637,6 +710,7 @@ mrb_value AbstractWindow::mrubyRectangle(mrb_state* mrb, [[maybe_unused]] mrb_va
 	rectangle.setPosition(sf::Vector2f(x, y));
 	rectangle.setOutlineColor(window->_palette[colorPalette]);
 	rectangle.setFillColor(window->_palette[colorPalette]);
+	std::lock_guard<std::mutex> drawLock(window->_drawMutex);
 	window->_texture.draw(rectangle);
 
 	return mrb_nil_value();
@@ -645,6 +719,7 @@ mrb_value AbstractWindow::mrubyRectangle(mrb_state* mrb, [[maybe_unused]] mrb_va
 mrb_value AbstractWindow::mrubyCircle(mrb_state* mrb, [[maybe_unused]] mrb_value self)
 {
 	AbstractWindow* window = mrubyGetWindowObject(mrb);
+	std::lock_guard<std::recursive_mutex> mrbLock(window->_mrbMutex);
 	mrb_int x, y, radius;
 	mrb_int colorPalette = 1;
 	mrb_get_args(mrb, "iii|i", &x, &y, &radius, &colorPalette);
@@ -653,6 +728,7 @@ mrb_value AbstractWindow::mrubyCircle(mrb_state* mrb, [[maybe_unused]] mrb_value
 	circle.setPosition(sf::Vector2f(x, y));
 	circle.setOutlineColor(window->_palette[colorPalette]);
 	circle.setFillColor(window->_palette[colorPalette]);
+	std::lock_guard<std::mutex> drawLock(window->_drawMutex);
 	window->_texture.draw(circle);
 
 	return mrb_nil_value();
@@ -661,11 +737,13 @@ mrb_value AbstractWindow::mrubyCircle(mrb_state* mrb, [[maybe_unused]] mrb_value
 mrb_value AbstractWindow::mrubyText(mrb_state* mrb, [[maybe_unused]] mrb_value self)
 {
 	AbstractWindow* window = mrubyGetWindowObject(mrb);
+	std::lock_guard<std::recursive_mutex> mrbLock(window->_mrbMutex);
 	const char* text;
 	mrb_int x, y;
 	mrb_int colorPalette = 1;
 	mrb_bool monospaces = false;
 	mrb_get_args(mrb, "iiz|ib", &x, &y, &text, &colorPalette, &monospaces);
+	std::lock_guard<std::mutex> drawLock(window->_drawMutex);
 	drawText(window->_texture, x, y, std::string(text), window->_palette[colorPalette], monospaces);
 
 	return mrb_nil_value();
@@ -674,6 +752,7 @@ mrb_value AbstractWindow::mrubyText(mrb_state* mrb, [[maybe_unused]] mrb_value s
 mrb_value AbstractWindow::mrubyKey(mrb_state* mrb, [[maybe_unused]] mrb_value self)
 {
 	AbstractWindow* window = mrubyGetWindowObject(mrb);
+	std::lock_guard<std::recursive_mutex> mrbLock(window->_mrbMutex);
 	mrb_int key = -1;
 	mrb_get_args(mrb, "|i", &key);
 
@@ -692,6 +771,7 @@ mrb_value AbstractWindow::mrubyKey(mrb_state* mrb, [[maybe_unused]] mrb_value se
 mrb_value AbstractWindow::mrubyButton(mrb_state* mrb, [[maybe_unused]] mrb_value self)
 {
 	AbstractWindow* window = mrubyGetWindowObject(mrb);
+	std::lock_guard<std::recursive_mutex> mrbLock(window->_mrbMutex);
 	mrb_int button = -1;
 	mrb_get_args(mrb, "|i", &button);
 
@@ -710,6 +790,7 @@ mrb_value AbstractWindow::mrubyButton(mrb_state* mrb, [[maybe_unused]] mrb_value
 mrb_value AbstractWindow::mrubySound(mrb_state* mrb, [[maybe_unused]] mrb_value self)
 {
 	AbstractWindow* window = mrubyGetWindowObject(mrb);
+	std::lock_guard<std::recursive_mutex> mrbLock(window->_mrbMutex);
 	mrb_int frequency = 440;
 	mrb_float duration = 1;
 	std::vector<std::int16_t> samples;

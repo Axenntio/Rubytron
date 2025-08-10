@@ -25,8 +25,8 @@ void drawOnTexture(sf::RenderTarget& target, sf::RenderStates states, int x, int
 	}
 	texture.clear(sf::Color::Transparent);
 	drawOnTexture(texture, 0, 0, sprBytes, height, color);
+	texture.display();
 	sf::Sprite sprite(texture.getTexture());
-	sprite.setTextureRect(sf::IntRect({0, height}, {8, -height}));
 	sprite.setPosition(sf::Vector2f(x, y));
 	target.draw(sprite, states);
 }

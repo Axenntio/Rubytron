@@ -14,8 +14,6 @@ Window::Window(unsigned int pid, sf::Vector2i position, sf::Vector2u size, const
 {
 	this->titleBarRefresh();
 
-	mrb_define_class_method(this->_mrb, this->_mrbWindowClass, "focused?", &Window::mrubyIsFocused, MRB_ARGS_NONE());
-
 	mrb_define_class_method(this->_mrb, this->_mrbDesktopClass, "kill_process", &Window::mrubyKillProcess, MRB_ARGS_REQ(1) | MRB_ARGS_OPT(1));
 	mrb_define_class_method(this->_mrb, this->_mrbDesktopClass, "spawn", &Window::mrubySpawn, MRB_ARGS_REQ(1) | MRB_ARGS_OPT(1) | MRB_ARGS_KEY(2, 0));
 	mrb_define_class_method(this->_mrb, this->_mrbDesktopClass, "folder", &Window::mrubyFolder, MRB_ARGS_NONE());
@@ -49,13 +47,11 @@ void Window::draw(sf::RenderTarget& target, sf::RenderStates states) const
 
 	if (this->_titleBarMode != TitleBarMode::None) {
 		sf::Sprite titleBar(this->_barTexture.getTexture());
-		titleBar.setTextureRect(sf::IntRect({0, (height - 2)}, {this->_size.x, -(height - 2)}));
 		titleBar.setPosition(sf::Vector2f(0, -(height - 1)));
 		target.draw(titleBar, states);
 	}
 
-	sf::Sprite canvas(this->_texture.getTexture());
-	canvas.setTextureRect(sf::IntRect({0, this->_size.y}, {this->_size.x, -this->_size.y}));
+	sf::Sprite canvas(this->_textureBuffer.getTexture());
 	target.draw(canvas, states);
 }
 
@@ -168,9 +164,8 @@ void Window::addKeyPressed(sf::Keyboard::Key key)
 
 void Window::focusEvent(bool focused)
 {
-	this->_focused = focused;
-	this->titleBarRefresh();
 	AbstractWindow::focusEvent(focused);
+	this->titleBarRefresh();
 }
 
 void Window::resizeTrigger()
@@ -187,6 +182,7 @@ void Window::changeTitleTrigger()
 
 void Window::titleBarRefresh()
 {
+	std::lock_guard<std::mutex> drawLock(this->_drawMutex);
 	if (this->_titleBarMode == TitleBarMode::None) {
 		return;
 	}
@@ -202,6 +198,7 @@ void Window::titleBarRefresh()
 		this->_barTexture.clear(sf::Color::Transparent);
 		if (this->_size.x - 12 > 0) {
 			drawText(this->_barTexture, 0, 0, this->_title, this->_palette[palette], false);
+			this->_barTexture.display();
 		}
 		sf::Texture tmp(this->_barTexture.getTexture());
 		if (!this->_barTexture.resize(sf::Vector2u(this->_size.x, height))) {
@@ -209,7 +206,6 @@ void Window::titleBarRefresh()
 		}
 		this->_barTexture.clear(sf::Color::Transparent);
 		sf::Sprite tmpSprite(tmp);
-		tmpSprite.setTextureRect(sf::IntRect(sf::Vector2i(0, tmp.getSize().y), sf::Vector2i(tmp.getSize().x, -tmp.getSize().y)));
 		this->_barTexture.draw(tmpSprite);
 		drawOnTexture(this->_barTexture, this->_size.x - 11, 0, spr_maximise_full, SPR_MAXIMISE_FULL_HEIGHT, this->_palette[palette]);
 		drawOnTexture(this->_barTexture, this->_size.x - 5, 0, spr_close_full, SPR_CLOSE_FULL_HEIGHT, this->_palette[palette]);
@@ -222,12 +218,7 @@ void Window::titleBarRefresh()
 		drawOnTexture(this->_barTexture, this->_size.x - 3, 0, spr_close_minimal, SPR_CLOSE_MINIMAL_HEIGHT, this->_palette[palette]);
 		drawOnTexture(this->_barTexture, this->_size.x - 7, 0, spr_maximise_minimal, SPR_MAXIMISE_MINIMAL_HEIGHT, this->_palette[palette]);
 	}
-}
-
-mrb_value Window::mrubyIsFocused(mrb_state *mrb, [[maybe_unused]] mrb_value self)
-{
-	AbstractWindow* window = mrubyGetWindowObject(mrb);
-	return mrb_bool_value(window->isFocused());
+	this->_barTexture.display();
 }
 
 mrb_value Window::mrubyDesktopClose([[maybe_unused]] mrb_state *mrb, [[maybe_unused]] mrb_value self)
