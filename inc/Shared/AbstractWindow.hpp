@@ -2,6 +2,7 @@
 
 #include <thread>
 #include <mutex>
+#include <atomic>
 #include <memory>
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
